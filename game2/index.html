@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAR SHIPS 3D</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+        }
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+        h1 {
+            color: #fff;
+            text-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff;
+            margin: 20px 0;
+            font-size: 2.5em;
+            letter-spacing: 8px;
+        }
+        #scoreboard {
+            display: flex;
+            gap: 50px;
+            margin: 10px 0;
+            font-size: 1.5em;
+        }
+        .score {
+            padding: 10px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .red-score {
+            background: rgba(255, 50, 50, 0.3);
+            color: #ff5555;
+            border: 2px solid #ff5555;
+        }
+        .blue-score {
+            background: rgba(50, 150, 255, 0.3);
+            color: #5599ff;
+            border: 2px solid #5599ff;
+        }
+        #controls {
+            margin-top: 10px;
+            pointer-events: auto;
+        }
+        button {
+            background: linear-gradient(180deg, #00d4ff, #0088aa);
+            border: none;
+            padding: 10px 25px;
+            font-size: 1em;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.7);
+        }
+        #info {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h1>⚓ WAR SHIPS ⚓</h1>
+        <div id="scoreboard">
+            <div class="score red-score">🔴 RED: <span id="redScore">0</span></div>
+            <div class="score blue-score">🔵 BLUE: <span id="blueScore">0</span></div>
+        </div>
+        <div id="controls">
+            <button onclick="resetGame()">🔄 RESTART</button>
+            <button onclick="togglePause()">⏸️ PAUSE</button>
+        </div>
+        <div id="info">WASD to move | Q/E to rotate | SPACE to fire | Your ship has GREEN lights</div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, water, sun, sky;
+        let ships = [];
+        let bullets = [];
+        let explosions = [];
+        let wakes = [];
+        let redScore = 0;
+        let blueScore = 0;
+        let paused = false;
+        let keys = {};
+        let playerShip = null;
+        let clock = new THREE.Clock();
+        const WORLD_SIZE = 400;
+
+        document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 80, 120);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 0.8;
+            document.body.appendChild(renderer.domElement);
+
+            // Sky
+            createSky();
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x6688cc, 0.4);
+            scene.add(ambientLight);
+
+            sun = new THREE.DirectionalLight(0xffffee, 1.5);
+            sun.position.set(100, 150, 100);
+            sun.castShadow = true;
+            sun.shadow.mapSize.width = 2048;
+            sun.shadow.mapSize.height = 2048;
+            sun.shadow.camera.near = 10;
+            sun.shadow.camera.far = 500;
+            sun.shadow.camera.left = -200;
+            sun.shadow.camera.right = 200;
+            sun.shadow.camera.top = 200;
+            sun.shadow.camera.bottom = -200;
+            scene.add(sun);
+
+            const hemiLight = new THREE.HemisphereLight(0x88aaff, 0x445566, 0.5);
+            scene.add(hemiLight);
+
+            // Ocean
+            createOcean();
+
+            spawnShips();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createSky() {
+            // Gradient sky dome
+            const skyGeometry = new THREE.SphereGeometry(1000, 32, 32);
+            const skyMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    topColor: { value: new THREE.Color(0x0066aa) },
+                    bottomColor: { value: new THREE.Color(0xaaccff) },
+                    offset: { value: 20 },
+                    exponent: { value: 0.6 }
+                },
+                vertexShader: `
+                    varying vec3 vWorldPosition;
+                    void main() {
+                        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                        vWorldPosition = worldPosition.xyz;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 topColor;
+                    uniform vec3 bottomColor;
+                    uniform float offset;
+                    uniform float exponent;
+                    varying vec3 vWorldPosition;
+                    void main() {
+                        float h = normalize(vWorldPosition + offset).y;
+                        gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+                    }
+                `,
+                side: THREE.BackSide
+            });
+            sky = new THREE.Mesh(skyGeometry, skyMaterial);
+            scene.add(sky);
+
+            // Sun sphere
+            const sunGeometry = new THREE.SphereGeometry(30, 32, 32);
+            const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffffcc });
+            const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+            sunMesh.position.set(300, 200, -400);
+            scene.add(sunMesh);
+
+            // Clouds
+            for (let i = 0; i < 20; i++) {
+                createCloud(
+                    (Math.random() - 0.5) * 800,
+                    100 + Math.random() * 100,
+                    (Math.random() - 0.5) * 800
+                );
+            }
+        }
+
+        function createCloud(x, y, z) {
+            const group = new THREE.Group();
+            const cloudMaterial = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                flatShading: true
+            });
+
+            for (let i = 0; i < 5 + Math.random() * 5; i++) {
+                const size = 10 + Math.random() * 20;
+                const geometry = new THREE.SphereGeometry(size, 8, 8);
+                const puff = new THREE.Mesh(geometry, cloudMaterial);
+                puff.position.set(
+                    (Math.random() - 0.5) * 40,
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 40
+                );
+                group.add(puff);
+            }
+
+            group.position.set(x, y, z);
+            scene.add(group);
+        }
+
+        function createOcean() {
+            // Ocean with animated waves
+            const waterGeometry = new THREE.PlaneGeometry(2000, 2000, 200, 200);
+            const waterMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    deepColor: { value: new THREE.Color(0x001e3c) },
+                    shallowColor: { value: new THREE.Color(0x0066aa) },
+                    foamColor: { value: new THREE.Color(0xffffff) },
+                    sunDirection: { value: new THREE.Vector3(0.5, 0.8, -0.3).normalize() }
+                },
+                vertexShader: `
+                    uniform float time;
+                    varying vec2 vUv;
+                    varying float vHeight;
+                    varying vec3 vNormal;
+                    varying vec3 vWorldPosition;
+                    
+                    void main() {
+                        vUv = uv;
+                        vec3 pos = position;
+                        
+                        // Multi-layered waves
+                        float wave1 = sin(pos.x * 0.02 + time * 0.5) * cos(pos.y * 0.02 + time * 0.3) * 3.0;
+                        float wave2 = sin(pos.x * 0.05 + time * 0.8) * cos(pos.y * 0.04 + time * 0.6) * 1.5;
+                        float wave3 = sin(pos.x * 0.1 + time * 1.2) * cos(pos.y * 0.08 + time * 0.9) * 0.5;
+                        
+                        pos.z = wave1 + wave2 + wave3;
+                        vHeight = pos.z;
+                        
+                        // Calculate normal
+                        float dx = cos(pos.x * 0.02 + time * 0.5) * 0.02 * 3.0 +
+                                   cos(pos.x * 0.05 + time * 0.8) * 0.05 * 1.5;
+                        float dy = -sin(pos.y * 0.02 + time * 0.3) * 0.02 * 3.0 +
+                                   -sin(pos.y * 0.04 + time * 0.6) * 0.04 * 1.5;
+                        vNormal = normalize(vec3(-dx, -dy, 1.0));
+                        
+                        vec4 worldPosition = modelMatrix * vec4(pos, 1.0);
+                        vWorldPosition = worldPosition.xyz;
+                        
+                        gl_Position = projectionMatrix * viewMatrix * worldPosition;
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 deepColor;
+                    uniform vec3 shallowColor;
+                    uniform vec3 foamColor;
+                    uniform vec3 sunDirection;
+                    uniform float time;
+                    varying vec2 vUv;
+                    varying float vHeight;
+                    varying vec3 vNormal;
+                    varying vec3 vWorldPosition;
+                    
+                    void main() {
+                        // Fresnel effect
+                        vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
+                        float fresnel = pow(1.0 - max(dot(viewDirection, vNormal), 0.0), 3.0);
+                        
+                        // Water color based on depth
+                        vec3 waterColor = mix(deepColor, shallowColor, fresnel * 0.5 + 0.3);
+                        
+                        // Sun reflection
+                        vec3 reflectedSun = reflect(-sunDirection, vNormal);
+                        float sunSpec = pow(max(dot(viewDirection, reflectedSun), 0.0), 256.0);
+                        
+                        // Foam on wave peaks
+                        float foam = smoothstep(2.5, 4.0, vHeight) * 0.6;
+                        
+                        vec3 finalColor = waterColor + vec3(sunSpec) * 2.0;
+                        finalColor = mix(finalColor, foamColor, foam);
+                        
+                        // Add some blue reflection from sky
+                        finalColor += vec3(0.1, 0.2, 0.3) * fresnel;
+                        
+                        gl_FragColor = vec4(finalColor, 0.95);
+                    }
+                `,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+
+            water = new THREE.Mesh(waterGeometry, waterMaterial);
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = 0;
+            scene.add(water);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function createDetailedShip(color, isPlayer, team) {
+            const group = new THREE.Group();
+            const hullColor = new THREE.Color(color);
+            const darkHull = hullColor.clone().multiplyScalar(0.6);
+
+            // Main hull
+            const hullShape = new THREE.Shape();
+            hullShape.moveTo(-15, 0);
+            hullShape.lineTo(-12, 4);
+            hullShape.lineTo(12, 4);
+            hullShape.lineTo(18, 0);
+            hullShape.lineTo(12, -4);
+            hullShape.lineTo(-12, -4);
+            hullShape.closePath();
+
+            const extrudeSettings = { depth: 6, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.5 };
+            const hullGeometry = new THREE.ExtrudeGeometry(hullShape, extrudeSettings);
+            const hullMaterial = new THREE.MeshPhongMaterial({ 
+                color: darkHull, 
+                shininess: 30,
+                flatShading: false
+            });
+            const hull = new THREE.Mesh(hullGeometry, hullMaterial);
+            hull.rotation.x = Math.PI / 2;
+            hull.position.y = 0;
+            hull.castShadow = true;
+            hull.receiveShadow = true;
+            group.add(hull);
+
+            // Deck
+            const deckGeometry = new THREE.BoxGeometry(26, 1, 7);
+            const deckMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513, shininess: 10 });
+            const deck = new THREE.Mesh(deckGeometry, deckMaterial);
+            deck.position.y = 3.5;
+            deck.castShadow = true;
+            group.add(deck);
+
+            // Deck planks
+            for (let i = -12; i <= 12; i += 2) {
+                const plankGeometry = new THREE.BoxGeometry(0.1, 0.2, 6.5);
+                const plank = new THREE.Mesh(plankGeometry, new THREE.MeshPhongMaterial({ color: 0x654321 }));
+                plank.position.set(i, 4.1, 0);
+                group.add(plank);
+            }
+
+            // Bridge/Superstructure
+            const bridgeGeometry = new THREE.BoxGeometry(8, 5, 5);
+            const bridgeMaterial = new THREE.MeshPhongMaterial({ color: 0x444444, shininess: 50 });
+            const bridge = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
+            bridge.position.set(-3, 6.5, 0);
+            bridge.castShadow = true;
+            group.add(bridge);
+
+            // Bridge windows
+            for (let i = -1; i <= 1; i++) {
+                const windowGeometry = new THREE.PlaneGeometry(1.5, 1);
+                const windowMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0x88ccff, 
+                    emissive: 0x224466,
+                    emissiveIntensity: 0.3,
+                    shininess: 100 
+                });
+                const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
+                windowMesh.position.set(-3 + i * 2, 7.5, 2.51);
+                group.add(windowMesh);
+            }
+
+            // Funnel/Smokestack
+            const funnelGeometry = new THREE.CylinderGeometry(1.2, 1.5, 6, 16);
+            const funnelMaterial = new THREE.MeshPhongMaterial({ color: 0x222222 });
+            const funnel = new THREE.Mesh(funnelGeometry, funnelMaterial);
+            funnel.position.set(-6, 10, 0);
+            funnel.castShadow = true;
+            group.add(funnel);
+
+            // Funnel band
+            const bandGeometry = new THREE.CylinderGeometry(1.3, 1.3, 1, 16);
+            const bandMaterial = new THREE.MeshPhongMaterial({ color: hullColor });
+            const band = new THREE.Mesh(bandGeometry, bandMaterial);
+            band.position.set(-6, 11, 0);
+            group.add(band);
+
+            // Main gun turret
+            const turretBaseGeometry = new THREE.CylinderGeometry(2.5, 3, 2, 16);
+            const turretMaterial = new THREE.MeshPhongMaterial({ color: 0x3a3a3a, shininess: 50 });
+            const turretBase = new THREE.Mesh(turretBaseGeometry, turretMaterial);
+            turretBase.position.set(6, 5, 0);
+            turretBase.castShadow = true;
+            group.add(turretBase);
+
+            // Gun barrels
+            for (let i = -1; i <= 1; i += 2) {
+                const barrelGeometry = new THREE.CylinderGeometry(0.4, 0.5, 10, 12);
+                const barrel = new THREE.Mesh(barrelGeometry, turretMaterial);
+                barrel.rotation.z = -Math.PI / 2;
+                barrel.position.set(12, 6, i * 0.8);
+                barrel.castShadow = true;
+                group.add(barrel);
+            }
+
+            // Secondary guns
+            for (let z of [-2.5, 2.5]) {
+                const smallTurret = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.8, 1, 1, 12),
+                    turretMaterial
+                );
+                smallTurret.position.set(0, 4.5, z);
+                group.add(smallTurret);
+
+                const smallBarrel = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.2, 0.25, 4, 8),
+                    turretMaterial
+                );
+                smallBarrel.rotation.z = -Math.PI / 2;
+                smallBarrel.position.set(2.5, 5, z);
+                group.add(smallBarrel);
+            }
+
+            // Mast
+            const mastGeometry = new THREE.CylinderGeometry(0.2, 0.3, 15, 8);
+            const mastMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+            const mast = new THREE.Mesh(mastGeometry, mastMaterial);
+            mast.position.set(-3, 16, 0);
+            group.add(mast);
+
+            // Radar dish
+            const radarGeometry = new THREE.BoxGeometry(4, 0.3, 2);
+            const radar = new THREE.Mesh(radarGeometry, new THREE.MeshPhongMaterial({ color: 0x666666 }));
+            radar.position.set(-3, 20, 0);
+            group.add(radar);
+
+            // Navigation lights
+            const lightGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+            
+            // Port (red) light
+            const portLight = new THREE.Mesh(
+                lightGeometry,
+                new THREE.MeshBasicMaterial({ color: isPlayer ? 0x00ff88 : (team === 'red' ? 0xff0000 : 0x00ff00) })
+            );
+            portLight.position.set(0, 8, -3);
+            group.add(portLight);
+
+            // Starboard (green) light
+            const starboardLight = new THREE.Mesh(
+                lightGeometry,
+                new THREE.MeshBasicMaterial({ color: isPlayer ? 0x00ff88 : (team === 'red' ? 0xff0000 : 0x00ff00) })
+            );
+            starboardLight.position.set(0, 8, 3);
+            group.add(starboardLight);
+
+            // Player indicator
+            if (isPlayer) {
+                const glowGeometry = new THREE.TorusGeometry(8, 0.5, 8, 32);
+                const glowMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x00ff88, 
+                    transparent: true, 
+                    opacity: 0.6
+                });
+                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                glow.rotation.x = Math.PI / 2;
+                glow.position.y = 1;
+                group.add(glow);
+
+                // Spotlight on player
+                const spotlight = new THREE.PointLight(0x00ff88, 1, 50);
+                spotlight.position.set(0, 15, 0);
+                group.add(spotlight);
+            }
+
+            // Team flag
+            const flagPoleGeometry = new THREE.CylinderGeometry(0.1, 0.1, 5, 8);
+            const flagPole = new THREE.Mesh(flagPoleGeometry, mastMaterial);
+            flagPole.position.set(-14, 6, 0);
+            group.add(flagPole);
+
+            const flagGeometry = new THREE.PlaneGeometry(3, 2);
+            const flagMaterial = new THREE.MeshPhongMaterial({ 
+                color: team === 'red' ? 0xff4444 : 0x4488ff,
+                side: THREE.DoubleSide
+            });
+            const flag = new THREE.Mesh(flagGeometry, flagMaterial);
+            flag.position.set(-14, 8, 1.5);
+            group.add(flag);
+
+            return group;
+        }
+
+        function createWake(ship) {
+            const wakeGroup = new THREE.Group();
+            
+            // Wake particles
+            for (let i = 0; i < 10; i++) {
+                const geometry = new THREE.PlaneGeometry(2 + i * 0.5, 1);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.3 - i * 0.03,
+                    side: THREE.DoubleSide
+                });
+                const wakePart = new THREE.Mesh(geometry, material);
+                wakePart.rotation.x = -Math.PI / 2;
+                wakePart.position.set(-18 - i * 3, 0.5, 0);
+                wakeGroup.add(wakePart);
+            }
+
+            return wakeGroup;
+        }
+
+        function createSmoke(x, y, z) {
+            const particles = [];
+            for (let i = 0; i < 5; i++) {
+                const geometry = new THREE.SphereGeometry(0.5 + Math.random() * 0.5, 8, 8);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x444444,
+                    transparent: true,
+                    opacity: 0.4
+                });
+                const particle = new THREE.Mesh(geometry, material);
+                particle.position.set(x, y + i * 2, z);
+                particle.userData = {
+                    vx: (Math.random() - 0.5) * 0.1,
+                    vy: 0.2 + Math.random() * 0.2,
+                    vz: (Math.random() - 0.5) * 0.1,
+                    life: 1
+                };
+                scene.add(particle);
+                particles.push(particle);
+            }
+            return particles;
+        }
+
+        class Ship {
+            constructor(team, isPlayer = false) {
+                this.team = team;
+                this.isPlayer = isPlayer;
+                this.health = 100;
+                this.maxHealth = 100;
+                this.speed = 0.15 + Math.random() * 0.1;
+                this.turnSpeed = 0.02;
+                this.fireRate = 90 + Math.random() * 60;
+                this.fireCooldown = Math.random() * this.fireRate;
+                this.velocity = { x: 0, z: 0 };
+                this.rotation = 0;
+                this.smokeTimer = 0;
+                this.smokeParticles = [];
+
+                let color;
+                if (team === 'red') {
+                    color = 0x8B0000;
+                    this.x = -WORLD_SIZE/2 + 30 + Math.random() * 60;
+                    this.z = -WORLD_SIZE/2 + 50 + Math.random() * (WORLD_SIZE - 100);
+                    this.rotation = 0;
+                } else {
+                    color = isPlayer ? 0x006644 : 0x000066;
+                    this.x = WORLD_SIZE/2 - 30 - Math.random() * 60;
+                    this.z = -WORLD_SIZE/2 + 50 + Math.random() * (WORLD_SIZE - 100);
+                    this.rotation = Math.PI;
+                }
+
+                this.mesh = createDetailedShip(color, isPlayer, team);
+                this.mesh.position.set(this.x, 0, this.z);
+                this.mesh.rotation.y = this.rotation;
+                scene.add(this.mesh);
+
+                this.wake = createWake(this);
+                scene.add(this.wake);
+
+                this.targetZ = this.z;
+                this.targetRotation = this.rotation;
+                this.bobOffset = Math.random() * Math.PI * 2;
+
+                // Health bar
+                const healthBarBg = new THREE.Mesh(
+                    new THREE.PlaneGeometry(12, 1.5),
+                    new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide })
+                );
+                healthBarBg.position.y = 25;
+                healthBarBg.rotation.y = Math.PI / 2;
+                this.mesh.add(healthBarBg);
+
+                const healthBar = new THREE.Mesh(
+                    new THREE.PlaneGeometry(11.5, 1.2),
+                    new THREE.MeshBasicMaterial({ color: 0x44ff44, side: THREE.DoubleSide })
+                );
+                healthBar.position.y = 25;
+                healthBar.position.x = 0.1;
+                healthBar.rotation.y = Math.PI / 2;
+                this.healthBar = healthBar;
+                this.mesh.add(healthBar);
+            }
+
+            update(delta) {
+                if (this.isPlayer) {
+                    this.updatePlayer(delta);
+                } else {
+                    this.updateAI(delta);
+                }
+
+                // Update smoke
+                this.smokeTimer += delta;
+                if (this.smokeTimer > 0.3 && this.speed > 0) {
+                    const worldPos = new THREE.Vector3(-6, 13, 0);
+                    worldPos.applyMatrix4(this.mesh.matrixWorld);
+                    this.smokeParticles.push(...createSmoke(worldPos.x, worldPos.y, worldPos.z));
+                    this.smokeTimer = 0;
+                }
+
+                // Update smoke particles
+                this.smokeParticles = this.smokeParticles.filter(p => {
+                    p.position.x += p.userData.vx;
+                    p.position.y += p.userData.vy;
+                    p.position.z += p.userData.vz;
+                    p.userData.life -= delta * 0.5;
+                    p.material.opacity = p.userData.life * 0.4;
+                    p.scale.setScalar(1 + (1 - p.userData.life) * 2);
+                    if (p.userData.life <= 0) {
+                        scene.remove(p);
+                        return false;
+                    }
+                    return true;
+                });
+
+                // Update wake
+                this.wake.position.copy(this.mesh.position);
+                this.wake.rotation.y = this.mesh.rotation.y;
+
+                // Ocean bobbing
+                this.bobOffset += delta * 2;
+                const bobY = Math.sin(this.bobOffset) * 0.8;
+                const bobRoll = Math.sin(this.bobOffset * 0.7) * 0.03;
+                const bobPitch = Math.sin(this.bobOffset * 0.5) * 0.02;
+
+                this.mesh.position.set(this.x, bobY, this.z);
+                this.mesh.rotation.set(bobPitch, this.rotation, bobRoll);
+            }
+
+            updatePlayer(delta) {
+                const acceleration = 0.01;
+                const friction = 0.98;
+                const maxSpeed = 0.8;
+
+                // Rotation
+                if (keys['q']) this.rotation += this.turnSpeed * 2;
+                if (keys['e']) this.rotation -= this.turnSpeed * 2;
+
+                // Thrust
+                let thrust = 0;
+                if (keys['w'] || keys['arrowup']) thrust = acceleration;
+                if (keys['s'] || keys['arrowdown']) thrust = -acceleration * 0.5;
+
+                // Apply thrust in ship's direction
+                this.velocity.x += Math.cos(this.rotation) * thrust;
+                this.velocity.z -= Math.sin(this.rotation) * thrust;
+
+                // Strafe (slow)
+                if (keys['a'] || keys['arrowleft']) {
+                    this.velocity.x += Math.cos(this.rotation + Math.PI/2) * acceleration * 0.3;
+                    this.velocity.z -= Math.sin(this.rotation + Math.PI/2) * acceleration * 0.3;
+                }
+                if (keys['d'] || keys['arrowright']) {
+                    this.velocity.x += Math.cos(this.rotation - Math.PI/2) * acceleration * 0.3;
+                    this.velocity.z -= Math.sin(this.rotation - Math.PI/2) * acceleration * 0.3;
+                }
+
+                // Apply friction
+                this.velocity.x *= friction;
+                this.velocity.z *= friction;
+
+                // Clamp speed
+                const speed = Math.hypot(this.velocity.x, this.velocity.z);
+                if (speed > maxSpeed) {
+                    this.velocity.x = (this.velocity.x / speed) * maxSpeed;
+                    this.velocity.z = (this.velocity.z / speed) * maxSpeed;
+                }
+
+                // Apply velocity
+                this.x += this.velocity.x;
+                this.z += this.velocity.z;
+
+                // Keep in bounds
+                this.x = Math.max(-WORLD_SIZE/2 + 20, Math.min(WORLD_SIZE/2 - 20, this.x));
+                this.z = Math.max(-WORLD_SIZE/2 + 20, Math.min(WORLD_SIZE/2 - 20, this.z));
+
+                // Manual fire
+                this.fireCooldown -= delta * 60;
+                if (keys[' '] && this.fireCooldown <= 0) {
+                    this.fire();
+                    this.fireCooldown = 20;
+                }
+            }
+
+            updateAI(delta) {
+                // Find target
+                const target = this.findTarget();
+                
+                if (target) {
+                    // Calculate angle to target
+                    const dx = target.x - this.x;
+                    const dz = target.z - this.z;
+                    const targetAngle = Math.atan2(-dz, dx);
+                    
+                    // Rotate towards target
+                    let angleDiff = targetAngle - this.rotation;
+                    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                    
+                    this.rotation += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), this.turnSpeed);
+                }
+
+                // Move forward
+                const moveSpeed = this.speed;
+                this.velocity.x = Math.cos(this.rotation) * moveSpeed;
+                this.velocity.z = -Math.sin(this.rotation) * moveSpeed;
+
+                this.x += this.velocity.x;
+                this.z += this.velocity.z;
+
+                // Keep in bounds
+                this.x = Math.max(-WORLD_SIZE/2 + 20, Math.min(WORLD_SIZE/2 - 20, this.x));
+                this.z = Math.max(-WORLD_SIZE/2 + 20, Math.min(WORLD_SIZE/2 - 20, this.z));
+                this.z = Math.max(-WORLD_SIZE/2 + 20, Math.min(WORLD_SIZE/2 - 20, this.z));
+
+                // Fire
+                this.fireCooldown -= delta * 60;
+                if (this.fireCooldown <= 0 && target) {
+                    const dist = Math.hypot(target.x - this.x, target.z - this.z);
+                    if (dist < 150) {
+                        this.fire();
+                        this.fireCooldown = this.fireRate;
+                    }
+                }
+            }
+
+            fire() {
+                const target = this.findTarget();
+                if (target) {
+                    // Calculate lead on target
+                    const dist = Math.hypot(target.x - this.x, target.z - this.z);
+                    const bulletSpeed = 3;
+                    const timeToTarget = dist / bulletSpeed;
+                    
+                    const predictedX = target.x + (target.velocity?.x || 0) * timeToTarget * 30;
+                    const predictedZ = target.z + (target.velocity?.z || 0) * timeToTarget * 30;
+                    
+                    const angle = Math.atan2(predictedZ - this.z, predictedX - this.x);
+                    
+                    // Fire from main gun position
+                    const gunPos = new THREE.Vector3(12, 6, 0);
+                    gunPos.applyMatrix4(this.mesh.matrixWorld);
+                    
+                    bullets.push(new Bullet(gunPos.x, gunPos.z, angle, this.team));
+                    
+                    // Muzzle flash
+                    this.createMuzzleFlash(gunPos);
+                }
+            }
+
+            createMuzzleFlash(pos) {
+                const flashGeometry = new THREE.SphereGeometry(2, 8, 8);
+                const flashMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xffff00,
+                    transparent: true,
+                    opacity: 1
+                });
+                const flash = new THREE.Mesh(flashGeometry, flashMaterial);
+                flash.position.set(pos.x, pos.y, pos.z);
+                flash.userData = { life: 0.1 };
+                scene.add(flash);
+                
+                setTimeout(() => scene.remove(flash), 100);
+            }
+
+            findTarget() {
+                let closest = null;
+                let closestDist = Infinity;
+                for (const ship of ships) {
+                    if (ship.team !== this.team && ship.health > 0) {
+                        const dist = Math.hypot(ship.x - this.x, ship.z - this.z);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            closest = ship;
+                        }
+                    }
+                }
+                return closest;
+            }
+
+            takeDamage(amount) {
+                this.health -= amount;
+                const healthPercent = Math.max(0, this.health / this.maxHealth);
+                this.healthBar.scale.x = healthPercent;
+                this.healthBar.position.z = -5.75 * (1 - healthPercent);
+                this.healthBar.material.color.setHex(this.health > 30 ? 0x44ff44 : 0xff4444);
+
+                if (this.health <= 0) {
+                    explosions.push(new Explosion(this.x, this.z));
+                    scene.remove(this.mesh);
+                    scene.remove(this.wake);
+                    for (const p of this.smokeParticles) {
+                        scene.remove(p);
+                    }
+                    if (this.team === 'red') {
+                        blueScore++;
+                        document.getElementById('blueScore').textContent = blueScore;
+                    } else {
+                        redScore++;
+                        document.getElementById('redScore').textContent = redScore;
+                    }
+                }
+            }
+        }
+
+        class Bullet {
+            constructor(x, z, angle, team) {
+                this.x = x;
+                this.z = z;
+                this.y = 6;
+                this.angle = angle;
+                this.speed = 3;
+                this.team = team;
+                this.gravity = -0.05;
+                this.vy = 0.8;
+
+                // Shell mesh
+                const geometry = new THREE.CapsuleGeometry(0.3, 1.5, 4, 8);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x444444,
+                    emissive: team === 'red' ? 0xff4400 : 0x0044ff,
+                    emissiveIntensity: 0.5
+                });
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.rotation.z = Math.PI / 2;
+                this.mesh.rotation.y = -angle;
+                this.mesh.position.set(x, this.y, z);
+                scene.add(this.mesh);
+
+                // Trail
+                const trailGeometry = new THREE.BufferGeometry();
+                this.trailPositions = new Float32Array(30);
+                for (let i = 0; i < 30; i += 3) {
+                    this.trailPositions[i] = x;
+                    this.trailPositions[i + 1] = this.y;
+                    this.trailPositions[i + 2] = z;
+                }
+                trailGeometry.setAttribute('position', new THREE.BufferAttribute(this.trailPositions, 3));
+                const trailMaterial = new THREE.LineBasicMaterial({
+                    color: team === 'red' ? 0xff8800 : 0x0088ff,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                this.trail = new THREE.Line(trailGeometry, trailMaterial);
+                scene.add(this.trail);
+            }
+
+            update(delta) {
+                // Update trail
+                for (let i = 29; i >= 3; i--) {
+                    this.trailPositions[i] = this.trailPositions[i - 3];
+                }
+                this.trailPositions[0] = this.x;
+                this.trailPositions[1] = this.y;
+                this.trailPositions[2] = this.z;
+                this.trail.geometry.attributes.position.needsUpdate = true;
+
+                // Physics
+                this.vy += this.gravity;
+                this.y += this.vy;
+                this.x += Math.cos(this.angle) * this.speed;
+                this.z += Math.sin(this.angle) * this.speed;
+
+                this.mesh.position.set(this.x, Math.max(1, this.y), this.z);
+
+                // Hit water
+                if (this.y < 0) {
+                    this.createSplash();
+                    this.hit = true;
+                }
+            }
+
+            createSplash() {
+                for (let i = 0; i < 8; i++) {
+                    const geometry = new THREE.SphereGeometry(0.5, 8, 8);
+                    const material = new THREE.MeshBasicMaterial({
+                        color: 0xaaddff,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    const splash = new THREE.Mesh(geometry, material);
+                    splash.position.set(this.x, 1, this.z);
+                    splash.userData = {
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: 1 + Math.random() * 2,
+                        vz: (Math.random() - 0.5) * 2,
+                        life: 1
+                    };
+                    scene.add(splash);
+                    
+                    // Animate and remove
+                    const animateSplash = () => {
+                        splash.position.x += splash.userData.vx * 0.1;
+                        splash.position.y += splash.userData.vy * 0.1;
+                        splash.position.z += splash.userData.vz * 0.1;
+                        splash.userData.vy -= 0.15;
+                        splash.userData.life -= 0.03;
+                        splash.material.opacity = splash.userData.life;
+                        
+                        if (splash.userData.life > 0 && splash.position.y > 0) {
+                            requestAnimationFrame(animateSplash);
+                        } else {
+                            scene.remove(splash);
+                        }
+                    };
+                    animateSplash();
+                }
+            }
+
+            isOffScreen() {
+                return Math.abs(this.x) > WORLD_SIZE || Math.abs(this.z) > WORLD_SIZE || this.y < -10;
+            }
+
+            remove() {
+                scene.remove(this.mesh);
+                scene.remove(this.trail);
+            }
+        }
+
+        class Explosion {
+            constructor(x, z) {
+                this.particles = [];
+                this.x = x;
+                this.z = z;
+                
+                // Fire/debris particles
+                for (let i = 0; i < 30; i++) {
+                    const geometry = new THREE.SphereGeometry(0.5 + Math.random() * 1.5, 8, 8);
+                    const colors = [0xff4400, 0xff8800, 0xffcc00, 0xff0000, 0x222222];
+                    const material = new THREE.MeshBasicMaterial({
+                        color: colors[Math.floor(Math.random() * colors.length)]
+                    });
+                    const particle = new THREE.Mesh(geometry, material);
+                    particle.position.set(x, 5 + Math.random() * 5, z);
+                    particle.userData = {
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: 2 + Math.random() * 5,
+                        vz: (Math.random() - 0.5) * 4,
+                        life: 1,
+                        rotSpeed: (Math.random() - 0.5) * 0.3
+                    };
+                    scene.add(particle);
+                    this.particles.push(particle);
+                }
+
+                // Explosion flash
+                const flashLight = new THREE.PointLight(0xff8800, 5, 100);
+                flashLight.position.set(x, 10, z);
+                scene.add(flashLight);
+                setTimeout(() => scene.remove(flashLight), 200);
+
+                // Smoke column
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        if (this.isDone()) return;
+                        const smokeGeo = new THREE.SphereGeometry(2 + Math.random() * 3, 8, 8);
+                        const smokeMat = new THREE.MeshBasicMaterial({
+                            color: 0x333333,
+                            transparent: true,
+                            opacity: 0.6
+                        });
+                        const smoke = new THREE.Mesh(smokeGeo, smokeMat);
+                        smoke.position.set(x + (Math.random() - 0.5) * 5, 5, z + (Math.random() - 0.5) * 5);
+                        smoke.userData = {
+                            vy: 0.5 + Math.random() * 0.5,
+                            life: 1
+                        };
+                        scene.add(smoke);
+                        this.particles.push(smoke);
+                    }, i * 50);
+                }
+            }
+
+            update(delta) {
+                for (const p of this.particles) {
+                    if (p.userData.vx !== undefined) {
+                        p.position.x += p.userData.vx * delta * 10;
+                        p.position.y += p.userData.vy * delta * 10;
+                        p.position.z += p.userData.vz * delta * 10;
+                        p.userData.vy -= delta * 10;
+                        p.rotation.x += p.userData.rotSpeed || 0;
+                        p.rotation.y += p.userData.rotSpeed || 0;
+                    } else {
+                        p.position.y += p.userData.vy;
+                        p.scale.multiplyScalar(1.02);
+                    }
+                    p.userData.life -= delta * 0.8;
+                    p.material.opacity = Math.max(0, p.userData.life);
+                    if (p.userData.life < 0.5) {
+                        p.scale.multiplyScalar(0.98);
+                    }
+                }
+            }
+
+            isDone() {
+                return this.particles.every(p => p.userData.life <= 0);
+            }
+
+            remove() {
+                for (const p of this.particles) {
+                    scene.remove(p);
+                }
+            }
+        }
+
+        function spawnShips() {
+            for (let i = 0; i < 5; i++) {
+                ships.push(new Ship('red'));
+            }
+            for (let i = 0; i < 4; i++) {
+                ships.push(new Ship('blue'));
+            }
+            playerShip = new Ship('blue', true);
+            ships.push(playerShip);
+        }
+
+        function checkCollisions() {
+            for (const bullet of bullets) {
+                if (bullet.hit) continue;
+                for (const ship of ships) {
+                    if (bullet.team !== ship.team && ship.health > 0) {
+                        const dist = Math.hypot(bullet.x - ship.x, bullet.z - ship.z);
+                        if (dist < 12 && bullet.y < 15 && bullet.y > 0) {
+                            ship.takeDamage(25);
+                            bullet.hit = true;
+                            
+                            // Hit effect
+                            const hitFlash = new THREE.PointLight(0xffaa00, 3, 30);
+                            hitFlash.position.set(bullet.x, bullet.y, bullet.z);
+                            scene.add(hitFlash);
+                            setTimeout(() => scene.remove(hitFlash), 100);
+                        }
+                    }
+                }
+            }
+        }
+
+        function respawnIfNeeded() {
+            const redAlive = ships.filter(s => s.team === 'red' && s.health > 0).length;
+            const blueAlive = ships.filter(s => s.team === 'blue' && s.health > 0 && !s.isPlayer).length;
+            const playerAlive = playerShip && playerShip.health > 0;
+
+            if (redAlive < 3) ships.push(new Ship('red'));
+            if (blueAlive < 4) ships.push(new Ship('blue'));
+            if (!playerAlive) {
+                playerShip = new Ship('blue', true);
+                ships.push(playerShip);
+            }
+        }
+
+        function gameLoop() {
+            requestAnimationFrame(gameLoop);
+            const delta = Math.min(clock.getDelta(), 0.1);
+
+            if (!paused) {
+                // Update water
+                water.material.uniforms.time.value += delta;
+
+                // Update ships
+                for (const ship of ships) {
+                    if (ship.health > 0) {
+                        ship.update(delta);
+                    }
+                }
+
+                // Update bullets
+                for (const bullet of bullets) {
+                    bullet.update(delta);
+                }
+
+                // Update explosions
+                for (const exp of explosions) {
+                    exp.update(delta);
+                }
+
+                checkCollisions();
+
+                // Clean up bullets
+                const aliveBullets = [];
+                for (const b of bullets) {
+                    if (b.isOffScreen() || b.hit) {
+                        b.remove();
+                    } else {
+                        aliveBullets.push(b);
+                    }
+                }
+                bullets = aliveBullets;
+
+                // Clean up ships
+                ships = ships.filter(s => s.health > 0);
+
+                // Clean up explosions
+                const aliveExplosions = [];
+                for (const e of explosions) {
+                    if (e.isDone()) {
+                        e.remove();
+                    } else {
+                        aliveExplosions.push(e);
+                    }
+                }
+                explosions = aliveExplosions;
+
+                respawnIfNeeded();
+
+                // Camera follows player
+                if (playerShip && playerShip.health > 0) {
+                    const targetCamX = playerShip.x - Math.cos(playerShip.rotation) * 60;
+                    const targetCamZ = playerShip.z + Math.sin(playerShip.rotation) * 60 + 80;
+                    
+                    camera.position.x += (targetCamX - camera.position.x) * 0.05;
+                    camera.position.z += (targetCamZ - camera.position.z) * 0.05;
+                    camera.position.y = 50;
+                    
+                    camera.lookAt(playerShip.x, 5, playerShip.z);
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function resetGame() {
+            for (const ship of ships) {
+                scene.remove(ship.mesh);
+                scene.remove(ship.wake);
+                for (const p of ship.smokeParticles) scene.remove(p);
+            }
+            for (const bullet of bullets) bullet.remove();
+            for (const exp of explosions) exp.remove();
+
+            ships = [];
+            bullets = [];
+            explosions = [];
+            redScore = 0;
+            blueScore = 0;
+            document.getElementById('redScore').textContent = '0';
+            document.getElementById('blueScore').textContent = '0';
+            spawnShips();
+        }
+
+        function togglePause() {
+            paused = !paused;
+        }
+
+        init();
+        gameLoop();
+    </script>
+</body>
+</html>
