@@ -52,11 +52,30 @@
             margin-bottom: 10px;
         }
 
-        .logo {
-            max-width: 400px;
-            width: 100%;
-            height: auto;
+        h1 {
+            font-size: 5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            background: linear-gradient(180deg, #00c853 0%, #00e676 50%, #69f0ae 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             filter: drop-shadow(0 0 30px rgba(0, 200, 83, 0.5));
+            transform: skewX(-5deg);
+        }
+
+        .bolt-icon {
+            display: inline-block;
+            color: #ff6600;
+            filter: drop-shadow(0 0 20px rgba(255, 102, 0, 0.8));
+            animation: pulse 1.5s ease-in-out infinite;
+            -webkit-text-fill-color: #ff6600;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
         }
 
         .subtitle {
@@ -172,7 +191,7 @@
     <div class="bolt bolt-2">⚡</div>
 
     <div class="logo-container">
-        <img src="images/logo.png" alt="Natorade" class="logo">
+        <h1><span class="bolt-icon">⚡</span> Natorade</h1>
     </div>
     <p class="subtitle">Fuel Your Game</p>
 
