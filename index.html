@@ -159,14 +159,10 @@
 
         .game-card:hover::before {
             background: conic-gradient(from var(--angle), #ff6600, #ff8533, #ffaa66, #ff6600);
-            box-shadow: 0 0 50px rgba(255, 102, 0, 0.6), 0 0 100px rgba(255, 102, 0, 0.4);
         }
 
         .game-card:hover {
-            box-shadow: 
-                0 0 60px rgba(255, 102, 0, 0.5),
-                0 0 100px rgba(255, 102, 0, 0.3),
-                inset 0 0 30px rgba(255, 102, 0, 0.1);
+            filter: drop-shadow(0 0 25px rgba(255, 102, 0, 0.7)) drop-shadow(0 0 50px rgba(255, 102, 0, 0.5));
             transform: skewX(-2deg) translateY(-5px);
         }
 
@@ -202,10 +198,11 @@
             padding: 14px 35px;
             background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
             color: #000;
-            font-weight: 900;
+            font-weight: 700;
             font-size: 1.4rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            font-family: 'Segoe UI', Arial, sans-serif;
             transition: all 0.3s ease;
             clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
         }
