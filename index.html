@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nate's World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 3.5rem;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.3rem;
+            margin-bottom: 50px;
+        }
+
+        .games-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            max-width: 900px;
+        }
+
+        .game-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .game-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .play-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .game-card:hover .play-btn {
+            transform: scale(1.1);
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 50px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Nate's World</h1>
+    <p class="subtitle">Welcome to my awesome game collection!</p>
+
+    <div class="games-container">
+        <a href="tic-tac-toe/index.html" class="game-card">
+            <div class="game-icon">❌⭕</div>
+            <h2 class="game-title">Tic-Tac-Toe</h2>
+            <p class="game-description">
+                The classic game of X's and O's! Challenge the computer at Easy, Medium, or Hard difficulty.
+            </p>
+            <span class="play-btn">Play Now!</span>
+        </a>
+
+        <a href="game2/index.html" class="game-card">
+            <div class="game-icon">🚢💥</div>
+            <h2 class="game-title">War Ships 3D</h2>
+            <p class="game-description">
+                An epic 3D battleship game! Sink the enemy fleet before they sink yours!
+            </p>
+            <span class="play-btn">Play Now!</span>
+        </a>
+    </div>
+
+    <footer>
+        Made with ❤️ by Nate
+    </footer>
+</body>
+</html>
