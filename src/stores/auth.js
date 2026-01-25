@@ -14,11 +14,20 @@ export const useAuthStore = defineStore('auth', () => {
     if (!user.value) return 'Guest'
     return user.value.user_metadata?.full_name ||
            user.value.user_metadata?.name ||
+           user.value.user_metadata?.preferred_username ||
+           user.value.user_metadata?.user_name ||
            user.value.email?.split('@')[0] ||
            'Player'
   })
 
-  const avatarUrl = computed(() => user.value?.user_metadata?.avatar_url || null)
+  const avatarUrl = computed(() => {
+    if (!user.value) return null
+    const meta = user.value.user_metadata
+    return meta?.avatar_url || 
+           meta?.picture || 
+           meta?.profile_image_url ||
+           null
+  })
 
   async function init() {
     if (initialized.value) return
