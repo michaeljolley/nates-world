@@ -477,6 +477,215 @@
         let clock = new THREE.Clock();
         const WORLD_SIZE = 400;
         
+        // ============ BACKGROUND MUSIC SYSTEM ============
+        let audioContext = null;
+        let musicPlaying = false;
+        let musicGain = null;
+        let musicNodes = [];
+        
+        function initBackgroundMusic() {
+            if (audioContext) return;
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            musicGain = audioContext.createGain();
+            musicGain.gain.value = 0.3;
+            musicGain.connect(audioContext.destination);
+        }
+        
+        function startBackgroundMusic() {
+            if (musicPlaying) return;
+            initBackgroundMusic();
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            musicPlaying = true;
+            playSeaBattleSong();
+        }
+        
+        function playSeaBattleSong() {
+            // Epic sea battle music - procedurally generated
+            const bpm = 100;
+            const beatDuration = 60 / bpm;
+            const barDuration = beatDuration * 4;
+            const loopDuration = barDuration * 16; // 16 bars loop
+            
+            // Musical scales and notes (D minor - dramatic naval feel)
+            const baseFreq = 146.83; // D3
+            const scale = [1, 1.0595, 1.1225, 1.1892, 1.2599, 1.3348, 1.4142, 1.4983, 1.5874, 1.6818, 1.7818, 1.8877, 2]; // Chromatic
+            const minorScale = [0, 2, 3, 5, 7, 8, 10, 12]; // Minor scale intervals
+            
+            function getFreq(octave, scaleIndex) {
+                return baseFreq * Math.pow(2, octave) * scale[minorScale[scaleIndex % minorScale.length] % 12];
+            }
+            
+            function scheduleLoop(startTime) {
+                if (!musicPlaying) return;
+                
+                // Deep drums - war drums feel
+                for (let bar = 0; bar < 16; bar++) {
+                    for (let beat = 0; beat < 4; beat++) {
+                        const time = startTime + bar * barDuration + beat * beatDuration;
+                        
+                        // Kick drum on 1 and 3
+                        if (beat === 0 || beat === 2) {
+                            playDrum(time, 60, 0.15, 0.6);
+                        }
+                        // Snare-like hit on 2 and 4
+                        if (beat === 1 || beat === 3) {
+                            playDrum(time, 150, 0.08, 0.3);
+                        }
+                        // Fast hi-hat for urgency
+                        playHiHat(time, 0.1);
+                        playHiHat(time + beatDuration * 0.5, 0.05);
+                    }
+                }
+                
+                // Bass line - ominous low notes
+                const bassPattern = [0, 0, 3, 2, 0, 0, 4, 3, 0, 0, 5, 4, 3, 2, 1, 0];
+                for (let bar = 0; bar < 16; bar++) {
+                    const time = startTime + bar * barDuration;
+                    playBass(time, getFreq(-1, bassPattern[bar]), barDuration * 0.9);
+                }
+                
+                // Melody - heroic brass-like synth
+                const melodyPattern = [
+                    [0, 2, 4, 5], [4, 5, 7, 5], [4, 2, 0, 2], [4, 5, 4, 2],
+                    [0, 2, 4, 5], [7, 5, 4, 2], [4, 5, 7, 9], [7, 5, 4, 2],
+                    [5, 7, 9, 7], [5, 4, 2, 4], [5, 7, 9, 10], [9, 7, 5, 4],
+                    [7, 5, 4, 2], [0, 2, 4, 5], [4, 2, 0, 2], [4, 2, 0, -1]
+                ];
+                for (let bar = 0; bar < 16; bar++) {
+                    for (let note = 0; note < 4; note++) {
+                        const time = startTime + bar * barDuration + note * beatDuration;
+                        const noteIndex = melodyPattern[bar][note];
+                        if (noteIndex >= 0) {
+                            playMelody(time, getFreq(1, noteIndex), beatDuration * 0.8);
+                        }
+                    }
+                }
+                
+                // Strings/pad for atmosphere
+                for (let bar = 0; bar < 16; bar += 2) {
+                    const time = startTime + bar * barDuration;
+                    const chordRoot = bassPattern[bar];
+                    playPad(time, getFreq(0, chordRoot), barDuration * 2);
+                    playPad(time, getFreq(0, chordRoot + 2), barDuration * 2);
+                    playPad(time, getFreq(0, chordRoot + 4), barDuration * 2);
+                }
+                
+                // Schedule next loop
+                setTimeout(() => {
+                    if (musicPlaying) {
+                        scheduleLoop(startTime + loopDuration);
+                    }
+                }, (loopDuration - 1) * 1000);
+            }
+            
+            function playDrum(time, freq, duration, volume) {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, time);
+                osc.frequency.exponentialRampToValueAtTime(30, time + duration);
+                gain.gain.setValueAtTime(volume, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                osc.connect(gain);
+                gain.connect(musicGain);
+                osc.start(time);
+                osc.stop(time + duration);
+            }
+            
+            function playHiHat(time, volume) {
+                const bufferSize = audioContext.sampleRate * 0.05;
+                const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
+                }
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                const gain = audioContext.createGain();
+                const filter = audioContext.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 7000;
+                gain.gain.value = volume;
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(musicGain);
+                source.start(time);
+            }
+            
+            function playBass(time, freq, duration) {
+                const osc = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                const filter = audioContext.createBiquadFilter();
+                osc.type = 'sawtooth';
+                osc2.type = 'square';
+                osc.frequency.value = freq;
+                osc2.frequency.value = freq * 0.5;
+                filter.type = 'lowpass';
+                filter.frequency.value = 200;
+                gain.gain.setValueAtTime(0.001, time);
+                gain.gain.exponentialRampToValueAtTime(0.4, time + 0.05);
+                gain.gain.setValueAtTime(0.4, time + duration - 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                osc.connect(filter);
+                osc2.connect(filter);
+                filter.connect(gain);
+                gain.connect(musicGain);
+                osc.start(time);
+                osc2.start(time);
+                osc.stop(time + duration);
+                osc2.stop(time + duration);
+            }
+            
+            function playMelody(time, freq, duration) {
+                const osc = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.type = 'sawtooth';
+                osc2.type = 'square';
+                osc.frequency.value = freq;
+                osc2.frequency.value = freq * 1.005; // Slight detune for richness
+                gain.gain.setValueAtTime(0.001, time);
+                gain.gain.exponentialRampToValueAtTime(0.15, time + 0.05);
+                gain.gain.setValueAtTime(0.12, time + duration - 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                osc.connect(gain);
+                osc2.connect(gain);
+                gain.connect(musicGain);
+                osc.start(time);
+                osc2.start(time);
+                osc.stop(time + duration);
+                osc2.stop(time + duration);
+            }
+            
+            function playPad(time, freq, duration) {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                const filter = audioContext.createBiquadFilter();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                filter.type = 'lowpass';
+                filter.frequency.value = 800;
+                gain.gain.setValueAtTime(0.001, time);
+                gain.gain.exponentialRampToValueAtTime(0.08, time + 0.5);
+                gain.gain.setValueAtTime(0.08, time + duration - 0.5);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(musicGain);
+                osc.start(time);
+                osc.stop(time + duration);
+            }
+            
+            scheduleLoop(audioContext.currentTime + 0.1);
+        }
+        
+        function stopBackgroundMusic() {
+            musicPlaying = false;
+        }
+        
         // Money and Quest System - persistent with localStorage
         let money = parseInt(localStorage.getItem('warships_money') || '0');
         let totalMoneyEarned = parseInt(localStorage.getItem('warships_totalEarned') || '0');
@@ -3609,6 +3818,7 @@
                 spawnShips();
             }
             paused = false;
+            startBackgroundMusic();
         }
         
         function showControls() {
