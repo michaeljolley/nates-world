@@ -4,7 +4,7 @@ A Vue 3 front-end and games project built by a 10 year old vibe coding with [Git
 
 ## About
 
-This project is a collection of games and interactive experiences created through the power of AI-assisted development. It showcases what's possible when creativity meets modern development tools. You can access this site at (https://natorade.com).
+This project is a collection of games and interactive experiences created through the power of AI-assisted development. It showcases what's possible when creativity meets modern development tools. You can access this site at https://natorade.com.
 
 ## Who
 
