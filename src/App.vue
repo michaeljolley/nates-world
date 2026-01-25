@@ -1,85 +1,21 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/AppHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'
-import GameCard from '@/components/GameCard.vue'
-import TicTacToe from '@/components/TicTacToe.vue'
-import WarShips from '@/components/WarShips.vue'
 
 const auth = useAuthStore()
-const currentGame = ref(null)
 
 onMounted(() => {
   auth.init()
 })
-
-const games = [
-  {
-    id: 'tic-tac-toe',
-    icon: '❌⭕',
-    title: 'Tic-Tac-Toe',
-    description: "The classic game of X's and O's! Challenge the computer at Easy, Medium, or Hard difficulty."
-  },
-  {
-    id: 'warships',
-    icon: '🚢💥',
-    title: 'War Ships 3D',
-    description: 'An epic 3D battleship game! Sink the enemy fleet before they sink yours!'
-  }
-]
-
-function openGame(game) {
-  if (game.id) {
-    currentGame.value = game.id
-  }
-}
-
-function goBack() {
-  currentGame.value = null
-}
 </script>
 
 <template>
-  <AppHeader @back="goBack" />
+  <AppHeader />
 
   <main class="main-content">
-    <!-- Game Views -->
-    <TicTacToe v-if="currentGame === 'tic-tac-toe'" />
-    <WarShips v-else-if="currentGame === 'warships'" />
-
-    <!-- Home View -->
-    <template v-else>
-      <div class="lightning-bg"></div>
-      <div class="bolt bolt-1">⚡</div>
-      <div class="bolt bolt-2">⚡</div>
-
-      <div class="logo-container">
-        <h1><span class="bolt-icon">⚡</span> Natorade</h1>
-      </div>
-      <p class="subtitle">Fuel Your Game</p>
-
-      <div class="games-container">
-        <GameCard
-          v-for="game in games"
-          :key="game.title"
-          :href="game.href || '#'"
-          :icon="game.icon"
-          :title="game.title"
-          :description="game.description"
-          @click.prevent="openGame(game)"
-        />
-      </div>
-
-      <section class="about-section">
-        <h2 class="about-title">About Nate</h2>
-        <p class="about-text">
-          Nate is a 10 year-old game developer who loves creating fun and challenging games. 
-          With the help of AI and a passion for coding, he's building awesome experiences 
-          for players of all ages. Stay tuned for more games coming soon!
-        </p>
-      </section>
-    </template>
+    <router-view />
   </main>
 
   <AppFooter />
@@ -119,7 +55,7 @@ function goBack() {
 body {
   min-height: 100vh;
   background: var(--bg-primary);
-  font-family: 'Impact', 'Arial Black', sans-serif;
+  font-family: 'Orbitron', 'Arial Black', sans-serif;
   overflow-x: hidden;
   transition: background 0.3s ease;
 }
@@ -194,7 +130,7 @@ h1 {
   filter: drop-shadow(0 0 20px rgba(0, 150, 60, 0.4));
 }
 
-.bolt-icon {
+.main-page-bolt-icon {
   display: inline-block;
   color: var(--accent-orange);
   filter: drop-shadow(0 0 20px rgba(255, 102, 0, 0.8));

@@ -101,6 +101,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
+    supabase,
     isConfigured,
     isLoggedIn,
     displayName,

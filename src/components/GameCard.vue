@@ -1,9 +1,5 @@
 <script setup>
 defineProps({
-  href: {
-    type: String,
-    required: true
-  },
   icon: {
     type: String,
     required: true
@@ -15,12 +11,17 @@ defineProps({
   description: {
     type: String,
     required: true
+  },
+  wip: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
 
 <template>
-  <a :href="href" class="game-card">
+  <a class="game-card" :class="{ 'is-wip': wip }">
+    <span v-if="wip" class="wip-badge">🚧 WIP</span>
     <div class="game-icon">{{ icon }}</div>
     <h2 class="game-title">{{ title }}</h2>
     <p class="game-description">{{ description }}</p>
@@ -46,6 +47,8 @@ defineProps({
   transform: skewX(-2deg);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
   z-index: 1;
+  overflow: hidden;
+  cursor: pointer;
 }
 
 .game-card::after {
@@ -63,29 +66,23 @@ defineProps({
 .game-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: conic-gradient(from var(--angle, 0deg), #00c853, #69f0ae, #00e676, #00c853);
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(#00c853, #69f0ae, #b9f6ca, #69f0ae, #00c853);
+  transform: translate(-50%, -50%);
   z-index: -2;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-  animation: rotate-border 3s linear infinite;
+  animation: spin-border 3s linear infinite;
 }
 
-@property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes rotate-border {
-  from { --angle: 0deg; }
-  to { --angle: 360deg; }
+@keyframes spin-border {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .game-card:hover::before {
-  background: conic-gradient(from var(--angle, 0deg), #ff6600, #ff8533, #ffaa66, #ff6600);
+  background: conic-gradient(#ff6600, #ff8533, #ffaa66, #ff8533, #ff6600);
 }
 
 .game-card:hover {
@@ -105,7 +102,7 @@ defineProps({
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 2px;
-  font-family: 'Impact', 'Arial Black', sans-serif;
+  font-family: 'Orbitron', 'Arial Black', sans-serif;
 }
 
 .game-card:hover .game-title {
@@ -139,5 +136,26 @@ defineProps({
   background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%);
   transform: scale(1.05);
   color: #fff;
+}
+
+.wip-badge {
+  position: absolute;
+  top: 10px;
+  right: -25px;
+  background: linear-gradient(135deg, #666 0%, #888 100%);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  padding: 4px 30px;
+  transform: rotate(35deg);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 10px rgba(100, 100, 100, 0.5);
+  z-index: 10;
+}
+
+.game-card.is-wip::before {
+  background: conic-gradient(#666, #888, #aaa, #888, #666);
 }
 </style>
