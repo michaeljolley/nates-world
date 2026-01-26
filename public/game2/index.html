@@ -74,10 +74,38 @@
             border-radius: 10px;
             cursor: pointer;
             margin: 5px;
+            pointer-events: auto;
         }
         #quests-btn {
             background: linear-gradient(180deg, #00d4ff, #0088aa);
             border-color: #00d4ff;
+        }
+        .top-left-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+        .bottom-left-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+        .bottom-left-buttons button {
+            background: linear-gradient(180deg, #cc3300, #990000);
+            border: 2px solid #ff6600;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            color: white;
+            border-radius: 8px;
+        }
+        .bottom-left-buttons button:hover {
+            background: linear-gradient(180deg, #ff4400, #cc2200);
         }
         #shop-panel {
             display: none;
@@ -174,6 +202,163 @@
             cursor: pointer;
             color: #ff4444;
         }
+        
+        /* Team Panel Styles */
+        #team-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 20, 40, 0.95);
+            border: 3px solid #44ddaa;
+            border-radius: 15px;
+            padding: 20px;
+            color: #fff;
+            z-index: 2000;
+            width: 90%;
+            max-width: 950px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        #team-panel h2 {
+            color: #44ddaa;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .team-subtitle {
+            text-align: center;
+            color: #88aacc;
+            margin-bottom: 15px;
+        }
+        .close-team {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #ff4444;
+        }
+        #team-members-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .team-member-card {
+            background: rgba(0, 50, 100, 0.4);
+            border: 2px solid #446688;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .team-member-card:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.2);
+        }
+        .team-member-card .member-role {
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .team-member-card .member-name {
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .team-member-card .member-personality {
+            color: #88aacc;
+            font-size: 0.85em;
+            font-style: italic;
+            margin-bottom: 12px;
+            min-height: 2.5em;
+        }
+        .team-member-card .assigned-ship {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .team-member-card .ship-emoji {
+            font-size: 1.8em;
+        }
+        .team-member-card .ship-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .team-member-card .assign-btn {
+            background: linear-gradient(180deg, #0088ff, #0066cc);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        .team-member-card .assign-btn:hover {
+            background: linear-gradient(180deg, #00aaff, #0088ff);
+        }
+        #team-ship-selection {
+            background: rgba(0, 30, 60, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #335577;
+        }
+        #team-ship-selection h3 {
+            color: #00d4ff;
+            margin: 0 0 10px 0;
+        }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #446688;
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: #88aacc;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        #team-ship-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+        .team-ship-card {
+            background: rgba(0, 50, 100, 0.4);
+            border: 2px solid #446688;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .team-ship-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+        .team-ship-card.assigned {
+            border-color: #00ff88;
+            background: rgba(0, 100, 50, 0.4);
+        }
+        .team-ship-card .ship-emoji-lg {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        @media (max-width: 800px) {
+            #team-members-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         .current-ship {
             text-align: center;
             color: #00d4ff;
@@ -182,18 +367,20 @@
         }
         #quest-panel {
             display: none;
-            position: relative;
-            background: rgba(0, 0, 0, 0.8);
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #00d4ff;
             border-radius: 10px;
             padding: 15px;
             color: #fff;
             font-size: 0.9em;
-            min-width: 280px;
-            max-width: 320px;
-            margin: 10px auto;
-            max-height: 300px;
+            min-width: 220px;
+            max-width: 260px;
+            max-height: calc(100vh - 150px);
             overflow-y: auto;
+            z-index: 100;
         }
         #quest-panel h3 {
             color: #00d4ff;
@@ -409,6 +596,16 @@
     </div>
     
     <div id="homeScreen">
+        <div class="top-left-buttons">
+            <button id="shop-btn" onclick="toggleShop()">🚢 SHIP SHOP</button>
+            <button id="team-btn" onclick="toggleTeam()">👥 FLEET</button>
+            <button id="quests-btn" onclick="toggleQuests()">📜 QUESTS</button>
+        </div>
+        
+        <div class="bottom-left-buttons">
+            <button onclick="resetAllProgress()">🔄 RESTART</button>
+        </div>
+        
         <div class="ship-silhouette">🚢</div>
         <h1>⚓ WAR SHIPS ⚓</h1>
         <div class="subtitle">NAVAL COMBAT SIMULATOR</div>
@@ -416,11 +613,6 @@
         <div id="money-display">💰 $<span id="money">0</span></div>
         
         <div class="current-ship">Current Ship: <span id="current-ship-name">Starter Vessel</span></div>
-        
-        <div>
-            <button id="shop-btn" onclick="toggleShop()">🚢 SHIP SHOP</button>
-            <button id="quests-btn" onclick="toggleQuests()">📜 QUESTS</button>
-        </div>
         
         <div id="quest-panel">
             <h3>📜 QUESTS</h3>
@@ -459,6 +651,18 @@
             <button class="shop-tab" onclick="showShopCategory('special')">Special</button>
         </div>
         <div id="ship-grid" class="ship-grid"></div>
+    </div>
+    
+    <div id="team-panel">
+        <span class="close-team" onclick="toggleTeam()">✕</span>
+        <h2>👥 FLEET COMMAND</h2>
+        <p class="team-subtitle">Assign ships to your crew members</p>
+        <div id="team-members-grid"></div>
+        <div id="team-ship-selection" style="display:none;">
+            <h3 id="team-selection-title">Select Ship</h3>
+            <button class="back-btn" onclick="closeTeamShipSelection()">← Back</button>
+            <div id="team-ship-grid"></div>
+        </div>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -948,6 +1152,36 @@
         let selectedShipId = localStorage.getItem('warships_selectedShip') || 'starter';
         let ownedShips = JSON.parse(localStorage.getItem('warships_ownedShips') || '["starter"]');
         
+        // ============ TEAM MEMBERS SYSTEM ============
+        const DEFAULT_TEAM_MEMBERS = [
+            { id: 'first-mate', name: 'First Mate Rodriguez', role: 'Flanker', assignedShipId: null, personality: 'aggressive' },
+            { id: 'gunner', name: 'Chief Gunner Chen', role: 'Support', assignedShipId: null, personality: 'cautious' },
+            { id: 'navigator', name: 'Navigator Williams', role: 'Scout', assignedShipId: null, personality: 'balanced' }
+        ];
+        let teamMembers = JSON.parse(localStorage.getItem('warships_teamMembers') || JSON.stringify(DEFAULT_TEAM_MEMBERS));
+        
+        // Get ship stats for a team member (returns starter if none assigned)
+        function getTeamMemberShipStats(memberId) {
+            const member = teamMembers.find(m => m.id === memberId);
+            if (!member || !member.assignedShipId) {
+                return shipTemplates.find(s => s.id === 'starter');
+            }
+            return shipTemplates.find(s => s.id === member.assignedShipId) || shipTemplates.find(s => s.id === 'starter');
+        }
+        
+        // Get emoji for a ship based on category
+        function getShipEmoji(ship) {
+            if (ship.emoji) return ship.emoji;
+            const categoryEmojis = {
+                'speed': '⚡',
+                'tank': '🛡️',
+                'damage': '💥',
+                'balanced': '⭐',
+                'special': '🔮'
+            };
+            return categoryEmojis[ship.category] || '🚢';
+        }
+        
         const shipTemplates = [
             // STARTER (free)
             { id: 'starter', name: 'Starter Vessel', category: 'balanced', price: 0, health: 100, speed: 1.0, fireRate: 1.0, damage: 1.0, accuracy: 1.0, buffs: ['Free ship'], debuffs: ['Basic stats'] },
@@ -1059,7 +1293,317 @@
             { id: 'spec16', name: 'Destroyer Elite', category: 'special', price: 500000, health: 150, speed: 1.3, fireRate: 1.5, damage: 2.5, accuracy: 1.3, buffs: ['+50% Health', '+30% Speed', '+50% Fire Rate', '+150% Damage'], debuffs: [] },
             { id: 'spec17', name: 'Legendary', category: 'special', price: 750000, health: 200, speed: 1.5, fireRate: 1.5, damage: 2.0, accuracy: 1.5, buffs: ['+100% Health', '+50% Speed', '+50% Fire/Damage/Accuracy'], debuffs: [] },
             { id: 'spec18', name: 'Mythic', category: 'special', price: 1500000, health: 250, speed: 1.7, fireRate: 1.8, damage: 2.5, accuracy: 1.6, buffs: ['+150% Health', '+70% Speed', '+80% Fire Rate', '+150% Damage'], debuffs: [] },
-            { id: 'spec19', name: 'Divine', category: 'special', price: 3000000, health: 350, speed: 2.0, fireRate: 2.0, damage: 3.0, accuracy: 1.8, buffs: ['+250% Health', '+100% Speed', '+100% Fire Rate', '+200% Damage'], debuffs: [] }
+            { id: 'spec19', name: 'Divine', category: 'special', price: 3000000, health: 350, speed: 2.0, fireRate: 2.0, damage: 3.0, accuracy: 1.8, buffs: ['+250% Health', '+100% Speed', '+100% Fire Rate', '+200% Damage'], debuffs: [] },
+            
+            // EXTENDED SPEED SHIPS (60 more)
+            { id: 'spd21', name: 'Wind Rider', category: 'speed', price: 650, health: 82, speed: 1.25, fireRate: 0.95, damage: 0.92, accuracy: 1.05, buffs: ['+25% Speed', '+5% Accuracy'], debuffs: ['-18% Health', '-8% Damage'] },
+            { id: 'spd22', name: 'Gale Force', category: 'speed', price: 900, health: 78, speed: 1.35, fireRate: 1.05, damage: 0.88, accuracy: 0.98, buffs: ['+35% Speed', '+5% Fire Rate'], debuffs: ['-22% Health', '-12% Damage'] },
+            { id: 'spd23', name: 'Breeze', category: 'speed', price: 1500, health: 85, speed: 1.28, fireRate: 1.0, damage: 0.95, accuracy: 1.1, buffs: ['+28% Speed', '+10% Accuracy'], debuffs: ['-15% Health'] },
+            { id: 'spd24', name: 'Tailwind', category: 'speed', price: 1800, health: 72, speed: 1.42, fireRate: 1.08, damage: 0.82, accuracy: 1.02, buffs: ['+42% Speed', '+8% Fire Rate'], debuffs: ['-28% Health', '-18% Damage'] },
+            { id: 'spd25', name: 'Cyclone', category: 'speed', price: 2800, health: 68, speed: 1.55, fireRate: 0.92, damage: 1.05, accuracy: 0.88, buffs: ['+55% Speed', '+5% Damage'], debuffs: ['-32% Health', '-12% Accuracy'] },
+            { id: 'spd26', name: 'Tornado', category: 'speed', price: 3500, health: 75, speed: 1.48, fireRate: 1.12, damage: 0.88, accuracy: 0.95, buffs: ['+48% Speed', '+12% Fire Rate'], debuffs: ['-25% Health', '-12% Damage'] },
+            { id: 'spd27', name: 'Whirlwind', category: 'speed', price: 4200, health: 62, speed: 1.62, fireRate: 1.0, damage: 0.92, accuracy: 1.08, buffs: ['+62% Speed', '+8% Accuracy'], debuffs: ['-38% Health'] },
+            { id: 'spd28', name: 'Monsoon', category: 'speed', price: 6000, health: 70, speed: 1.58, fireRate: 1.18, damage: 0.85, accuracy: 1.0, buffs: ['+58% Speed', '+18% Fire Rate'], debuffs: ['-30% Health', '-15% Damage'] },
+            { id: 'spd29', name: 'Squall', category: 'speed', price: 7000, health: 58, speed: 1.72, fireRate: 0.95, damage: 1.1, accuracy: 0.85, buffs: ['+72% Speed', '+10% Damage'], debuffs: ['-42% Health', '-15% Accuracy'] },
+            { id: 'spd30', name: 'Draft', category: 'speed', price: 9000, health: 65, speed: 1.75, fireRate: 1.08, damage: 0.9, accuracy: 1.05, buffs: ['+75% Speed', '+8% Fire Rate', '+5% Accuracy'], debuffs: ['-35% Health', '-10% Damage'] },
+            { id: 'spd31', name: 'Gust', category: 'speed', price: 10500, health: 55, speed: 1.85, fireRate: 1.0, damage: 0.98, accuracy: 0.92, buffs: ['+85% Speed'], debuffs: ['-45% Health', '-8% Accuracy'] },
+            { id: 'spd32', name: 'Sirocco', category: 'speed', price: 13000, health: 68, speed: 1.78, fireRate: 1.22, damage: 0.82, accuracy: 1.12, buffs: ['+78% Speed', '+22% Fire Rate', '+12% Accuracy'], debuffs: ['-32% Health', '-18% Damage'] },
+            { id: 'spd33', name: 'Mistral', category: 'speed', price: 15000, health: 52, speed: 1.92, fireRate: 1.05, damage: 1.02, accuracy: 0.88, buffs: ['+92% Speed', '+5% Fire Rate'], debuffs: ['-48% Health', '-12% Accuracy'] },
+            { id: 'spd34', name: 'Chinook', category: 'speed', price: 20000, health: 62, speed: 1.88, fireRate: 1.15, damage: 0.88, accuracy: 1.08, buffs: ['+88% Speed', '+15% Fire Rate', '+8% Accuracy'], debuffs: ['-38% Health', '-12% Damage'] },
+            { id: 'spd35', name: 'Zonda', category: 'speed', price: 22000, health: 48, speed: 2.05, fireRate: 0.9, damage: 1.15, accuracy: 0.82, buffs: ['+105% Speed', '+15% Damage'], debuffs: ['-52% Health', '-18% Accuracy'] },
+            { id: 'spd36', name: 'Tramontane', category: 'speed', price: 28000, health: 58, speed: 1.95, fireRate: 1.25, damage: 0.8, accuracy: 1.15, buffs: ['+95% Speed', '+25% Fire Rate', '+15% Accuracy'], debuffs: ['-42% Health', '-20% Damage'] },
+            { id: 'spd37', name: 'Bora', category: 'speed', price: 32000, health: 52, speed: 2.08, fireRate: 1.1, damage: 0.92, accuracy: 1.0, buffs: ['+108% Speed', '+10% Fire Rate'], debuffs: ['-48% Health', '-8% Damage'] },
+            { id: 'spd38', name: 'Foehn', category: 'speed', price: 38000, health: 60, speed: 2.0, fireRate: 1.2, damage: 0.85, accuracy: 1.1, buffs: ['+100% Speed', '+20% Fire Rate', '+10% Accuracy'], debuffs: ['-40% Health', '-15% Damage'] },
+            { id: 'spd39', name: 'Khamsin', category: 'speed', price: 42000, health: 45, speed: 2.18, fireRate: 0.95, damage: 1.2, accuracy: 0.78, buffs: ['+118% Speed', '+20% Damage'], debuffs: ['-55% Health', '-22% Accuracy'] },
+            { id: 'spd40', name: 'Harmattan', category: 'speed', price: 48000, health: 55, speed: 2.12, fireRate: 1.28, damage: 0.78, accuracy: 1.18, buffs: ['+112% Speed', '+28% Fire Rate', '+18% Accuracy'], debuffs: ['-45% Health', '-22% Damage'] },
+            { id: 'spd41', name: 'Levanter', category: 'speed', price: 55000, health: 58, speed: 2.15, fireRate: 1.12, damage: 0.9, accuracy: 1.05, buffs: ['+115% Speed', '+12% Fire Rate', '+5% Accuracy'], debuffs: ['-42% Health', '-10% Damage'] },
+            { id: 'spd42', name: 'Shamal', category: 'speed', price: 62000, health: 48, speed: 2.25, fireRate: 1.0, damage: 1.0, accuracy: 0.95, buffs: ['+125% Speed'], debuffs: ['-52% Health', '-5% Accuracy'] },
+            { id: 'spd43', name: 'Etesian', category: 'speed', price: 72000, health: 52, speed: 2.28, fireRate: 1.18, damage: 0.85, accuracy: 1.12, buffs: ['+128% Speed', '+18% Fire Rate', '+12% Accuracy'], debuffs: ['-48% Health', '-15% Damage'] },
+            { id: 'spd44', name: 'Pampero', category: 'speed', price: 82000, health: 42, speed: 2.38, fireRate: 0.92, damage: 1.25, accuracy: 0.75, buffs: ['+138% Speed', '+25% Damage'], debuffs: ['-58% Health', '-25% Accuracy'] },
+            { id: 'spd45', name: 'Williwaw', category: 'speed', price: 95000, health: 55, speed: 2.32, fireRate: 1.25, damage: 0.82, accuracy: 1.15, buffs: ['+132% Speed', '+25% Fire Rate', '+15% Accuracy'], debuffs: ['-45% Health', '-18% Damage'] },
+            { id: 'spd46', name: 'Derecho', category: 'speed', price: 110000, health: 48, speed: 2.42, fireRate: 1.1, damage: 0.95, accuracy: 1.02, buffs: ['+142% Speed', '+10% Fire Rate'], debuffs: ['-52% Health', '-5% Damage'] },
+            { id: 'spd47', name: 'Haboob', category: 'speed', price: 125000, health: 52, speed: 2.45, fireRate: 1.2, damage: 0.88, accuracy: 1.1, buffs: ['+145% Speed', '+20% Fire Rate', '+10% Accuracy'], debuffs: ['-48% Health', '-12% Damage'] },
+            { id: 'spd48', name: 'Nor Easter', category: 'speed', price: 140000, health: 45, speed: 2.55, fireRate: 1.0, damage: 1.05, accuracy: 0.9, buffs: ['+155% Speed', '+5% Damage'], debuffs: ['-55% Health', '-10% Accuracy'] },
+            { id: 'spd49', name: 'Southeaster', category: 'speed', price: 160000, health: 50, speed: 2.52, fireRate: 1.28, damage: 0.8, accuracy: 1.2, buffs: ['+152% Speed', '+28% Fire Rate', '+20% Accuracy'], debuffs: ['-50% Health', '-20% Damage'] },
+            { id: 'spd50', name: 'Westerly', category: 'speed', price: 180000, health: 55, speed: 2.48, fireRate: 1.15, damage: 0.92, accuracy: 1.08, buffs: ['+148% Speed', '+15% Fire Rate', '+8% Accuracy'], debuffs: ['-45% Health', '-8% Damage'] },
+            { id: 'spd51', name: 'Norther', category: 'speed', price: 220000, health: 42, speed: 2.65, fireRate: 1.02, damage: 1.1, accuracy: 0.85, buffs: ['+165% Speed', '+10% Damage'], debuffs: ['-58% Health', '-15% Accuracy'] },
+            { id: 'spd52', name: 'Easterly', category: 'speed', price: 250000, health: 48, speed: 2.62, fireRate: 1.22, damage: 0.85, accuracy: 1.15, buffs: ['+162% Speed', '+22% Fire Rate', '+15% Accuracy'], debuffs: ['-52% Health', '-15% Damage'] },
+            { id: 'spd53', name: 'Jet Stream', category: 'speed', price: 280000, health: 52, speed: 2.68, fireRate: 1.12, damage: 0.9, accuracy: 1.05, buffs: ['+168% Speed', '+12% Fire Rate', '+5% Accuracy'], debuffs: ['-48% Health', '-10% Damage'] },
+            { id: 'spd54', name: 'Trade Wind', category: 'speed', price: 320000, health: 45, speed: 2.75, fireRate: 1.0, damage: 1.0, accuracy: 1.0, buffs: ['+175% Speed'], debuffs: ['-55% Health'] },
+            { id: 'spd55', name: 'Polar Vortex', category: 'speed', price: 360000, health: 38, speed: 2.85, fireRate: 1.32, damage: 0.75, accuracy: 1.22, buffs: ['+185% Speed', '+32% Fire Rate', '+22% Accuracy'], debuffs: ['-62% Health', '-25% Damage'] },
+            { id: 'spd56', name: 'Convergence', category: 'speed', price: 420000, health: 50, speed: 2.78, fireRate: 1.18, damage: 0.88, accuracy: 1.1, buffs: ['+178% Speed', '+18% Fire Rate', '+10% Accuracy'], debuffs: ['-50% Health', '-12% Damage'] },
+            { id: 'spd57', name: 'Front Runner', category: 'speed', price: 480000, health: 42, speed: 2.88, fireRate: 1.08, damage: 0.98, accuracy: 0.95, buffs: ['+188% Speed', '+8% Fire Rate'], debuffs: ['-58% Health', '-5% Accuracy'] },
+            { id: 'spd58', name: 'Pressure Drop', category: 'speed', price: 550000, health: 48, speed: 2.82, fireRate: 1.25, damage: 0.82, accuracy: 1.18, buffs: ['+182% Speed', '+25% Fire Rate', '+18% Accuracy'], debuffs: ['-52% Health', '-18% Damage'] },
+            { id: 'spd59', name: 'Storm Chaser', category: 'speed', price: 620000, health: 45, speed: 2.92, fireRate: 1.15, damage: 0.92, accuracy: 1.05, buffs: ['+192% Speed', '+15% Fire Rate', '+5% Accuracy'], debuffs: ['-55% Health', '-8% Damage'] },
+            { id: 'spd60', name: 'Air Current', category: 'speed', price: 700000, health: 52, speed: 2.95, fireRate: 1.2, damage: 0.88, accuracy: 1.12, buffs: ['+195% Speed', '+20% Fire Rate', '+12% Accuracy'], debuffs: ['-48% Health', '-12% Damage'] },
+            { id: 'spd61', name: 'Velocity Max', category: 'speed', price: 800000, health: 40, speed: 3.1, fireRate: 1.0, damage: 1.0, accuracy: 0.9, buffs: ['+210% Speed'], debuffs: ['-60% Health', '-10% Accuracy'] },
+            { id: 'spd62', name: 'Mach One', category: 'speed', price: 900000, health: 45, speed: 3.08, fireRate: 1.28, damage: 0.8, accuracy: 1.2, buffs: ['+208% Speed', '+28% Fire Rate', '+20% Accuracy'], debuffs: ['-55% Health', '-20% Damage'] },
+            { id: 'spd63', name: 'Afterburner', category: 'speed', price: 1100000, health: 38, speed: 3.25, fireRate: 1.12, damage: 0.95, accuracy: 1.0, buffs: ['+225% Speed', '+12% Fire Rate'], debuffs: ['-62% Health', '-5% Damage'] },
+            { id: 'spd64', name: 'Rocket Sled', category: 'speed', price: 1300000, health: 42, speed: 3.3, fireRate: 1.35, damage: 0.78, accuracy: 1.22, buffs: ['+230% Speed', '+35% Fire Rate', '+22% Accuracy'], debuffs: ['-58% Health', '-22% Damage'] },
+            { id: 'spd65', name: 'Warp Drive', category: 'speed', price: 1500000, health: 48, speed: 3.35, fireRate: 1.2, damage: 0.88, accuracy: 1.1, buffs: ['+235% Speed', '+20% Fire Rate', '+10% Accuracy'], debuffs: ['-52% Health', '-12% Damage'] },
+            { id: 'spd66', name: 'Light Skipper', category: 'speed', price: 1800000, health: 35, speed: 3.45, fireRate: 1.42, damage: 0.72, accuracy: 1.28, buffs: ['+245% Speed', '+42% Fire Rate', '+28% Accuracy'], debuffs: ['-65% Health', '-28% Damage'] },
+            { id: 'spd67', name: 'Event Horizon', category: 'speed', price: 2200000, health: 42, speed: 3.55, fireRate: 1.25, damage: 0.85, accuracy: 1.15, buffs: ['+255% Speed', '+25% Fire Rate', '+15% Accuracy'], debuffs: ['-58% Health', '-15% Damage'] },
+            { id: 'spd68', name: 'Tachyon', category: 'speed', price: 2500000, health: 38, speed: 3.65, fireRate: 1.1, damage: 0.95, accuracy: 1.02, buffs: ['+265% Speed', '+10% Fire Rate'], debuffs: ['-62% Health', '-5% Damage'] },
+            { id: 'spd69', name: 'Neutrino', category: 'speed', price: 3000000, health: 45, speed: 3.72, fireRate: 1.32, damage: 0.82, accuracy: 1.2, buffs: ['+272% Speed', '+32% Fire Rate', '+20% Accuracy'], debuffs: ['-55% Health', '-18% Damage'] },
+            { id: 'spd70', name: 'Photon Rush', category: 'speed', price: 3500000, health: 35, speed: 3.85, fireRate: 1.45, damage: 0.75, accuracy: 1.32, buffs: ['+285% Speed', '+45% Fire Rate', '+32% Accuracy'], debuffs: ['-65% Health', '-25% Damage'] },
+            { id: 'spd71', name: 'Quasar', category: 'speed', price: 4000000, health: 40, speed: 3.9, fireRate: 1.22, damage: 0.9, accuracy: 1.12, buffs: ['+290% Speed', '+22% Fire Rate', '+12% Accuracy'], debuffs: ['-60% Health', '-10% Damage'] },
+            { id: 'spd72', name: 'Pulsar', category: 'speed', price: 4500000, health: 38, speed: 4.0, fireRate: 1.35, damage: 0.82, accuracy: 1.22, buffs: ['+300% Speed', '+35% Fire Rate', '+22% Accuracy'], debuffs: ['-62% Health', '-18% Damage'] },
+            { id: 'spd73', name: 'Blazar', category: 'speed', price: 5000000, health: 42, speed: 4.1, fireRate: 1.18, damage: 0.92, accuracy: 1.08, buffs: ['+310% Speed', '+18% Fire Rate', '+8% Accuracy'], debuffs: ['-58% Health', '-8% Damage'] },
+            { id: 'spd74', name: 'Magnetar', category: 'speed', price: 6000000, health: 35, speed: 4.25, fireRate: 1.5, damage: 0.72, accuracy: 1.35, buffs: ['+325% Speed', '+50% Fire Rate', '+35% Accuracy'], debuffs: ['-65% Health', '-28% Damage'] },
+            { id: 'spd75', name: 'Gamma Ray', category: 'speed', price: 7000000, health: 40, speed: 4.35, fireRate: 1.28, damage: 0.85, accuracy: 1.18, buffs: ['+335% Speed', '+28% Fire Rate', '+18% Accuracy'], debuffs: ['-60% Health', '-15% Damage'] },
+            { id: 'spd76', name: 'X-Ray', category: 'speed', price: 8000000, health: 38, speed: 4.5, fireRate: 1.4, damage: 0.78, accuracy: 1.28, buffs: ['+350% Speed', '+40% Fire Rate', '+28% Accuracy'], debuffs: ['-62% Health', '-22% Damage'] },
+            { id: 'spd77', name: 'Cosmic Ray', category: 'speed', price: 9000000, health: 42, speed: 4.6, fireRate: 1.25, damage: 0.88, accuracy: 1.15, buffs: ['+360% Speed', '+25% Fire Rate', '+15% Accuracy'], debuffs: ['-58% Health', '-12% Damage'] },
+            { id: 'spd78', name: 'Solar Wind', category: 'speed', price: 10000000, health: 35, speed: 4.8, fireRate: 1.55, damage: 0.7, accuracy: 1.4, buffs: ['+380% Speed', '+55% Fire Rate', '+40% Accuracy'], debuffs: ['-65% Health', '-30% Damage'] },
+            { id: 'spd79', name: 'Stellar Stream', category: 'speed', price: 12000000, health: 40, speed: 4.9, fireRate: 1.35, damage: 0.82, accuracy: 1.25, buffs: ['+390% Speed', '+35% Fire Rate', '+25% Accuracy'], debuffs: ['-60% Health', '-18% Damage'] },
+            { id: 'spd80', name: 'Infinity Speed', category: 'speed', price: 15000000, health: 32, speed: 5.0, fireRate: 1.6, damage: 0.65, accuracy: 1.45, buffs: ['+400% Speed', '+60% Fire Rate', '+45% Accuracy'], debuffs: ['-68% Health', '-35% Damage'] },
+            
+            // EXTENDED TANK SHIPS (60 more)
+            { id: 'tnk21', name: 'Plated Hull', category: 'tank', price: 650, health: 135, speed: 0.82, fireRate: 1.02, damage: 0.98, accuracy: 1.0, buffs: ['+35% Health'], debuffs: ['-18% Speed'] },
+            { id: 'tnk22', name: 'Reinforced', category: 'tank', price: 900, health: 150, speed: 0.78, fireRate: 0.95, damage: 1.05, accuracy: 0.98, buffs: ['+50% Health', '+5% Damage'], debuffs: ['-22% Speed', '-5% Fire Rate'] },
+            { id: 'tnk23', name: 'Bulwark', category: 'tank', price: 1500, health: 165, speed: 0.72, fireRate: 1.0, damage: 1.02, accuracy: 0.95, buffs: ['+65% Health'], debuffs: ['-28% Speed', '-5% Accuracy'] },
+            { id: 'tnk24', name: 'Bastion', category: 'tank', price: 1800, health: 175, speed: 0.68, fireRate: 0.88, damage: 1.15, accuracy: 0.92, buffs: ['+75% Health', '+15% Damage'], debuffs: ['-32% Speed', '-12% Fire Rate'] },
+            { id: 'tnk25', name: 'Rampart', category: 'tank', price: 2800, health: 190, speed: 0.72, fireRate: 0.92, damage: 1.08, accuracy: 1.0, buffs: ['+90% Health', '+8% Damage'], debuffs: ['-28% Speed', '-8% Fire Rate'] },
+            { id: 'tnk26', name: 'Citadel', category: 'tank', price: 3500, health: 210, speed: 0.62, fireRate: 0.85, damage: 1.25, accuracy: 0.88, buffs: ['+110% Health', '+25% Damage'], debuffs: ['-38% Speed', '-15% Fire Rate', '-12% Accuracy'] },
+            { id: 'tnk27', name: 'Stronghold', category: 'tank', price: 4200, health: 195, speed: 0.75, fireRate: 0.98, damage: 1.05, accuracy: 0.95, buffs: ['+95% Health', '+5% Damage'], debuffs: ['-25% Speed'] },
+            { id: 'tnk28', name: 'Keep', category: 'tank', price: 6000, health: 225, speed: 0.58, fireRate: 0.82, damage: 1.32, accuracy: 0.85, buffs: ['+125% Health', '+32% Damage'], debuffs: ['-42% Speed', '-18% Fire Rate', '-15% Accuracy'] },
+            { id: 'tnk29', name: 'Redoubt', category: 'tank', price: 7000, health: 205, speed: 0.72, fireRate: 0.95, damage: 1.12, accuracy: 0.98, buffs: ['+105% Health', '+12% Damage'], debuffs: ['-28% Speed', '-5% Fire Rate'] },
+            { id: 'tnk30', name: 'Parapet', category: 'tank', price: 9000, health: 240, speed: 0.55, fireRate: 0.78, damage: 1.4, accuracy: 0.82, buffs: ['+140% Health', '+40% Damage'], debuffs: ['-45% Speed', '-22% Fire Rate', '-18% Accuracy'] },
+            { id: 'tnk31', name: 'Battlement', category: 'tank', price: 10500, health: 220, speed: 0.68, fireRate: 0.92, damage: 1.18, accuracy: 0.95, buffs: ['+120% Health', '+18% Damage'], debuffs: ['-32% Speed', '-8% Fire Rate'] },
+            { id: 'tnk32', name: 'Tower', category: 'tank', price: 13000, health: 260, speed: 0.52, fireRate: 0.75, damage: 1.48, accuracy: 0.78, buffs: ['+160% Health', '+48% Damage'], debuffs: ['-48% Speed', '-25% Fire Rate', '-22% Accuracy'] },
+            { id: 'tnk33', name: 'Garrison', category: 'tank', price: 15000, health: 235, speed: 0.65, fireRate: 0.88, damage: 1.25, accuracy: 0.92, buffs: ['+135% Health', '+25% Damage'], debuffs: ['-35% Speed', '-12% Fire Rate'] },
+            { id: 'tnk34', name: 'Barricade', category: 'tank', price: 20000, health: 280, speed: 0.48, fireRate: 0.72, damage: 1.55, accuracy: 0.75, buffs: ['+180% Health', '+55% Damage'], debuffs: ['-52% Speed', '-28% Fire Rate', '-25% Accuracy'] },
+            { id: 'tnk35', name: 'Blockade', category: 'tank', price: 22000, health: 250, speed: 0.62, fireRate: 0.85, damage: 1.32, accuracy: 0.88, buffs: ['+150% Health', '+32% Damage'], debuffs: ['-38% Speed', '-15% Fire Rate', '-12% Accuracy'] },
+            { id: 'tnk36', name: 'Shield Wall', category: 'tank', price: 28000, health: 300, speed: 0.45, fireRate: 0.68, damage: 1.62, accuracy: 0.72, buffs: ['+200% Health', '+62% Damage'], debuffs: ['-55% Speed', '-32% Fire Rate', '-28% Accuracy'] },
+            { id: 'tnk37', name: 'Iron Curtain', category: 'tank', price: 32000, health: 270, speed: 0.58, fireRate: 0.82, damage: 1.4, accuracy: 0.85, buffs: ['+170% Health', '+40% Damage'], debuffs: ['-42% Speed', '-18% Fire Rate', '-15% Accuracy'] },
+            { id: 'tnk38', name: 'Steel Barrier', category: 'tank', price: 38000, health: 320, speed: 0.42, fireRate: 0.65, damage: 1.7, accuracy: 0.68, buffs: ['+220% Health', '+70% Damage'], debuffs: ['-58% Speed', '-35% Fire Rate', '-32% Accuracy'] },
+            { id: 'tnk39', name: 'Titanium Wall', category: 'tank', price: 42000, health: 290, speed: 0.55, fireRate: 0.78, damage: 1.48, accuracy: 0.82, buffs: ['+190% Health', '+48% Damage'], debuffs: ['-45% Speed', '-22% Fire Rate', '-18% Accuracy'] },
+            { id: 'tnk40', name: 'Adamantine', category: 'tank', price: 48000, health: 340, speed: 0.38, fireRate: 0.62, damage: 1.78, accuracy: 0.65, buffs: ['+240% Health', '+78% Damage'], debuffs: ['-62% Speed', '-38% Fire Rate', '-35% Accuracy'] },
+            { id: 'tnk41', name: 'Mithril Hull', category: 'tank', price: 55000, health: 310, speed: 0.52, fireRate: 0.75, damage: 1.55, accuracy: 0.78, buffs: ['+210% Health', '+55% Damage'], debuffs: ['-48% Speed', '-25% Fire Rate', '-22% Accuracy'] },
+            { id: 'tnk42', name: 'Orichalcum', category: 'tank', price: 62000, health: 360, speed: 0.35, fireRate: 0.58, damage: 1.85, accuracy: 0.62, buffs: ['+260% Health', '+85% Damage'], debuffs: ['-65% Speed', '-42% Fire Rate', '-38% Accuracy'] },
+            { id: 'tnk43', name: 'Diamond Plate', category: 'tank', price: 72000, health: 330, speed: 0.48, fireRate: 0.72, damage: 1.62, accuracy: 0.75, buffs: ['+230% Health', '+62% Damage'], debuffs: ['-52% Speed', '-28% Fire Rate', '-25% Accuracy'] },
+            { id: 'tnk44', name: 'Neutronium', category: 'tank', price: 82000, health: 380, speed: 0.32, fireRate: 0.55, damage: 1.92, accuracy: 0.58, buffs: ['+280% Health', '+92% Damage'], debuffs: ['-68% Speed', '-45% Fire Rate', '-42% Accuracy'] },
+            { id: 'tnk45', name: 'Dark Matter', category: 'tank', price: 95000, health: 350, speed: 0.45, fireRate: 0.68, damage: 1.7, accuracy: 0.72, buffs: ['+250% Health', '+70% Damage'], debuffs: ['-55% Speed', '-32% Fire Rate', '-28% Accuracy'] },
+            { id: 'tnk46', name: 'Event Shield', category: 'tank', price: 110000, health: 400, speed: 0.28, fireRate: 0.52, damage: 2.0, accuracy: 0.55, buffs: ['+300% Health', '+100% Damage'], debuffs: ['-72% Speed', '-48% Fire Rate', '-45% Accuracy'] },
+            { id: 'tnk47', name: 'Singularity', category: 'tank', price: 125000, health: 370, speed: 0.42, fireRate: 0.65, damage: 1.78, accuracy: 0.68, buffs: ['+270% Health', '+78% Damage'], debuffs: ['-58% Speed', '-35% Fire Rate', '-32% Accuracy'] },
+            { id: 'tnk48', name: 'Black Hole', category: 'tank', price: 140000, health: 420, speed: 0.25, fireRate: 0.48, damage: 2.08, accuracy: 0.52, buffs: ['+320% Health', '+108% Damage'], debuffs: ['-75% Speed', '-52% Fire Rate', '-48% Accuracy'] },
+            { id: 'tnk49', name: 'Nebula Core', category: 'tank', price: 160000, health: 390, speed: 0.38, fireRate: 0.62, damage: 1.85, accuracy: 0.65, buffs: ['+290% Health', '+85% Damage'], debuffs: ['-62% Speed', '-38% Fire Rate', '-35% Accuracy'] },
+            { id: 'tnk50', name: 'Galactic Fort', category: 'tank', price: 180000, health: 440, speed: 0.22, fireRate: 0.45, damage: 2.15, accuracy: 0.48, buffs: ['+340% Health', '+115% Damage'], debuffs: ['-78% Speed', '-55% Fire Rate', '-52% Accuracy'] },
+            { id: 'tnk51', name: 'Universe Wall', category: 'tank', price: 220000, health: 410, speed: 0.35, fireRate: 0.58, damage: 1.92, accuracy: 0.62, buffs: ['+310% Health', '+92% Damage'], debuffs: ['-65% Speed', '-42% Fire Rate', '-38% Accuracy'] },
+            { id: 'tnk52', name: 'Cosmic Shield', category: 'tank', price: 250000, health: 460, speed: 0.2, fireRate: 0.42, damage: 2.22, accuracy: 0.45, buffs: ['+360% Health', '+122% Damage'], debuffs: ['-80% Speed', '-58% Fire Rate', '-55% Accuracy'] },
+            { id: 'tnk53', name: 'Dimension Wall', category: 'tank', price: 280000, health: 430, speed: 0.32, fireRate: 0.55, damage: 2.0, accuracy: 0.58, buffs: ['+330% Health', '+100% Damage'], debuffs: ['-68% Speed', '-45% Fire Rate', '-42% Accuracy'] },
+            { id: 'tnk54', name: 'Reality Anchor', category: 'tank', price: 320000, health: 480, speed: 0.18, fireRate: 0.38, damage: 2.3, accuracy: 0.42, buffs: ['+380% Health', '+130% Damage'], debuffs: ['-82% Speed', '-62% Fire Rate', '-58% Accuracy'] },
+            { id: 'tnk55', name: 'Multiverse Fort', category: 'tank', price: 360000, health: 450, speed: 0.28, fireRate: 0.52, damage: 2.08, accuracy: 0.55, buffs: ['+350% Health', '+108% Damage'], debuffs: ['-72% Speed', '-48% Fire Rate', '-45% Accuracy'] },
+            { id: 'tnk56', name: 'Omni Shield', category: 'tank', price: 420000, health: 500, speed: 0.15, fireRate: 0.35, damage: 2.38, accuracy: 0.38, buffs: ['+400% Health', '+138% Damage'], debuffs: ['-85% Speed', '-65% Fire Rate', '-62% Accuracy'] },
+            { id: 'tnk57', name: 'Infinity Fort', category: 'tank', price: 480000, health: 470, speed: 0.25, fireRate: 0.48, damage: 2.15, accuracy: 0.52, buffs: ['+370% Health', '+115% Damage'], debuffs: ['-75% Speed', '-52% Fire Rate', '-48% Accuracy'] },
+            { id: 'tnk58', name: 'Eternal Wall', category: 'tank', price: 550000, health: 520, speed: 0.12, fireRate: 0.32, damage: 2.45, accuracy: 0.35, buffs: ['+420% Health', '+145% Damage'], debuffs: ['-88% Speed', '-68% Fire Rate', '-65% Accuracy'] },
+            { id: 'tnk59', name: 'Timeless Fort', category: 'tank', price: 620000, health: 490, speed: 0.22, fireRate: 0.45, damage: 2.22, accuracy: 0.48, buffs: ['+390% Health', '+122% Damage'], debuffs: ['-78% Speed', '-55% Fire Rate', '-52% Accuracy'] },
+            { id: 'tnk60', name: 'Absolute Defense', category: 'tank', price: 700000, health: 540, speed: 0.1, fireRate: 0.28, damage: 2.52, accuracy: 0.32, buffs: ['+440% Health', '+152% Damage'], debuffs: ['-90% Speed', '-72% Fire Rate', '-68% Accuracy'] },
+            { id: 'tnk61', name: 'Void Fortress', category: 'tank', price: 800000, health: 510, speed: 0.18, fireRate: 0.42, damage: 2.3, accuracy: 0.45, buffs: ['+410% Health', '+130% Damage'], debuffs: ['-82% Speed', '-58% Fire Rate', '-55% Accuracy'] },
+            { id: 'tnk62', name: 'Null Zone', category: 'tank', price: 900000, health: 560, speed: 0.08, fireRate: 0.25, damage: 2.6, accuracy: 0.28, buffs: ['+460% Health', '+160% Damage'], debuffs: ['-92% Speed', '-75% Fire Rate', '-72% Accuracy'] },
+            { id: 'tnk63', name: 'Zero Point', category: 'tank', price: 1100000, health: 530, speed: 0.15, fireRate: 0.38, damage: 2.38, accuracy: 0.42, buffs: ['+430% Health', '+138% Damage'], debuffs: ['-85% Speed', '-62% Fire Rate', '-58% Accuracy'] },
+            { id: 'tnk64', name: 'Absolute Zero', category: 'tank', price: 1300000, health: 580, speed: 0.06, fireRate: 0.22, damage: 2.68, accuracy: 0.25, buffs: ['+480% Health', '+168% Damage'], debuffs: ['-94% Speed', '-78% Fire Rate', '-75% Accuracy'] },
+            { id: 'tnk65', name: 'Entropy Wall', category: 'tank', price: 1500000, health: 550, speed: 0.12, fireRate: 0.35, damage: 2.45, accuracy: 0.38, buffs: ['+450% Health', '+145% Damage'], debuffs: ['-88% Speed', '-65% Fire Rate', '-62% Accuracy'] },
+            { id: 'tnk66', name: 'Heat Death', category: 'tank', price: 1800000, health: 600, speed: 0.05, fireRate: 0.2, damage: 2.75, accuracy: 0.22, buffs: ['+500% Health', '+175% Damage'], debuffs: ['-95% Speed', '-80% Fire Rate', '-78% Accuracy'] },
+            { id: 'tnk67', name: 'Big Crunch', category: 'tank', price: 2200000, health: 570, speed: 0.1, fireRate: 0.32, damage: 2.52, accuracy: 0.35, buffs: ['+470% Health', '+152% Damage'], debuffs: ['-90% Speed', '-68% Fire Rate', '-65% Accuracy'] },
+            { id: 'tnk68', name: 'Big Bang', category: 'tank', price: 2500000, health: 620, speed: 0.04, fireRate: 0.18, damage: 2.82, accuracy: 0.2, buffs: ['+520% Health', '+182% Damage'], debuffs: ['-96% Speed', '-82% Fire Rate', '-80% Accuracy'] },
+            { id: 'tnk69', name: 'Primordial', category: 'tank', price: 3000000, health: 590, speed: 0.08, fireRate: 0.28, damage: 2.6, accuracy: 0.32, buffs: ['+490% Health', '+160% Damage'], debuffs: ['-92% Speed', '-72% Fire Rate', '-68% Accuracy'] },
+            { id: 'tnk70', name: 'Genesis Shield', category: 'tank', price: 3500000, health: 640, speed: 0.03, fireRate: 0.15, damage: 2.9, accuracy: 0.18, buffs: ['+540% Health', '+190% Damage'], debuffs: ['-97% Speed', '-85% Fire Rate', '-82% Accuracy'] },
+            { id: 'tnk71', name: 'Creation Fort', category: 'tank', price: 4000000, health: 610, speed: 0.06, fireRate: 0.25, damage: 2.68, accuracy: 0.28, buffs: ['+510% Health', '+168% Damage'], debuffs: ['-94% Speed', '-75% Fire Rate', '-72% Accuracy'] },
+            { id: 'tnk72', name: 'Divine Shield', category: 'tank', price: 4500000, health: 660, speed: 0.02, fireRate: 0.12, damage: 2.98, accuracy: 0.15, buffs: ['+560% Health', '+198% Damage'], debuffs: ['-98% Speed', '-88% Fire Rate', '-85% Accuracy'] },
+            { id: 'tnk73', name: 'Holy Fortress', category: 'tank', price: 5000000, health: 630, speed: 0.05, fireRate: 0.22, damage: 2.75, accuracy: 0.25, buffs: ['+530% Health', '+175% Damage'], debuffs: ['-95% Speed', '-78% Fire Rate', '-75% Accuracy'] },
+            { id: 'tnk74', name: 'Sacred Wall', category: 'tank', price: 6000000, health: 680, speed: 0.02, fireRate: 0.1, damage: 3.05, accuracy: 0.12, buffs: ['+580% Health', '+205% Damage'], debuffs: ['-98% Speed', '-90% Fire Rate', '-88% Accuracy'] },
+            { id: 'tnk75', name: 'Blessed Fort', category: 'tank', price: 7000000, health: 650, speed: 0.04, fireRate: 0.2, damage: 2.82, accuracy: 0.22, buffs: ['+550% Health', '+182% Damage'], debuffs: ['-96% Speed', '-80% Fire Rate', '-78% Accuracy'] },
+            { id: 'tnk76', name: 'Angelic Shield', category: 'tank', price: 8000000, health: 700, speed: 0.02, fireRate: 0.08, damage: 3.12, accuracy: 0.1, buffs: ['+600% Health', '+212% Damage'], debuffs: ['-98% Speed', '-92% Fire Rate', '-90% Accuracy'] },
+            { id: 'tnk77', name: 'Seraphim Wall', category: 'tank', price: 9000000, health: 670, speed: 0.03, fireRate: 0.18, damage: 2.9, accuracy: 0.2, buffs: ['+570% Health', '+190% Damage'], debuffs: ['-97% Speed', '-82% Fire Rate', '-80% Accuracy'] },
+            { id: 'tnk78', name: 'Cherubim Fort', category: 'tank', price: 10000000, health: 720, speed: 0.02, fireRate: 0.06, damage: 3.2, accuracy: 0.08, buffs: ['+620% Health', '+220% Damage'], debuffs: ['-98% Speed', '-94% Fire Rate', '-92% Accuracy'] },
+            { id: 'tnk79', name: 'Throne Shield', category: 'tank', price: 12000000, health: 690, speed: 0.03, fireRate: 0.15, damage: 2.98, accuracy: 0.18, buffs: ['+590% Health', '+198% Damage'], debuffs: ['-97% Speed', '-85% Fire Rate', '-82% Accuracy'] },
+            { id: 'tnk80', name: 'Ultimate Tank', category: 'tank', price: 15000000, health: 750, speed: 0.01, fireRate: 0.05, damage: 3.3, accuracy: 0.05, buffs: ['+650% Health', '+230% Damage'], debuffs: ['-99% Speed', '-95% Fire Rate', '-95% Accuracy'] },
+            
+            // EXTENDED DAMAGE SHIPS (60 more)
+            { id: 'dmg21', name: 'Pain Bringer', category: 'damage', price: 650, health: 92, speed: 0.95, fireRate: 0.92, damage: 1.35, accuracy: 1.05, buffs: ['+35% Damage', '+5% Accuracy'], debuffs: ['-8% Health', '-8% Fire Rate'] },
+            { id: 'dmg22', name: 'Hurt Locker', category: 'damage', price: 900, health: 85, speed: 0.9, fireRate: 0.88, damage: 1.45, accuracy: 1.1, buffs: ['+45% Damage', '+10% Accuracy'], debuffs: ['-15% Health', '-12% Fire Rate'] },
+            { id: 'dmg23', name: 'Wound Maker', category: 'damage', price: 1500, health: 95, speed: 0.98, fireRate: 0.95, damage: 1.38, accuracy: 1.02, buffs: ['+38% Damage'], debuffs: ['-5% Health', '-5% Fire Rate'] },
+            { id: 'dmg24', name: 'Agony', category: 'damage', price: 1800, health: 82, speed: 0.85, fireRate: 0.82, damage: 1.55, accuracy: 1.15, buffs: ['+55% Damage', '+15% Accuracy'], debuffs: ['-18% Health', '-18% Fire Rate', '-15% Speed'] },
+            { id: 'dmg25', name: 'Torment', category: 'damage', price: 2800, health: 90, speed: 0.92, fireRate: 0.9, damage: 1.48, accuracy: 1.08, buffs: ['+48% Damage', '+8% Accuracy'], debuffs: ['-10% Health', '-10% Fire Rate'] },
+            { id: 'dmg26', name: 'Suffering', category: 'damage', price: 3500, health: 78, speed: 0.82, fireRate: 0.78, damage: 1.65, accuracy: 1.2, buffs: ['+65% Damage', '+20% Accuracy'], debuffs: ['-22% Health', '-22% Fire Rate', '-18% Speed'] },
+            { id: 'dmg27', name: 'Misery', category: 'damage', price: 4200, health: 88, speed: 0.95, fireRate: 0.88, damage: 1.52, accuracy: 1.05, buffs: ['+52% Damage', '+5% Accuracy'], debuffs: ['-12% Health', '-12% Fire Rate'] },
+            { id: 'dmg28', name: 'Anguish', category: 'damage', price: 6000, health: 75, speed: 0.78, fireRate: 0.75, damage: 1.75, accuracy: 1.25, buffs: ['+75% Damage', '+25% Accuracy'], debuffs: ['-25% Health', '-25% Fire Rate', '-22% Speed'] },
+            { id: 'dmg29', name: 'Woe', category: 'damage', price: 7000, health: 85, speed: 0.92, fireRate: 0.85, damage: 1.58, accuracy: 1.1, buffs: ['+58% Damage', '+10% Accuracy'], debuffs: ['-15% Health', '-15% Fire Rate'] },
+            { id: 'dmg30', name: 'Calamity', category: 'damage', price: 9000, health: 72, speed: 0.75, fireRate: 0.72, damage: 1.85, accuracy: 1.3, buffs: ['+85% Damage', '+30% Accuracy'], debuffs: ['-28% Health', '-28% Fire Rate', '-25% Speed'] },
+            { id: 'dmg31', name: 'Catastrophe', category: 'damage', price: 10500, health: 82, speed: 0.88, fireRate: 0.82, damage: 1.65, accuracy: 1.15, buffs: ['+65% Damage', '+15% Accuracy'], debuffs: ['-18% Health', '-18% Fire Rate', '-12% Speed'] },
+            { id: 'dmg32', name: 'Cataclysm', category: 'damage', price: 13000, health: 68, speed: 0.72, fireRate: 0.68, damage: 1.95, accuracy: 1.35, buffs: ['+95% Damage', '+35% Accuracy'], debuffs: ['-32% Health', '-32% Fire Rate', '-28% Speed'] },
+            { id: 'dmg33', name: 'Apocalypse', category: 'damage', price: 15000, health: 78, speed: 0.85, fireRate: 0.78, damage: 1.72, accuracy: 1.2, buffs: ['+72% Damage', '+20% Accuracy'], debuffs: ['-22% Health', '-22% Fire Rate', '-15% Speed'] },
+            { id: 'dmg34', name: 'Armageddon', category: 'damage', price: 20000, health: 65, speed: 0.68, fireRate: 0.65, damage: 2.05, accuracy: 1.4, buffs: ['+105% Damage', '+40% Accuracy'], debuffs: ['-35% Health', '-35% Fire Rate', '-32% Speed'] },
+            { id: 'dmg35', name: 'Ragnarok', category: 'damage', price: 22000, health: 75, speed: 0.82, fireRate: 0.75, damage: 1.8, accuracy: 1.25, buffs: ['+80% Damage', '+25% Accuracy'], debuffs: ['-25% Health', '-25% Fire Rate', '-18% Speed'] },
+            { id: 'dmg36', name: 'Doomsday', category: 'damage', price: 28000, health: 62, speed: 0.65, fireRate: 0.62, damage: 2.15, accuracy: 1.45, buffs: ['+115% Damage', '+45% Accuracy'], debuffs: ['-38% Health', '-38% Fire Rate', '-35% Speed'] },
+            { id: 'dmg37', name: 'Extinction', category: 'damage', price: 32000, health: 72, speed: 0.78, fireRate: 0.72, damage: 1.88, accuracy: 1.3, buffs: ['+88% Damage', '+30% Accuracy'], debuffs: ['-28% Health', '-28% Fire Rate', '-22% Speed'] },
+            { id: 'dmg38', name: 'Annihilation', category: 'damage', price: 38000, health: 58, speed: 0.62, fireRate: 0.58, damage: 2.25, accuracy: 1.5, buffs: ['+125% Damage', '+50% Accuracy'], debuffs: ['-42% Health', '-42% Fire Rate', '-38% Speed'] },
+            { id: 'dmg39', name: 'Oblivion', category: 'damage', price: 42000, health: 68, speed: 0.75, fireRate: 0.68, damage: 1.95, accuracy: 1.35, buffs: ['+95% Damage', '+35% Accuracy'], debuffs: ['-32% Health', '-32% Fire Rate', '-25% Speed'] },
+            { id: 'dmg40', name: 'Void Strike', category: 'damage', price: 48000, health: 55, speed: 0.58, fireRate: 0.55, damage: 2.35, accuracy: 1.55, buffs: ['+135% Damage', '+55% Accuracy'], debuffs: ['-45% Health', '-45% Fire Rate', '-42% Speed'] },
+            { id: 'dmg41', name: 'Null Cannon', category: 'damage', price: 55000, health: 65, speed: 0.72, fireRate: 0.65, damage: 2.02, accuracy: 1.4, buffs: ['+102% Damage', '+40% Accuracy'], debuffs: ['-35% Health', '-35% Fire Rate', '-28% Speed'] },
+            { id: 'dmg42', name: 'Zero Point Gun', category: 'damage', price: 62000, health: 52, speed: 0.55, fireRate: 0.52, damage: 2.45, accuracy: 1.6, buffs: ['+145% Damage', '+60% Accuracy'], debuffs: ['-48% Health', '-48% Fire Rate', '-45% Speed'] },
+            { id: 'dmg43', name: 'Entropy Cannon', category: 'damage', price: 72000, health: 62, speed: 0.68, fireRate: 0.62, damage: 2.1, accuracy: 1.45, buffs: ['+110% Damage', '+45% Accuracy'], debuffs: ['-38% Health', '-38% Fire Rate', '-32% Speed'] },
+            { id: 'dmg44', name: 'Chaos Cannon', category: 'damage', price: 82000, health: 48, speed: 0.52, fireRate: 0.48, damage: 2.55, accuracy: 1.65, buffs: ['+155% Damage', '+65% Accuracy'], debuffs: ['-52% Health', '-52% Fire Rate', '-48% Speed'] },
+            { id: 'dmg45', name: 'Discord', category: 'damage', price: 95000, health: 58, speed: 0.65, fireRate: 0.58, damage: 2.18, accuracy: 1.5, buffs: ['+118% Damage', '+50% Accuracy'], debuffs: ['-42% Health', '-42% Fire Rate', '-35% Speed'] },
+            { id: 'dmg46', name: 'Havoc', category: 'damage', price: 110000, health: 45, speed: 0.48, fireRate: 0.45, damage: 2.65, accuracy: 1.7, buffs: ['+165% Damage', '+70% Accuracy'], debuffs: ['-55% Health', '-55% Fire Rate', '-52% Speed'] },
+            { id: 'dmg47', name: 'Mayhem', category: 'damage', price: 125000, health: 55, speed: 0.62, fireRate: 0.55, damage: 2.25, accuracy: 1.55, buffs: ['+125% Damage', '+55% Accuracy'], debuffs: ['-45% Health', '-45% Fire Rate', '-38% Speed'] },
+            { id: 'dmg48', name: 'Pandemonium', category: 'damage', price: 140000, health: 42, speed: 0.45, fireRate: 0.42, damage: 2.75, accuracy: 1.75, buffs: ['+175% Damage', '+75% Accuracy'], debuffs: ['-58% Health', '-58% Fire Rate', '-55% Speed'] },
+            { id: 'dmg49', name: 'Turmoil', category: 'damage', price: 160000, health: 52, speed: 0.58, fireRate: 0.52, damage: 2.32, accuracy: 1.6, buffs: ['+132% Damage', '+60% Accuracy'], debuffs: ['-48% Health', '-48% Fire Rate', '-42% Speed'] },
+            { id: 'dmg50', name: 'Upheaval', category: 'damage', price: 180000, health: 38, speed: 0.42, fireRate: 0.38, damage: 2.85, accuracy: 1.8, buffs: ['+185% Damage', '+80% Accuracy'], debuffs: ['-62% Health', '-62% Fire Rate', '-58% Speed'] },
+            { id: 'dmg51', name: 'Revolution', category: 'damage', price: 220000, health: 48, speed: 0.55, fireRate: 0.48, damage: 2.4, accuracy: 1.65, buffs: ['+140% Damage', '+65% Accuracy'], debuffs: ['-52% Health', '-52% Fire Rate', '-45% Speed'] },
+            { id: 'dmg52', name: 'Insurrection', category: 'damage', price: 250000, health: 35, speed: 0.38, fireRate: 0.35, damage: 2.95, accuracy: 1.85, buffs: ['+195% Damage', '+85% Accuracy'], debuffs: ['-65% Health', '-65% Fire Rate', '-62% Speed'] },
+            { id: 'dmg53', name: 'Rebellion', category: 'damage', price: 280000, health: 45, speed: 0.52, fireRate: 0.45, damage: 2.48, accuracy: 1.7, buffs: ['+148% Damage', '+70% Accuracy'], debuffs: ['-55% Health', '-55% Fire Rate', '-48% Speed'] },
+            { id: 'dmg54', name: 'Revolt', category: 'damage', price: 320000, health: 32, speed: 0.35, fireRate: 0.32, damage: 3.05, accuracy: 1.9, buffs: ['+205% Damage', '+90% Accuracy'], debuffs: ['-68% Health', '-68% Fire Rate', '-65% Speed'] },
+            { id: 'dmg55', name: 'Mutiny', category: 'damage', price: 360000, health: 42, speed: 0.48, fireRate: 0.42, damage: 2.55, accuracy: 1.75, buffs: ['+155% Damage', '+75% Accuracy'], debuffs: ['-58% Health', '-58% Fire Rate', '-52% Speed'] },
+            { id: 'dmg56', name: 'Sedition', category: 'damage', price: 420000, health: 28, speed: 0.32, fireRate: 0.28, damage: 3.15, accuracy: 1.95, buffs: ['+215% Damage', '+95% Accuracy'], debuffs: ['-72% Health', '-72% Fire Rate', '-68% Speed'] },
+            { id: 'dmg57', name: 'Anarchy', category: 'damage', price: 480000, health: 38, speed: 0.45, fireRate: 0.38, damage: 2.62, accuracy: 1.8, buffs: ['+162% Damage', '+80% Accuracy'], debuffs: ['-62% Health', '-62% Fire Rate', '-55% Speed'] },
+            { id: 'dmg58', name: 'Chaos Lord', category: 'damage', price: 550000, health: 25, speed: 0.28, fireRate: 0.25, damage: 3.25, accuracy: 2.0, buffs: ['+225% Damage', '+100% Accuracy'], debuffs: ['-75% Health', '-75% Fire Rate', '-72% Speed'] },
+            { id: 'dmg59', name: 'Entropy King', category: 'damage', price: 620000, health: 35, speed: 0.42, fireRate: 0.35, damage: 2.7, accuracy: 1.85, buffs: ['+170% Damage', '+85% Accuracy'], debuffs: ['-65% Health', '-65% Fire Rate', '-58% Speed'] },
+            { id: 'dmg60', name: 'Void Emperor', category: 'damage', price: 700000, health: 22, speed: 0.25, fireRate: 0.22, damage: 3.35, accuracy: 2.05, buffs: ['+235% Damage', '+105% Accuracy'], debuffs: ['-78% Health', '-78% Fire Rate', '-75% Speed'] },
+            { id: 'dmg61', name: 'Null Monarch', category: 'damage', price: 800000, health: 32, speed: 0.38, fireRate: 0.32, damage: 2.78, accuracy: 1.9, buffs: ['+178% Damage', '+90% Accuracy'], debuffs: ['-68% Health', '-68% Fire Rate', '-62% Speed'] },
+            { id: 'dmg62', name: 'Zero Sovereign', category: 'damage', price: 900000, health: 18, speed: 0.22, fireRate: 0.18, damage: 3.45, accuracy: 2.1, buffs: ['+245% Damage', '+110% Accuracy'], debuffs: ['-82% Health', '-82% Fire Rate', '-78% Speed'] },
+            { id: 'dmg63', name: 'Omega Destroyer', category: 'damage', price: 1100000, health: 28, speed: 0.35, fireRate: 0.28, damage: 2.85, accuracy: 1.95, buffs: ['+185% Damage', '+95% Accuracy'], debuffs: ['-72% Health', '-72% Fire Rate', '-65% Speed'] },
+            { id: 'dmg64', name: 'Alpha Striker', category: 'damage', price: 1300000, health: 15, speed: 0.18, fireRate: 0.15, damage: 3.55, accuracy: 2.15, buffs: ['+255% Damage', '+115% Accuracy'], debuffs: ['-85% Health', '-85% Fire Rate', '-82% Speed'] },
+            { id: 'dmg65', name: 'Prime Annihilator', category: 'damage', price: 1500000, health: 25, speed: 0.32, fireRate: 0.25, damage: 2.92, accuracy: 2.0, buffs: ['+192% Damage', '+100% Accuracy'], debuffs: ['-75% Health', '-75% Fire Rate', '-68% Speed'] },
+            { id: 'dmg66', name: 'Ultimate Cannon', category: 'damage', price: 1800000, health: 12, speed: 0.15, fireRate: 0.12, damage: 3.65, accuracy: 2.2, buffs: ['+265% Damage', '+120% Accuracy'], debuffs: ['-88% Health', '-88% Fire Rate', '-85% Speed'] },
+            { id: 'dmg67', name: 'Supreme Strike', category: 'damage', price: 2200000, health: 22, speed: 0.28, fireRate: 0.22, damage: 3.0, accuracy: 2.05, buffs: ['+200% Damage', '+105% Accuracy'], debuffs: ['-78% Health', '-78% Fire Rate', '-72% Speed'] },
+            { id: 'dmg68', name: 'Infinite Damage', category: 'damage', price: 2500000, health: 10, speed: 0.12, fireRate: 0.1, damage: 3.75, accuracy: 2.25, buffs: ['+275% Damage', '+125% Accuracy'], debuffs: ['-90% Health', '-90% Fire Rate', '-88% Speed'] },
+            { id: 'dmg69', name: 'Eternal Pain', category: 'damage', price: 3000000, health: 18, speed: 0.25, fireRate: 0.18, damage: 3.08, accuracy: 2.1, buffs: ['+208% Damage', '+110% Accuracy'], debuffs: ['-82% Health', '-82% Fire Rate', '-75% Speed'] },
+            { id: 'dmg70', name: 'Timeless Fury', category: 'damage', price: 3500000, health: 8, speed: 0.1, fireRate: 0.08, damage: 3.85, accuracy: 2.3, buffs: ['+285% Damage', '+130% Accuracy'], debuffs: ['-92% Health', '-92% Fire Rate', '-90% Speed'] },
+            { id: 'dmg71', name: 'Divine Wrath', category: 'damage', price: 4000000, health: 15, speed: 0.22, fireRate: 0.15, damage: 3.15, accuracy: 2.15, buffs: ['+215% Damage', '+115% Accuracy'], debuffs: ['-85% Health', '-85% Fire Rate', '-78% Speed'] },
+            { id: 'dmg72', name: 'Holy Smite', category: 'damage', price: 4500000, health: 6, speed: 0.08, fireRate: 0.06, damage: 3.95, accuracy: 2.35, buffs: ['+295% Damage', '+135% Accuracy'], debuffs: ['-94% Health', '-94% Fire Rate', '-92% Speed'] },
+            { id: 'dmg73', name: 'Sacred Strike', category: 'damage', price: 5000000, health: 12, speed: 0.18, fireRate: 0.12, damage: 3.22, accuracy: 2.2, buffs: ['+222% Damage', '+120% Accuracy'], debuffs: ['-88% Health', '-88% Fire Rate', '-82% Speed'] },
+            { id: 'dmg74', name: 'Blessed Fury', category: 'damage', price: 6000000, health: 5, speed: 0.06, fireRate: 0.05, damage: 4.05, accuracy: 2.4, buffs: ['+305% Damage', '+140% Accuracy'], debuffs: ['-95% Health', '-95% Fire Rate', '-94% Speed'] },
+            { id: 'dmg75', name: 'Angelic Wrath', category: 'damage', price: 7000000, health: 10, speed: 0.15, fireRate: 0.1, damage: 3.3, accuracy: 2.25, buffs: ['+230% Damage', '+125% Accuracy'], debuffs: ['-90% Health', '-90% Fire Rate', '-85% Speed'] },
+            { id: 'dmg76', name: 'Seraphim Strike', category: 'damage', price: 8000000, health: 4, speed: 0.05, fireRate: 0.04, damage: 4.15, accuracy: 2.45, buffs: ['+315% Damage', '+145% Accuracy'], debuffs: ['-96% Health', '-96% Fire Rate', '-95% Speed'] },
+            { id: 'dmg77', name: 'Cherubim Cannon', category: 'damage', price: 9000000, health: 8, speed: 0.12, fireRate: 0.08, damage: 3.38, accuracy: 2.3, buffs: ['+238% Damage', '+130% Accuracy'], debuffs: ['-92% Health', '-92% Fire Rate', '-88% Speed'] },
+            { id: 'dmg78', name: 'Throne Fury', category: 'damage', price: 10000000, health: 3, speed: 0.04, fireRate: 0.03, damage: 4.25, accuracy: 2.5, buffs: ['+325% Damage', '+150% Accuracy'], debuffs: ['-97% Health', '-97% Fire Rate', '-96% Speed'] },
+            { id: 'dmg79', name: 'Dominion Strike', category: 'damage', price: 12000000, health: 6, speed: 0.1, fireRate: 0.06, damage: 3.45, accuracy: 2.35, buffs: ['+245% Damage', '+135% Accuracy'], debuffs: ['-94% Health', '-94% Fire Rate', '-90% Speed'] },
+            { id: 'dmg80', name: 'Ultimate Damage', category: 'damage', price: 15000000, health: 2, speed: 0.02, fireRate: 0.02, damage: 4.5, accuracy: 2.6, buffs: ['+350% Damage', '+160% Accuracy'], debuffs: ['-98% Health', '-98% Fire Rate', '-98% Speed'] },
+            
+            // EXTENDED BALANCED SHIPS (60 more)
+            { id: 'bal21', name: 'Equilibrium', category: 'balanced', price: 650, health: 108, speed: 1.05, fireRate: 1.05, damage: 1.05, accuracy: 1.05, buffs: ['+5% All Stats'], debuffs: [] },
+            { id: 'bal22', name: 'Poise', category: 'balanced', price: 900, health: 112, speed: 1.08, fireRate: 1.08, damage: 1.08, accuracy: 1.08, buffs: ['+8% All Stats'], debuffs: [] },
+            { id: 'bal23', name: 'Steadfast', category: 'balanced', price: 1500, health: 118, speed: 1.1, fireRate: 1.1, damage: 1.1, accuracy: 1.1, buffs: ['+10% All Stats'], debuffs: [] },
+            { id: 'bal24', name: 'Resolute', category: 'balanced', price: 1800, health: 125, speed: 1.12, fireRate: 1.12, damage: 1.12, accuracy: 1.12, buffs: ['+12% All Stats'], debuffs: [] },
+            { id: 'bal25', name: 'Stalwart', category: 'balanced', price: 2800, health: 132, speed: 1.15, fireRate: 1.15, damage: 1.15, accuracy: 1.15, buffs: ['+15% All Stats'], debuffs: [] },
+            { id: 'bal26', name: 'Unwavering', category: 'balanced', price: 3500, health: 140, speed: 1.18, fireRate: 1.18, damage: 1.18, accuracy: 1.18, buffs: ['+18% All Stats'], debuffs: [] },
+            { id: 'bal27', name: 'Indomitable', category: 'balanced', price: 4200, health: 148, speed: 1.2, fireRate: 1.2, damage: 1.2, accuracy: 1.2, buffs: ['+20% All Stats'], debuffs: [] },
+            { id: 'bal28', name: 'Unyielding', category: 'balanced', price: 6000, health: 155, speed: 1.22, fireRate: 1.22, damage: 1.22, accuracy: 1.22, buffs: ['+22% All Stats'], debuffs: [] },
+            { id: 'bal29', name: 'Unbreakable', category: 'balanced', price: 7000, health: 162, speed: 1.25, fireRate: 1.25, damage: 1.25, accuracy: 1.25, buffs: ['+25% All Stats'], debuffs: [] },
+            { id: 'bal30', name: 'Immovable', category: 'balanced', price: 9000, health: 170, speed: 1.28, fireRate: 1.28, damage: 1.28, accuracy: 1.28, buffs: ['+28% All Stats'], debuffs: [] },
+            { id: 'bal31', name: 'Invincible', category: 'balanced', price: 10500, health: 178, speed: 1.3, fireRate: 1.3, damage: 1.3, accuracy: 1.3, buffs: ['+30% All Stats'], debuffs: [] },
+            { id: 'bal32', name: 'Unconquerable', category: 'balanced', price: 13000, health: 185, speed: 1.32, fireRate: 1.32, damage: 1.32, accuracy: 1.32, buffs: ['+32% All Stats'], debuffs: [] },
+            { id: 'bal33', name: 'Impregnable', category: 'balanced', price: 15000, health: 192, speed: 1.35, fireRate: 1.35, damage: 1.35, accuracy: 1.35, buffs: ['+35% All Stats'], debuffs: [] },
+            { id: 'bal34', name: 'Insurmountable', category: 'balanced', price: 20000, health: 200, speed: 1.38, fireRate: 1.38, damage: 1.38, accuracy: 1.38, buffs: ['+38% All Stats'], debuffs: [] },
+            { id: 'bal35', name: 'Unstoppable', category: 'balanced', price: 22000, health: 208, speed: 1.4, fireRate: 1.4, damage: 1.4, accuracy: 1.4, buffs: ['+40% All Stats'], debuffs: [] },
+            { id: 'bal36', name: 'Relentless', category: 'balanced', price: 28000, health: 215, speed: 1.42, fireRate: 1.42, damage: 1.42, accuracy: 1.42, buffs: ['+42% All Stats'], debuffs: [] },
+            { id: 'bal37', name: 'Persistent', category: 'balanced', price: 32000, health: 222, speed: 1.45, fireRate: 1.45, damage: 1.45, accuracy: 1.45, buffs: ['+45% All Stats'], debuffs: [] },
+            { id: 'bal38', name: 'Tenacious', category: 'balanced', price: 38000, health: 230, speed: 1.48, fireRate: 1.48, damage: 1.48, accuracy: 1.48, buffs: ['+48% All Stats'], debuffs: [] },
+            { id: 'bal39', name: 'Determined', category: 'balanced', price: 42000, health: 238, speed: 1.5, fireRate: 1.5, damage: 1.5, accuracy: 1.5, buffs: ['+50% All Stats'], debuffs: [] },
+            { id: 'bal40', name: 'Resolute II', category: 'balanced', price: 48000, health: 245, speed: 1.52, fireRate: 1.52, damage: 1.52, accuracy: 1.52, buffs: ['+52% All Stats'], debuffs: [] },
+            { id: 'bal41', name: 'Steadfast II', category: 'balanced', price: 55000, health: 252, speed: 1.55, fireRate: 1.55, damage: 1.55, accuracy: 1.55, buffs: ['+55% All Stats'], debuffs: [] },
+            { id: 'bal42', name: 'Stalwart II', category: 'balanced', price: 62000, health: 260, speed: 1.58, fireRate: 1.58, damage: 1.58, accuracy: 1.58, buffs: ['+58% All Stats'], debuffs: [] },
+            { id: 'bal43', name: 'Unwavering II', category: 'balanced', price: 72000, health: 268, speed: 1.6, fireRate: 1.6, damage: 1.6, accuracy: 1.6, buffs: ['+60% All Stats'], debuffs: [] },
+            { id: 'bal44', name: 'Indomitable II', category: 'balanced', price: 82000, health: 275, speed: 1.62, fireRate: 1.62, damage: 1.62, accuracy: 1.62, buffs: ['+62% All Stats'], debuffs: [] },
+            { id: 'bal45', name: 'Unyielding II', category: 'balanced', price: 95000, health: 282, speed: 1.65, fireRate: 1.65, damage: 1.65, accuracy: 1.65, buffs: ['+65% All Stats'], debuffs: [] },
+            { id: 'bal46', name: 'Unbreakable II', category: 'balanced', price: 110000, health: 290, speed: 1.68, fireRate: 1.68, damage: 1.68, accuracy: 1.68, buffs: ['+68% All Stats'], debuffs: [] },
+            { id: 'bal47', name: 'Immovable II', category: 'balanced', price: 125000, health: 298, speed: 1.7, fireRate: 1.7, damage: 1.7, accuracy: 1.7, buffs: ['+70% All Stats'], debuffs: [] },
+            { id: 'bal48', name: 'Invincible II', category: 'balanced', price: 140000, health: 305, speed: 1.72, fireRate: 1.72, damage: 1.72, accuracy: 1.72, buffs: ['+72% All Stats'], debuffs: [] },
+            { id: 'bal49', name: 'Unconquerable II', category: 'balanced', price: 160000, health: 312, speed: 1.75, fireRate: 1.75, damage: 1.75, accuracy: 1.75, buffs: ['+75% All Stats'], debuffs: [] },
+            { id: 'bal50', name: 'Impregnable II', category: 'balanced', price: 180000, health: 320, speed: 1.78, fireRate: 1.78, damage: 1.78, accuracy: 1.78, buffs: ['+78% All Stats'], debuffs: [] },
+            { id: 'bal51', name: 'Insurmountable II', category: 'balanced', price: 220000, health: 328, speed: 1.8, fireRate: 1.8, damage: 1.8, accuracy: 1.8, buffs: ['+80% All Stats'], debuffs: [] },
+            { id: 'bal52', name: 'Unstoppable II', category: 'balanced', price: 250000, health: 335, speed: 1.82, fireRate: 1.82, damage: 1.82, accuracy: 1.82, buffs: ['+82% All Stats'], debuffs: [] },
+            { id: 'bal53', name: 'Relentless II', category: 'balanced', price: 280000, health: 342, speed: 1.85, fireRate: 1.85, damage: 1.85, accuracy: 1.85, buffs: ['+85% All Stats'], debuffs: [] },
+            { id: 'bal54', name: 'Persistent II', category: 'balanced', price: 320000, health: 350, speed: 1.88, fireRate: 1.88, damage: 1.88, accuracy: 1.88, buffs: ['+88% All Stats'], debuffs: [] },
+            { id: 'bal55', name: 'Tenacious II', category: 'balanced', price: 360000, health: 358, speed: 1.9, fireRate: 1.9, damage: 1.9, accuracy: 1.9, buffs: ['+90% All Stats'], debuffs: [] },
+            { id: 'bal56', name: 'Determined II', category: 'balanced', price: 420000, health: 365, speed: 1.92, fireRate: 1.92, damage: 1.92, accuracy: 1.92, buffs: ['+92% All Stats'], debuffs: [] },
+            { id: 'bal57', name: 'Equilibrium II', category: 'balanced', price: 480000, health: 372, speed: 1.95, fireRate: 1.95, damage: 1.95, accuracy: 1.95, buffs: ['+95% All Stats'], debuffs: [] },
+            { id: 'bal58', name: 'Poise II', category: 'balanced', price: 550000, health: 380, speed: 1.98, fireRate: 1.98, damage: 1.98, accuracy: 1.98, buffs: ['+98% All Stats'], debuffs: [] },
+            { id: 'bal59', name: 'Harmony', category: 'balanced', price: 620000, health: 388, speed: 2.0, fireRate: 2.0, damage: 2.0, accuracy: 2.0, buffs: ['+100% All Stats'], debuffs: [] },
+            { id: 'bal60', name: 'Serenity', category: 'balanced', price: 700000, health: 395, speed: 2.02, fireRate: 2.02, damage: 2.02, accuracy: 2.02, buffs: ['+102% All Stats'], debuffs: [] },
+            { id: 'bal61', name: 'Tranquility', category: 'balanced', price: 800000, health: 402, speed: 2.05, fireRate: 2.05, damage: 2.05, accuracy: 2.05, buffs: ['+105% All Stats'], debuffs: [] },
+            { id: 'bal62', name: 'Peace', category: 'balanced', price: 900000, health: 410, speed: 2.08, fireRate: 2.08, damage: 2.08, accuracy: 2.08, buffs: ['+108% All Stats'], debuffs: [] },
+            { id: 'bal63', name: 'Unity', category: 'balanced', price: 1100000, health: 418, speed: 2.1, fireRate: 2.1, damage: 2.1, accuracy: 2.1, buffs: ['+110% All Stats'], debuffs: [] },
+            { id: 'bal64', name: 'Accord', category: 'balanced', price: 1300000, health: 425, speed: 2.12, fireRate: 2.12, damage: 2.12, accuracy: 2.12, buffs: ['+112% All Stats'], debuffs: [] },
+            { id: 'bal65', name: 'Concord', category: 'balanced', price: 1500000, health: 432, speed: 2.15, fireRate: 2.15, damage: 2.15, accuracy: 2.15, buffs: ['+115% All Stats'], debuffs: [] },
+            { id: 'bal66', name: 'Amity', category: 'balanced', price: 1800000, health: 440, speed: 2.18, fireRate: 2.18, damage: 2.18, accuracy: 2.18, buffs: ['+118% All Stats'], debuffs: [] },
+            { id: 'bal67', name: 'Solidarity', category: 'balanced', price: 2200000, health: 448, speed: 2.2, fireRate: 2.2, damage: 2.2, accuracy: 2.2, buffs: ['+120% All Stats'], debuffs: [] },
+            { id: 'bal68', name: 'Fellowship', category: 'balanced', price: 2500000, health: 455, speed: 2.22, fireRate: 2.22, damage: 2.22, accuracy: 2.22, buffs: ['+122% All Stats'], debuffs: [] },
+            { id: 'bal69', name: 'Kinship', category: 'balanced', price: 3000000, health: 462, speed: 2.25, fireRate: 2.25, damage: 2.25, accuracy: 2.25, buffs: ['+125% All Stats'], debuffs: [] },
+            { id: 'bal70', name: 'Brotherhood', category: 'balanced', price: 3500000, health: 470, speed: 2.28, fireRate: 2.28, damage: 2.28, accuracy: 2.28, buffs: ['+128% All Stats'], debuffs: [] },
+            { id: 'bal71', name: 'Alliance', category: 'balanced', price: 4000000, health: 478, speed: 2.3, fireRate: 2.3, damage: 2.3, accuracy: 2.3, buffs: ['+130% All Stats'], debuffs: [] },
+            { id: 'bal72', name: 'Coalition', category: 'balanced', price: 4500000, health: 485, speed: 2.32, fireRate: 2.32, damage: 2.32, accuracy: 2.32, buffs: ['+132% All Stats'], debuffs: [] },
+            { id: 'bal73', name: 'Federation', category: 'balanced', price: 5000000, health: 492, speed: 2.35, fireRate: 2.35, damage: 2.35, accuracy: 2.35, buffs: ['+135% All Stats'], debuffs: [] },
+            { id: 'bal74', name: 'Confederation', category: 'balanced', price: 6000000, health: 500, speed: 2.38, fireRate: 2.38, damage: 2.38, accuracy: 2.38, buffs: ['+138% All Stats'], debuffs: [] },
+            { id: 'bal75', name: 'Empire', category: 'balanced', price: 7000000, health: 508, speed: 2.4, fireRate: 2.4, damage: 2.4, accuracy: 2.4, buffs: ['+140% All Stats'], debuffs: [] },
+            { id: 'bal76', name: 'Dynasty', category: 'balanced', price: 8000000, health: 515, speed: 2.42, fireRate: 2.42, damage: 2.42, accuracy: 2.42, buffs: ['+142% All Stats'], debuffs: [] },
+            { id: 'bal77', name: 'Dominion', category: 'balanced', price: 9000000, health: 522, speed: 2.45, fireRate: 2.45, damage: 2.45, accuracy: 2.45, buffs: ['+145% All Stats'], debuffs: [] },
+            { id: 'bal78', name: 'Sovereignty', category: 'balanced', price: 10000000, health: 530, speed: 2.48, fireRate: 2.48, damage: 2.48, accuracy: 2.48, buffs: ['+148% All Stats'], debuffs: [] },
+            { id: 'bal79', name: 'Reign', category: 'balanced', price: 12000000, health: 538, speed: 2.5, fireRate: 2.5, damage: 2.5, accuracy: 2.5, buffs: ['+150% All Stats'], debuffs: [] },
+            { id: 'bal80', name: 'Ultimate Balance', category: 'balanced', price: 15000000, health: 550, speed: 2.55, fireRate: 2.55, damage: 2.55, accuracy: 2.55, buffs: ['+155% All Stats'], debuffs: [] },
+            
+            // EXTENDED SPECIAL SHIPS (60 more) - with extreme trade-offs
+            { id: 'spc20', name: 'Paradox', category: 'special', price: 4000, health: 150, speed: 0.5, fireRate: 2.5, damage: 0.5, accuracy: 1.5, buffs: ['+50% Health', '+150% Fire Rate', '+50% Accuracy'], debuffs: ['-50% Speed', '-50% Damage'] },
+            { id: 'spc21', name: 'Contradiction', category: 'special', price: 5500, health: 50, speed: 2.0, fireRate: 0.5, damage: 2.5, accuracy: 0.8, buffs: ['+100% Speed', '+150% Damage'], debuffs: ['-50% Health', '-50% Fire Rate', '-20% Accuracy'] },
+            { id: 'spc22', name: 'Enigma', category: 'special', price: 7000, health: 200, speed: 0.4, fireRate: 0.4, damage: 3.0, accuracy: 1.0, buffs: ['+100% Health', '+200% Damage'], debuffs: ['-60% Speed', '-60% Fire Rate'] },
+            { id: 'spc23', name: 'Mystery', category: 'special', price: 9000, health: 30, speed: 2.5, fireRate: 3.0, damage: 0.6, accuracy: 0.6, buffs: ['+150% Speed', '+200% Fire Rate'], debuffs: ['-70% Health', '-40% Damage', '-40% Accuracy'] },
+            { id: 'spc24', name: 'Riddle', category: 'special', price: 11000, health: 120, speed: 1.0, fireRate: 1.0, damage: 1.0, accuracy: 2.5, buffs: ['+20% Health', '+150% Accuracy'], debuffs: ['No other buffs'] },
+            { id: 'spc25', name: 'Puzzle', category: 'special', price: 14000, health: 80, speed: 1.5, fireRate: 1.5, damage: 1.5, accuracy: 0.5, buffs: ['+50% Speed/Fire/Damage'], debuffs: ['-20% Health', '-50% Accuracy'] },
+            { id: 'spc26', name: 'Conundrum', category: 'special', price: 17000, health: 250, speed: 0.3, fireRate: 1.8, damage: 0.8, accuracy: 1.2, buffs: ['+150% Health', '+80% Fire Rate', '+20% Accuracy'], debuffs: ['-70% Speed', '-20% Damage'] },
+            { id: 'spc27', name: 'Dilemma', category: 'special', price: 21000, health: 40, speed: 1.8, fireRate: 0.6, damage: 3.5, accuracy: 1.3, buffs: ['+80% Speed', '+250% Damage', '+30% Accuracy'], debuffs: ['-60% Health', '-40% Fire Rate'] },
+            { id: 'spc28', name: 'Quandary', category: 'special', price: 26000, health: 100, speed: 0.8, fireRate: 2.8, damage: 0.7, accuracy: 1.4, buffs: ['+180% Fire Rate', '+40% Accuracy'], debuffs: ['-20% Speed', '-30% Damage'] },
+            { id: 'spc29', name: 'Predicament', category: 'special', price: 32000, health: 180, speed: 0.6, fireRate: 0.8, damage: 2.2, accuracy: 1.8, buffs: ['+80% Health', '+120% Damage', '+80% Accuracy'], debuffs: ['-40% Speed', '-20% Fire Rate'] },
+            { id: 'spc30', name: 'Impasse', category: 'special', price: 38000, health: 60, speed: 2.2, fireRate: 2.0, damage: 1.2, accuracy: 0.7, buffs: ['+120% Speed', '+100% Fire Rate', '+20% Damage'], debuffs: ['-40% Health', '-30% Accuracy'] },
+            { id: 'spc31', name: 'Stalemate', category: 'special', price: 45000, health: 300, speed: 0.25, fireRate: 0.6, damage: 2.8, accuracy: 1.1, buffs: ['+200% Health', '+180% Damage'], debuffs: ['-75% Speed', '-40% Fire Rate'] },
+            { id: 'spc32', name: 'Deadlock', category: 'special', price: 52000, health: 25, speed: 2.8, fireRate: 2.5, damage: 1.5, accuracy: 0.6, buffs: ['+180% Speed', '+150% Fire Rate', '+50% Damage'], debuffs: ['-75% Health', '-40% Accuracy'] },
+            { id: 'spc33', name: 'Standoff', category: 'special', price: 65000, health: 140, speed: 1.2, fireRate: 0.5, damage: 4.0, accuracy: 1.6, buffs: ['+40% Health', '+300% Damage', '+60% Accuracy'], debuffs: ['-50% Fire Rate'] },
+            { id: 'spc34', name: 'Gridlock', category: 'special', price: 75000, health: 90, speed: 1.0, fireRate: 3.2, damage: 0.6, accuracy: 1.0, buffs: ['+220% Fire Rate'], debuffs: ['-10% Health', '-40% Damage'] },
+            { id: 'spc35', name: 'Bottleneck', category: 'special', price: 88000, health: 220, speed: 0.5, fireRate: 1.5, damage: 1.8, accuracy: 1.3, buffs: ['+120% Health', '+50% Fire Rate', '+80% Damage', '+30% Accuracy'], debuffs: ['-50% Speed'] },
+            { id: 'spc36', name: 'Crossroads', category: 'special', price: 100000, health: 70, speed: 1.8, fireRate: 1.8, damage: 1.8, accuracy: 0.5, buffs: ['+80% Speed/Fire/Damage'], debuffs: ['-30% Health', '-50% Accuracy'] },
+            { id: 'spc37', name: 'Junction', category: 'special', price: 115000, health: 160, speed: 0.7, fireRate: 2.2, damage: 1.4, accuracy: 1.5, buffs: ['+60% Health', '+120% Fire Rate', '+40% Damage', '+50% Accuracy'], debuffs: ['-30% Speed'] },
+            { id: 'spc38', name: 'Intersection', category: 'special', price: 130000, health: 55, speed: 2.5, fireRate: 1.2, damage: 2.4, accuracy: 0.8, buffs: ['+150% Speed', '+140% Damage'], debuffs: ['-45% Health', '-20% Accuracy'] },
+            { id: 'spc39', name: 'Vertex', category: 'special', price: 150000, health: 280, speed: 0.35, fireRate: 0.7, damage: 2.6, accuracy: 1.4, buffs: ['+180% Health', '+160% Damage', '+40% Accuracy'], debuffs: ['-65% Speed', '-30% Fire Rate'] },
+            { id: 'spc40', name: 'Apex', category: 'special', price: 175000, health: 45, speed: 2.4, fireRate: 2.8, damage: 1.3, accuracy: 0.75, buffs: ['+140% Speed', '+180% Fire Rate', '+30% Damage'], debuffs: ['-55% Health', '-25% Accuracy'] },
+            { id: 'spc41', name: 'Zenith', category: 'special', price: 200000, health: 130, speed: 1.1, fireRate: 1.4, damage: 2.0, accuracy: 1.7, buffs: ['+30% Health', '+100% Damage', '+70% Accuracy'], debuffs: ['-10% Speed'] },
+            { id: 'spc42', name: 'Pinnacle', category: 'special', price: 230000, health: 350, speed: 0.3, fireRate: 1.0, damage: 2.2, accuracy: 1.2, buffs: ['+250% Health', '+120% Damage', '+20% Accuracy'], debuffs: ['-70% Speed'] },
+            { id: 'spc43', name: 'Summit', category: 'special', price: 260000, health: 35, speed: 2.7, fireRate: 2.2, damage: 2.0, accuracy: 0.7, buffs: ['+170% Speed', '+120% Fire Rate', '+100% Damage'], debuffs: ['-65% Health', '-30% Accuracy'] },
+            { id: 'spc44', name: 'Peak', category: 'special', price: 300000, health: 170, speed: 0.8, fireRate: 2.5, damage: 1.5, accuracy: 1.4, buffs: ['+70% Health', '+150% Fire Rate', '+50% Damage', '+40% Accuracy'], debuffs: ['-20% Speed'] },
+            { id: 'spc45', name: 'Crest', category: 'special', price: 340000, health: 65, speed: 2.0, fireRate: 0.8, damage: 3.2, accuracy: 1.5, buffs: ['+100% Speed', '+220% Damage', '+50% Accuracy'], debuffs: ['-35% Health', '-20% Fire Rate'] },
+            { id: 'spc46', name: 'Crown', category: 'special', price: 380000, health: 240, speed: 0.45, fireRate: 1.8, damage: 1.8, accuracy: 1.3, buffs: ['+140% Health', '+80% Fire Rate', '+80% Damage', '+30% Accuracy'], debuffs: ['-55% Speed'] },
+            { id: 'spc47', name: 'Throne', category: 'special', price: 430000, health: 50, speed: 2.3, fireRate: 3.0, damage: 1.1, accuracy: 0.8, buffs: ['+130% Speed', '+200% Fire Rate'], debuffs: ['-50% Health', '-20% Accuracy'] },
+            { id: 'spc48', name: 'Scepter', category: 'special', price: 480000, health: 190, speed: 0.65, fireRate: 1.2, damage: 2.5, accuracy: 1.6, buffs: ['+90% Health', '+150% Damage', '+60% Accuracy'], debuffs: ['-35% Speed', '-20% Fire Rate'] },
+            { id: 'spc49', name: 'Orb', category: 'special', price: 530000, health: 80, speed: 1.6, fireRate: 2.2, damage: 1.6, accuracy: 1.1, buffs: ['+60% Speed', '+120% Fire Rate', '+60% Damage'], debuffs: ['-20% Health'] },
+            { id: 'spc50', name: 'Regalia', category: 'special', price: 600000, health: 320, speed: 0.35, fireRate: 1.5, damage: 2.0, accuracy: 1.4, buffs: ['+220% Health', '+50% Fire Rate', '+100% Damage', '+40% Accuracy'], debuffs: ['-65% Speed'] },
+            { id: 'spc51', name: 'Imperial', category: 'special', price: 680000, health: 42, speed: 2.6, fireRate: 2.4, damage: 1.8, accuracy: 0.75, buffs: ['+160% Speed', '+140% Fire Rate', '+80% Damage'], debuffs: ['-58% Health', '-25% Accuracy'] },
+            { id: 'spc52', name: 'Royal', category: 'special', price: 750000, health: 200, speed: 0.75, fireRate: 1.6, damage: 2.2, accuracy: 1.5, buffs: ['+100% Health', '+60% Fire Rate', '+120% Damage', '+50% Accuracy'], debuffs: ['-25% Speed'] },
+            { id: 'spc53', name: 'Noble', category: 'special', price: 850000, health: 110, speed: 1.4, fireRate: 1.0, damage: 2.8, accuracy: 1.7, buffs: ['+40% Speed', '+180% Damage', '+70% Accuracy'], debuffs: ['-10% Health'] },
+            { id: 'spc54', name: 'Aristocrat', category: 'special', price: 950000, health: 380, speed: 0.28, fireRate: 0.8, damage: 2.8, accuracy: 1.3, buffs: ['+280% Health', '+180% Damage', '+30% Accuracy'], debuffs: ['-72% Speed', '-20% Fire Rate'] },
+            { id: 'spc55', name: 'Patrician', category: 'special', price: 1100000, health: 55, speed: 2.4, fireRate: 2.8, damage: 1.5, accuracy: 0.85, buffs: ['+140% Speed', '+180% Fire Rate', '+50% Damage'], debuffs: ['-45% Health', '-15% Accuracy'] },
+            { id: 'spc56', name: 'Senator', category: 'special', price: 1250000, health: 160, speed: 1.0, fireRate: 2.0, damage: 2.0, accuracy: 1.4, buffs: ['+60% Health', '+100% Fire Rate', '+100% Damage', '+40% Accuracy'], debuffs: [] },
+            { id: 'spc57', name: 'Consul', category: 'special', price: 1400000, health: 75, speed: 1.8, fireRate: 1.4, damage: 2.6, accuracy: 1.2, buffs: ['+80% Speed', '+40% Fire Rate', '+160% Damage', '+20% Accuracy'], debuffs: ['-25% Health'] },
+            { id: 'spc58', name: 'Praetor', category: 'special', price: 1600000, health: 280, speed: 0.5, fireRate: 1.8, damage: 2.2, accuracy: 1.5, buffs: ['+180% Health', '+80% Fire Rate', '+120% Damage', '+50% Accuracy'], debuffs: ['-50% Speed'] },
+            { id: 'spc59', name: 'Tribune', category: 'special', price: 1800000, health: 48, speed: 2.5, fireRate: 2.6, damage: 2.0, accuracy: 0.8, buffs: ['+150% Speed', '+160% Fire Rate', '+100% Damage'], debuffs: ['-52% Health', '-20% Accuracy'] },
+            { id: 'spc60', name: 'Dictator', category: 'special', price: 2000000, health: 220, speed: 0.7, fireRate: 1.5, damage: 2.6, accuracy: 1.6, buffs: ['+120% Health', '+50% Fire Rate', '+160% Damage', '+60% Accuracy'], debuffs: ['-30% Speed'] },
+            { id: 'spc61', name: 'Emperor', category: 'special', price: 2300000, health: 90, speed: 1.7, fireRate: 2.2, damage: 2.2, accuracy: 1.1, buffs: ['+70% Speed', '+120% Fire Rate', '+120% Damage'], debuffs: ['-10% Health'] },
+            { id: 'spc62', name: 'Caesar', category: 'special', price: 2600000, health: 400, speed: 0.35, fireRate: 1.2, damage: 2.5, accuracy: 1.4, buffs: ['+300% Health', '+20% Fire Rate', '+150% Damage', '+40% Accuracy'], debuffs: ['-65% Speed'] },
+            { id: 'spc63', name: 'Augustus', category: 'special', price: 3000000, health: 60, speed: 2.3, fireRate: 2.8, damage: 2.2, accuracy: 0.9, buffs: ['+130% Speed', '+180% Fire Rate', '+120% Damage'], debuffs: ['-40% Health', '-10% Accuracy'] },
+            { id: 'spc64', name: 'Imperator', category: 'special', price: 3500000, health: 180, speed: 1.2, fireRate: 1.8, damage: 2.5, accuracy: 1.5, buffs: ['+80% Health', '+80% Fire Rate', '+150% Damage', '+50% Accuracy'], debuffs: ['-20% Speed'] },
+            { id: 'spc65', name: 'Tyrant', category: 'special', price: 4000000, health: 100, speed: 1.5, fireRate: 1.5, damage: 3.0, accuracy: 1.3, buffs: ['+50% Speed', '+50% Fire Rate', '+200% Damage', '+30% Accuracy'], debuffs: [] },
+            { id: 'spc66', name: 'Despot', category: 'special', price: 4500000, health: 450, speed: 0.3, fireRate: 1.0, damage: 2.8, accuracy: 1.3, buffs: ['+350% Health', '+180% Damage', '+30% Accuracy'], debuffs: ['-70% Speed'] },
+            { id: 'spc67', name: 'Overlord', category: 'special', price: 5000000, health: 70, speed: 2.2, fireRate: 2.5, damage: 2.5, accuracy: 0.95, buffs: ['+120% Speed', '+150% Fire Rate', '+150% Damage'], debuffs: ['-30% Health', '-5% Accuracy'] },
+            { id: 'spc68', name: 'Warlord', category: 'special', price: 5500000, health: 250, speed: 0.8, fireRate: 2.0, damage: 2.5, accuracy: 1.5, buffs: ['+150% Health', '+100% Fire Rate', '+150% Damage', '+50% Accuracy'], debuffs: ['-20% Speed'] },
+            { id: 'spc69', name: 'Conqueror', category: 'special', price: 6000000, health: 120, speed: 1.6, fireRate: 1.8, damage: 2.8, accuracy: 1.4, buffs: ['+60% Speed', '+80% Fire Rate', '+180% Damage', '+40% Accuracy'], debuffs: ['-20% Health'] },
+            { id: 'spc70', name: 'Vanquisher', category: 'special', price: 7000000, health: 500, speed: 0.25, fireRate: 0.9, damage: 3.0, accuracy: 1.4, buffs: ['+400% Health', '+200% Damage', '+40% Accuracy'], debuffs: ['-75% Speed', '-10% Fire Rate'] },
+            { id: 'spc71', name: 'Subjugator', category: 'special', price: 8000000, health: 80, speed: 2.1, fireRate: 2.8, damage: 2.6, accuracy: 1.0, buffs: ['+110% Speed', '+180% Fire Rate', '+160% Damage'], debuffs: ['-20% Health'] },
+            { id: 'spc72', name: 'Dominator', category: 'special', price: 9000000, health: 300, speed: 0.7, fireRate: 1.8, damage: 2.8, accuracy: 1.6, buffs: ['+200% Health', '+80% Fire Rate', '+180% Damage', '+60% Accuracy'], debuffs: ['-30% Speed'] },
+            { id: 'spc73', name: 'Annihilator', category: 'special', price: 10000000, health: 140, speed: 1.5, fireRate: 2.0, damage: 3.0, accuracy: 1.4, buffs: ['+50% Speed', '+100% Fire Rate', '+200% Damage', '+40% Accuracy'], debuffs: ['-40% Health'] },
+            { id: 'spc74', name: 'Eradicator', category: 'special', price: 12000000, health: 550, speed: 0.22, fireRate: 0.8, damage: 3.2, accuracy: 1.5, buffs: ['+450% Health', '+220% Damage', '+50% Accuracy'], debuffs: ['-78% Speed', '-20% Fire Rate'] },
+            { id: 'spc75', name: 'Exterminator', category: 'special', price: 14000000, health: 90, speed: 2.0, fireRate: 2.6, damage: 2.8, accuracy: 1.1, buffs: ['+100% Speed', '+160% Fire Rate', '+180% Damage'], debuffs: ['-10% Health'] },
+            { id: 'spc76', name: 'Obliterator', category: 'special', price: 16000000, health: 350, speed: 0.6, fireRate: 2.0, damage: 3.0, accuracy: 1.6, buffs: ['+250% Health', '+100% Fire Rate', '+200% Damage', '+60% Accuracy'], debuffs: ['-40% Speed'] },
+            { id: 'spc77', name: 'Decimator', category: 'special', price: 18000000, health: 160, speed: 1.4, fireRate: 2.2, damage: 3.2, accuracy: 1.4, buffs: ['+40% Speed', '+120% Fire Rate', '+220% Damage', '+40% Accuracy'], debuffs: ['-60% Health'] },
+            { id: 'spc78', name: 'Terminator', category: 'special', price: 20000000, health: 600, speed: 0.2, fireRate: 1.5, damage: 3.5, accuracy: 1.6, buffs: ['+500% Health', '+50% Fire Rate', '+250% Damage', '+60% Accuracy'], debuffs: ['-80% Speed'] },
+            { id: 'spc79', name: 'Omega Elite', category: 'special', price: 25000000, health: 400, speed: 1.8, fireRate: 2.0, damage: 3.0, accuracy: 1.8, buffs: ['+300% Health', '+80% Speed', '+100% Fire Rate', '+200% Damage', '+80% Accuracy'], debuffs: [] }
         ];
         
         function initShop() {
@@ -1072,9 +1616,162 @@
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
         
+        function resetAllProgress() {
+            if (confirm('Are you sure you want to restart? This will delete ALL your progress including money, ships, and quests!')) {
+                localStorage.removeItem('warships_money');
+                localStorage.removeItem('warships_totalEarned');
+                localStorage.removeItem('warships_stats');
+                localStorage.removeItem('warships_ownedShips');
+                localStorage.removeItem('warships_selectedShip');
+                localStorage.removeItem('warships_completedQuests');
+                localStorage.removeItem('warships_teamMembers');
+                location.reload();
+            }
+        }
+        
         function toggleQuests() {
             const panel = document.getElementById('quest-panel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // ============ TEAM PANEL FUNCTIONS ============
+        let selectedTeamMemberId = null;
+        
+        const personalityDescriptions = {
+            'aggressive': 'Engages enemies head-on, prioritizes offense',
+            'cautious': 'Maintains distance, provides covering fire',
+            'balanced': 'Adapts to situation, flanks when possible'
+        };
+        
+        const roleIcons = {
+            'Flanker': '⚔️',
+            'Support': '🛡️',
+            'Scout': '🔭'
+        };
+        
+        function toggleTeam() {
+            const panel = document.getElementById('team-panel');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'block';
+                renderTeamMembers();
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        
+        function renderTeamMembers() {
+            const grid = document.getElementById('team-members-grid');
+            document.getElementById('team-ship-selection').style.display = 'none';
+            
+            grid.innerHTML = teamMembers.map(member => {
+                const shipStats = getTeamMemberShipStats(member.id);
+                const hasCustomShip = member.assignedShipId !== null;
+                
+                return `
+                    <div class="team-member-card" onclick="selectTeamMember('${member.id}')">
+                        <div class="member-role">${roleIcons[member.role] || '👤'} ${member.role}</div>
+                        <div class="member-name">${member.name}</div>
+                        <div class="member-personality">${personalityDescriptions[member.personality] || ''}</div>
+                        <div class="assigned-ship">
+                            <div class="ship-info">
+                                <span class="ship-emoji">${getShipEmoji(shipStats)}</span>
+                                <span>${shipStats.name}</span>
+                            </div>
+                            <div style="color: ${hasCustomShip ? '#00ff88' : '#88aacc'}; font-size: 0.8em; margin-top: 5px;">
+                                ${hasCustomShip ? 'ASSIGNED' : 'DEFAULT'}
+                            </div>
+                        </div>
+                        <button class="assign-btn">${hasCustomShip ? 'Change Ship' : 'Assign Ship'}</button>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function selectTeamMember(memberId) {
+            selectedTeamMemberId = memberId;
+            const member = teamMembers.find(m => m.id === memberId);
+            
+            document.getElementById('team-selection-title').textContent = `Select Ship for ${member.name}`;
+            document.getElementById('team-ship-selection').style.display = 'block';
+            
+            renderTeamShipSelection();
+        }
+        
+        function renderTeamShipSelection() {
+            const grid = document.getElementById('team-ship-grid');
+            const member = teamMembers.find(m => m.id === selectedTeamMemberId);
+            
+            // Get ships available for assignment (owned, not player's, not assigned to OTHER members)
+            const otherAssignedIds = teamMembers
+                .filter(m => m.id !== selectedTeamMemberId && m.assignedShipId)
+                .map(m => m.assignedShipId);
+            
+            const availableShips = ownedShips
+                .filter(shipId => shipId !== selectedShipId && !otherAssignedIds.includes(shipId))
+                .map(shipId => {
+                    const ship = shipTemplates.find(s => s.id === shipId);
+                    return {
+                        ...ship,
+                        isCurrentlyAssigned: member.assignedShipId === shipId
+                    };
+                });
+            
+            if (availableShips.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #88aacc;">
+                        <p>No additional ships available to assign.</p>
+                        <p style="font-size: 0.9em; opacity: 0.7;">Buy more ships from the Shop, or unassign from another crew member.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = availableShips.map(ship => `
+                <div class="team-ship-card ${ship.isCurrentlyAssigned ? 'assigned' : ''}" onclick="assignShipToTeamMember('${ship.id}')">
+                    <div class="ship-emoji-lg">${getShipEmoji(ship)}</div>
+                    <div style="font-weight: bold; color: #fff;">${ship.name}</div>
+                    <div style="font-size: 0.8em; color: #88aacc;">
+                        ❤️${ship.health} ⚡${(ship.speed * 100).toFixed(0)}% 💥${(ship.damage * 100).toFixed(0)}%
+                    </div>
+                    <div style="margin-top: 8px; padding: 5px; border-radius: 4px; font-size: 0.85em; font-weight: bold;
+                        ${ship.isCurrentlyAssigned 
+                            ? 'background: linear-gradient(180deg, #44aa44, #228822); color: #fff;' 
+                            : 'background: linear-gradient(180deg, #0088ff, #0066cc); color: #fff;'}">
+                        ${ship.isCurrentlyAssigned ? '✓ ASSIGNED' : 'TAP TO ASSIGN'}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function assignShipToTeamMember(shipId) {
+            const member = teamMembers.find(m => m.id === selectedTeamMemberId);
+            if (!member) return;
+            
+            // If clicking the already-assigned ship, unassign it
+            if (member.assignedShipId === shipId) {
+                member.assignedShipId = null;
+            } else {
+                // Remove this ship from any other member
+                teamMembers.forEach(m => {
+                    if (m.assignedShipId === shipId) {
+                        m.assignedShipId = null;
+                    }
+                });
+                // Assign to selected member
+                member.assignedShipId = shipId;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('warships_teamMembers', JSON.stringify(teamMembers));
+            
+            // Refresh UI
+            renderTeamShipSelection();
+        }
+        
+        function closeTeamShipSelection() {
+            document.getElementById('team-ship-selection').style.display = 'none';
+            selectedTeamMemberId = null;
+            renderTeamMembers();
         }
         
         function showShopCategory(category) {
@@ -2736,6 +3433,12 @@
             }
 
             updateAI(delta) {
+                // Team member allies have advanced realistic AI
+                if (this.isTeamMemberAlly && playerShip && playerShip.health > 0) {
+                    this.updateTeamMemberAI(delta);
+                    return;
+                }
+                
                 // Find target
                 const target = this.findTarget();
                 
@@ -2770,6 +3473,157 @@
                     if (dist < 150) {
                         this.fire();
                         this.fireCooldown = this.fireRate;
+                    }
+                }
+            }
+            
+            // Realistic team member AI with formation flying and personality-based behavior
+            updateTeamMemberAI(delta) {
+                const personality = this.teamMember?.personality || 'balanced';
+                const role = this.teamMember?.role || 'Support';
+                
+                // Formation positions relative to player (naval formation)
+                const formationOffsets = [
+                    { x: -40, z: -30 },  // Left flank
+                    { x: 40, z: -30 },   // Right flank  
+                    { x: 0, z: -50 }     // Rear guard
+                ];
+                
+                const formationOffset = formationOffsets[this.formationIndex] || formationOffsets[0];
+                
+                // Calculate formation position based on player's heading
+                const playerAngle = playerShip.rotation;
+                const cos = Math.cos(-playerAngle);
+                const sin = Math.sin(-playerAngle);
+                const formationX = playerShip.x + (formationOffset.x * cos - formationOffset.z * sin);
+                const formationZ = playerShip.z + (formationOffset.x * sin + formationOffset.z * cos);
+                
+                // Find nearest enemy threat
+                const target = this.findTarget();
+                const distToFormation = Math.hypot(formationX - this.x, formationZ - this.z);
+                
+                // Decision making based on personality and situation
+                let targetX, targetZ, shouldEngage = false;
+                
+                if (target) {
+                    const distToEnemy = Math.hypot(target.x - this.x, target.z - this.z);
+                    const enemyDistToPlayer = Math.hypot(target.x - playerShip.x, target.z - playerShip.z);
+                    
+                    // Health-based retreat behavior (realistic damage response)
+                    const healthPercent = this.health / this.maxHealth;
+                    if (healthPercent < 0.25) {
+                        // Critically damaged - retreat behind player
+                        targetX = playerShip.x - Math.cos(playerAngle) * 60;
+                        targetZ = playerShip.z + Math.sin(playerAngle) * 60;
+                        shouldEngage = false;
+                    } else if (personality === 'aggressive') {
+                        // Aggressive: Prioritize attacking, break formation to engage
+                        if (distToEnemy < 120 || enemyDistToPlayer < 80) {
+                            targetX = target.x;
+                            targetZ = target.z;
+                            shouldEngage = true;
+                        } else {
+                            targetX = formationX;
+                            targetZ = formationZ;
+                            shouldEngage = distToEnemy < 100;
+                        }
+                    } else if (personality === 'cautious') {
+                        // Cautious: Maintain distance, provide covering fire
+                        if (enemyDistToPlayer < 60) {
+                            // Enemy too close to player - intercept
+                            targetX = (target.x + playerShip.x) / 2;
+                            targetZ = (target.z + playerShip.z) / 2;
+                            shouldEngage = true;
+                        } else {
+                            // Stay in formation, engage only at range
+                            targetX = formationX;
+                            targetZ = formationZ;
+                            shouldEngage = distToEnemy < 130 && distToEnemy > 60;
+                        }
+                    } else {
+                        // Balanced: Adaptive behavior
+                        if (role === 'Flanker' && distToEnemy < 100) {
+                            // Flanking maneuver - approach from the side
+                            const flankAngle = Math.atan2(target.z - this.z, target.x - this.x) + Math.PI / 3;
+                            targetX = target.x + Math.cos(flankAngle) * 50;
+                            targetZ = target.z + Math.sin(flankAngle) * 50;
+                            shouldEngage = true;
+                        } else if (role === 'Scout') {
+                            // Scout ahead but return to formation
+                            if (distToFormation > 80) {
+                                targetX = formationX;
+                                targetZ = formationZ;
+                            } else {
+                                targetX = formationX + Math.cos(playerAngle) * 30;
+                                targetZ = formationZ - Math.sin(playerAngle) * 30;
+                            }
+                            shouldEngage = distToEnemy < 110;
+                        } else {
+                            targetX = formationX;
+                            targetZ = formationZ;
+                            shouldEngage = distToEnemy < 120;
+                        }
+                    }
+                } else {
+                    // No enemies - return to formation
+                    targetX = formationX;
+                    targetZ = formationZ;
+                }
+                
+                // Collision avoidance with other friendly ships
+                for (const other of ships) {
+                    if (other !== this && other.team === this.team && other.health > 0) {
+                        const dist = Math.hypot(other.x - this.x, other.z - this.z);
+                        if (dist < 25) {
+                            // Push away from nearby friendly
+                            const pushAngle = Math.atan2(this.z - other.z, this.x - other.x);
+                            targetX += Math.cos(pushAngle) * (25 - dist) * 0.5;
+                            targetZ += Math.sin(pushAngle) * (25 - dist) * 0.5;
+                        }
+                    }
+                }
+                
+                // Navigate to target position with realistic turning
+                const dx = targetX - this.x;
+                const dz = targetZ - this.z;
+                const targetAngle = Math.atan2(-dz, dx);
+                
+                let angleDiff = targetAngle - this.rotation;
+                while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                
+                // Realistic turn rate (larger ships turn slower)
+                const turnRate = Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), this.turnSpeed * 0.8);
+                this.rotation += turnRate;
+                
+                // Move forward with speed variation based on situation
+                let speedMult = 0.8;
+                if (distToFormation > 60) speedMult = 1.0; // Catch up to formation
+                if (shouldEngage && target) speedMult = 0.9; // Slightly slower when engaging
+                
+                const moveSpeed = this.speed * speedMult;
+                this.x += Math.cos(this.rotation) * moveSpeed;
+                this.z -= Math.sin(this.rotation) * moveSpeed;
+                
+                // Keep in bounds
+                this.x = Math.max(-WORLD_SIZE/2 + 20, Math.min(WORLD_SIZE/2 - 20, this.x));
+                this.z = Math.max(-WORLD_SIZE/2 + 20, Math.min(WORLD_SIZE/2 - 20, this.z));
+                
+                // Firing with lead prediction (realistic aiming)
+                this.fireCooldown -= delta * 60;
+                if (this.fireCooldown <= 0 && target && shouldEngage) {
+                    const distToTarget = Math.hypot(target.x - this.x, target.z - this.z);
+                    if (distToTarget < 150) {
+                        // Check if target is roughly in front (don't fire backwards)
+                        const angleToTarget = Math.atan2(-(target.z - this.z), target.x - this.x);
+                        let aimDiff = angleToTarget - this.rotation;
+                        while (aimDiff > Math.PI) aimDiff -= Math.PI * 2;
+                        while (aimDiff < -Math.PI) aimDiff += Math.PI * 2;
+                        
+                        if (Math.abs(aimDiff) < Math.PI / 3) { // 60 degree firing arc
+                            this.fire();
+                            this.fireCooldown = this.fireRate;
+                        }
                     }
                 }
             }
@@ -3538,6 +4392,7 @@
             
             const settings = difficultySettings[difficulty];
             
+            // Spawn enemy ships
             for (let i = 0; i < settings.enemies; i++) {
                 const ship = new Ship('red');
                 ship.fireRate *= settings.fireRateMult;
@@ -3545,8 +4400,33 @@
                 ship.accuracy = settings.accuracy;
                 ships.push(ship);
             }
-            for (let i = 0; i < settings.allies; i++) {
-                ships.push(new Ship('blue'));
+            
+            // Spawn ally ships using team member assignments with realistic behavior
+            // First ally is always a generic one, then 3 team members
+            ships.push(new Ship('blue'));
+            
+            for (let i = 0; i < Math.min(teamMembers.length, settings.allies - 1); i++) {
+                const member = teamMembers[i];
+                const memberShipStats = getTeamMemberShipStats(member.id);
+                
+                // Create ally with specific ship stats
+                const ally = new Ship('blue', false, memberShipStats);
+                
+                // Apply ship stats to ally
+                const allyBaseHealth = 100 * (memberShipStats.health / 100);
+                ally.health = allyBaseHealth;
+                ally.maxHealth = allyBaseHealth;
+                ally.speed *= memberShipStats.speed;
+                ally.fireRate /= memberShipStats.fireRate;
+                ally.damageMultiplier = memberShipStats.damage;
+                ally.accuracy = 0.05 / memberShipStats.accuracy;
+                
+                // Store team member info for AI behavior
+                ally.teamMember = member;
+                ally.isTeamMemberAlly = true;
+                ally.formationIndex = i; // Position in formation around player
+                
+                ships.push(ally);
             }
             
             // Apply selected ship stats to player
@@ -3610,6 +4490,11 @@
                 winner = 'BLUE';
                 if (playerShip && playerShip.health > 0) {
                     updateQuestProgress('survived', 1);
+                    // Award 100 coins for winning
+                    money += 100;
+                    totalMoneyEarned += 100;
+                    saveStats();
+                    document.getElementById('money').textContent = money.toLocaleString();
                 }
                 showVictoryScreen('BLUE TEAM WINS!', '#5599ff');
             } else if (blueAlive === 0 && redAlive > 0) {
@@ -3751,14 +4636,16 @@
 
                 checkGameOver();
 
-                // Camera follows player
+                // Camera follows player from behind
                 if (playerShip && playerShip.health > 0) {
-                    const targetCamX = playerShip.x - Math.cos(playerShip.rotation) * 60;
-                    const targetCamZ = playerShip.z + Math.sin(playerShip.rotation) * 60 + 80;
+                    const camDistance = 80;
+                    const camHeight = 40;
+                    const targetCamX = playerShip.x - Math.cos(playerShip.rotation) * camDistance;
+                    const targetCamZ = playerShip.z + Math.sin(playerShip.rotation) * camDistance;
                     
-                    camera.position.x += (targetCamX - camera.position.x) * 0.05;
-                    camera.position.z += (targetCamZ - camera.position.z) * 0.05;
-                    camera.position.y = 50;
+                    camera.position.x += (targetCamX - camera.position.x) * 0.08;
+                    camera.position.z += (targetCamZ - camera.position.z) * 0.08;
+                    camera.position.y = camHeight;
                     
                     // Apply recoil camera shake
                     if (playerShip.recoilOffset > 0) {

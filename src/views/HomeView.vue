@@ -56,6 +56,7 @@ function openGame(game) {
         for players of all ages. Stay tuned for more games coming soon!
       </p>
     </section>
+
   </div>
 </template>
 
@@ -185,4 +186,5 @@ function openGame(game) {
   color: var(--text-secondary);
   line-height: 1.8;
 }
+
 </style>

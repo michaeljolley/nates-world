@@ -2,7 +2,7 @@
 import { useGameState } from '../composables/useGameState'
 import { usePlayerData } from '../composables/usePlayerData'
 
-const emit = defineEmits(['start', 'openShop', 'openQuests'])
+const emit = defineEmits(['start', 'openShop', 'openQuests', 'openTeam'])
 
 const { difficulty, setDifficulty, difficultyNames } = useGameState()
 const { money, selectedShip } = usePlayerData()
@@ -28,6 +28,7 @@ const difficulties = [
     
     <div class="menu-buttons">
       <button class="menu-btn-small" @click="$emit('openShop')">🚢 SHIP SHOP</button>
+      <button class="menu-btn-small team" @click="$emit('openTeam')">👥 FLEET</button>
       <button class="menu-btn-small quests" @click="$emit('openQuests')">📜 QUESTS</button>
     </div>
     
@@ -130,6 +131,11 @@ h1 {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.menu-btn-small.team {
+  background: linear-gradient(180deg, #44aa88, #228866);
+  border-color: #44ddaa;
 }
 
 .menu-btn-small.quests {

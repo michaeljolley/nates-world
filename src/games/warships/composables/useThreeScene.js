@@ -50,32 +50,89 @@ export function useThreeScene(containerRef) {
   }
 
   function createSky() {
-    // Simple gradient sky using a basic shader
-    const skyGeometry = new THREE.SphereGeometry(1500, 32, 32)
+    // Photorealistic sky with Rayleigh/Mie scattering simulation
+    const skyGeometry = new THREE.SphereGeometry(1500, 64, 64)
     const skyMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        topColor: { value: new THREE.Color(0x0077be) },
-        bottomColor: { value: new THREE.Color(0x89cff0) },
-        offset: { value: 20 },
-        exponent: { value: 0.6 }
+        sunPosition: { value: new THREE.Vector3(200, 100, -300) },
+        rayleigh: { value: 2.0 },
+        turbidity: { value: 8.0 },
+        mieCoefficient: { value: 0.005 },
+        mieDirectionalG: { value: 0.8 },
+        luminance: { value: 1.1 }
       },
       vertexShader: `
         varying vec3 vWorldPosition;
+        varying vec3 vSunDirection;
+        uniform vec3 sunPosition;
+        
         void main() {
           vec4 worldPosition = modelMatrix * vec4(position, 1.0);
           vWorldPosition = worldPosition.xyz;
+          vSunDirection = normalize(sunPosition);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
       fragmentShader: `
-        uniform vec3 topColor;
-        uniform vec3 bottomColor;
-        uniform float offset;
-        uniform float exponent;
+        uniform float rayleigh;
+        uniform float turbidity;
+        uniform float mieCoefficient;
+        uniform float mieDirectionalG;
+        uniform float luminance;
+        uniform vec3 sunPosition;
+        
         varying vec3 vWorldPosition;
+        varying vec3 vSunDirection;
+        
+        float rayleighPhase(float cosTheta) {
+          return (3.0 / (16.0 * 3.14159)) * (1.0 + cosTheta * cosTheta);
+        }
+        
+        float hgPhase(float cosTheta, float g) {
+          float g2 = g * g;
+          float inverse = 1.0 / pow(1.0 - 2.0 * g * cosTheta + g2, 1.5);
+          return (1.0 / (4.0 * 3.14159)) * ((1.0 - g2) * inverse);
+        }
+        
         void main() {
-          float h = normalize(vWorldPosition + offset).y;
-          gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+          vec3 direction = normalize(vWorldPosition);
+          float zenithAngle = acos(max(0.0, direction.y));
+          float inverse = 1.0 / (cos(zenithAngle) + 0.15 * pow(93.885 - degrees(zenithAngle), -1.253));
+          
+          vec3 betaR = vec3(5.5e-6, 13.0e-6, 22.4e-6) * rayleigh;
+          float Km = turbidity * mieCoefficient;
+          vec3 betaM = vec3(Km, Km, Km);
+          
+          float sR = inverse * 8400.0;
+          float sM = inverse * 1200.0;
+          vec3 Fex = exp(-(betaR * sR + betaM * sM));
+          
+          float cosTheta = dot(direction, vSunDirection);
+          float rPhase = rayleighPhase(cosTheta);
+          vec3 betaRTheta = betaR * rPhase;
+          float mPhase = hgPhase(cosTheta, mieDirectionalG);
+          vec3 betaMTheta = betaM * mPhase;
+          
+          vec3 sunE = vec3(1.0, 0.95, 0.85) * 1000.0;
+          vec3 Lin = pow(sunE * ((betaRTheta + betaMTheta) / (betaR + betaM)) * (1.0 - Fex), vec3(1.5));
+          Lin *= mix(vec3(1.0), pow(sunE * ((betaRTheta + betaMTheta) / (betaR + betaM)) * Fex, vec3(0.5)), 
+                     clamp(pow(1.0 - dot(vSunDirection, vec3(0.0, 1.0, 0.0)), 5.0), 0.0, 1.0));
+          
+          float sunAngularDiameter = 0.00933;
+          float sunDist = length(direction - vSunDirection);
+          float sundisk = smoothstep(sunAngularDiameter, sunAngularDiameter * 0.9, sunDist);
+          
+          vec3 L0 = vec3(0.1) * Fex;
+          L0 += sunE * 19000.0 * Fex * sundisk;
+          
+          vec3 texColor = (Lin + L0) * 0.04;
+          texColor = pow(texColor, vec3(1.0 / 2.2));
+          
+          float horizonBlend = pow(1.0 - max(direction.y, 0.0), 3.0);
+          vec3 horizonColor = vec3(0.75, 0.82, 0.92);
+          texColor = mix(texColor, horizonColor, horizonBlend * 0.3);
+          
+          gl_FragColor = vec4(clamp(texColor * luminance, 0.0, 1.0), 1.0);
         }
       `,
       side: THREE.BackSide,
@@ -200,55 +257,85 @@ export function useThreeScene(containerRef) {
   }
 
   function createOcean() {
-    const waterGeometry = new THREE.PlaneGeometry(2000, 2000, 64, 64)
+    // Ocean with realistic Gerstner-like waves
+    const waterGeometry = new THREE.PlaneGeometry(2000, 2000, 128, 128)
     const waterMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
-        waterColor: { value: new THREE.Color(0x0a4d7c) },
-        skyColor: { value: new THREE.Color(0x87ceeb) }
+        deepColor: { value: new THREE.Color(0x001020) },
+        midColor: { value: new THREE.Color(0x0a3d5c) },
+        shallowColor: { value: new THREE.Color(0x1a6e8e) },
+        sunDirection: { value: new THREE.Vector3(0.5, 0.8, -0.3).normalize() },
+        sunColor: { value: new THREE.Color(0xfffaf0) },
+        skyColorTop: { value: new THREE.Color(0x0055aa) },
+        skyColorHorizon: { value: new THREE.Color(0x88aacc) }
       },
       vertexShader: `
         uniform float time;
-        varying vec3 vWorldPosition;
+        varying vec2 vUv;
         varying vec3 vNormal;
+        varying vec3 vWorldPosition;
+        varying float vHeight;
         
         void main() {
+          vUv = uv;
           vec3 pos = position;
           
-          float wave1 = sin(pos.x * 0.02 + time * 0.5) * 1.0;
-          float wave2 = sin(pos.y * 0.03 + time * 0.4) * 0.8;
-          float wave3 = sin((pos.x + pos.y) * 0.015 + time * 0.3) * 0.5;
+          // Gentle waves
+          float wave1 = sin(pos.x * 0.05 + time * 0.5) * 0.3;
+          float wave2 = sin(pos.y * 0.07 + time * 0.4) * 0.2;
+          float wave3 = sin((pos.x + pos.y) * 0.03 + time * 0.3) * 0.15;
           float waveHeight = wave1 + wave2 + wave3;
           
-          pos.z = waveHeight;
+          vHeight = waveHeight;
           
-          float dx = cos(pos.x * 0.02 + time * 0.5) * 0.02;
-          float dy = cos(pos.y * 0.03 + time * 0.4) * 0.024;
-          vNormal = normalize(vec3(-dx, -dy, 1.0));
+          // Calculate normal from wave slope
+          float dx = cos(pos.x * 0.05 + time * 0.5) * 0.05 * 0.3 +
+                     cos((pos.x + pos.y) * 0.03 + time * 0.3) * 0.03 * 0.15;
+          float dy = cos(pos.y * 0.07 + time * 0.4) * 0.07 * 0.2 +
+                     cos((pos.x + pos.y) * 0.03 + time * 0.3) * 0.03 * 0.15;
+          vNormal = normalize(vec3(-dx, 1.0, -dy));
           
-          vec4 worldPos = modelMatrix * vec4(pos, 1.0);
-          vWorldPosition = worldPos.xyz;
-          gl_Position = projectionMatrix * viewMatrix * worldPos;
+          vec4 worldPosition = modelMatrix * vec4(pos.x, pos.y, waveHeight, 1.0);
+          vWorldPosition = worldPosition.xyz;
+          gl_Position = projectionMatrix * viewMatrix * worldPosition;
         }
       `,
       fragmentShader: `
-        uniform vec3 waterColor;
-        uniform vec3 skyColor;
-        varying vec3 vWorldPosition;
+        uniform vec3 deepColor;
+        uniform vec3 midColor;
+        uniform vec3 shallowColor;
+        uniform vec3 sunDirection;
+        uniform vec3 sunColor;
+        uniform vec3 skyColorTop;
+        uniform vec3 skyColorHorizon;
+        uniform float time;
+        varying vec2 vUv;
         varying vec3 vNormal;
+        varying vec3 vWorldPosition;
+        varying float vHeight;
         
         void main() {
           vec3 viewDir = normalize(cameraPosition - vWorldPosition);
           vec3 normal = normalize(vNormal);
           
+          // Water color
+          vec3 waterColor = mix(deepColor, midColor, 0.5);
+          
+          // Fresnel
           float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
-          vec3 color = mix(waterColor, skyColor, fresnel * 0.5);
           
-          vec3 lightDir = normalize(vec3(0.5, 0.8, -0.3));
-          float spec = pow(max(dot(reflect(-lightDir, normal), viewDir), 0.0), 64.0);
-          color += vec3(1.0, 0.95, 0.9) * spec * 0.5;
+          // Sky reflection
+          vec3 skyColor = mix(skyColorHorizon, skyColorTop, 0.3);
           
-          gl_FragColor = vec4(color, 0.9);
+          // Specular
+          vec3 halfDir = normalize(sunDirection + viewDir);
+          float spec = pow(max(dot(normal, halfDir), 0.0), 256.0);
+          
+          vec3 finalColor = mix(waterColor, skyColor, fresnel * 0.6);
+          finalColor += sunColor * spec * 0.8;
+          
+          gl_FragColor = vec4(finalColor, 0.95);
         }
       `,
       transparent: true,

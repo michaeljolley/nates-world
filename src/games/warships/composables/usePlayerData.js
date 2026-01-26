@@ -2,11 +2,19 @@ import { ref, computed } from 'vue'
 import { shipTemplates } from '../data/ships'
 import { questTemplates } from '../data/quests'
 
+// Default team members - naval crew with realistic roles
+const DEFAULT_TEAM_MEMBERS = [
+  { id: 'first-mate', name: 'First Mate Rodriguez', role: 'Flanker', assignedShipId: null, personality: 'aggressive' },
+  { id: 'gunner', name: 'Chief Gunner Chen', role: 'Support', assignedShipId: null, personality: 'cautious' },
+  { id: 'navigator', name: 'Navigator Williams', role: 'Scout', assignedShipId: null, personality: 'balanced' }
+]
+
 // Singleton state for player data persistence
 const money = ref(parseInt(localStorage.getItem('warships_money') || '0'))
 const totalMoneyEarned = ref(parseInt(localStorage.getItem('warships_totalEarned') || '0'))
 const ownedShips = ref(JSON.parse(localStorage.getItem('warships_ownedShips') || '["starter"]'))
 const selectedShipId = ref(localStorage.getItem('warships_selectedShip') || 'starter')
+const teamMembers = ref(JSON.parse(localStorage.getItem('warships_teamMembers') || JSON.stringify(DEFAULT_TEAM_MEMBERS)))
 
 const questStats = ref(JSON.parse(localStorage.getItem('warships_stats') || JSON.stringify({
   kills: 0,
@@ -31,6 +39,7 @@ export function usePlayerData() {
     localStorage.setItem('warships_selectedShip', selectedShipId.value)
     localStorage.setItem('warships_stats', JSON.stringify(questStats.value))
     localStorage.setItem('warships_completedQuests', JSON.stringify(completedQuestIds.value))
+    localStorage.setItem('warships_teamMembers', JSON.stringify(teamMembers.value))
   }
 
   function addMoney(amount, difficulty = 2) {
@@ -95,6 +104,62 @@ export function usePlayerData() {
     return Math.min(questStats.value[quest.type] || 0, quest.target)
   }
 
+  // Get ship data for a team member (returns starter if none assigned)
+  function getTeamMemberShip(memberId) {
+    const member = teamMembers.value.find(m => m.id === memberId)
+    if (!member || !member.assignedShipId) {
+      return shipTemplates.find(s => s.id === 'starter')
+    }
+    return shipTemplates.find(s => s.id === member.assignedShipId) || shipTemplates.find(s => s.id === 'starter')
+  }
+
+  // Assign a ship to a team member (replaces existing assignment)
+  function assignShipToMember(memberId, shipId) {
+    // Can only assign owned ships
+    if (!ownedShips.value.includes(shipId)) return false
+    
+    // Can't assign the player's currently selected ship
+    if (shipId === selectedShipId.value) return false
+    
+    // Remove this ship from any other team member who has it
+    teamMembers.value.forEach(m => {
+      if (m.assignedShipId === shipId) {
+        m.assignedShipId = null
+      }
+    })
+    
+    // Assign to the target member
+    const member = teamMembers.value.find(m => m.id === memberId)
+    if (member) {
+      member.assignedShipId = shipId
+      saveData()
+      return true
+    }
+    return false
+  }
+
+  // Unassign a ship from a team member
+  function unassignShipFromMember(memberId) {
+    const member = teamMembers.value.find(m => m.id === memberId)
+    if (member) {
+      member.assignedShipId = null
+      saveData()
+      return true
+    }
+    return false
+  }
+
+  // Get list of ships available for assignment (owned, not player's, not already assigned)
+  const availableShipsForAssignment = computed(() => {
+    const assignedShipIds = teamMembers.value
+      .filter(m => m.assignedShipId)
+      .map(m => m.assignedShipId)
+    
+    return ownedShips.value.filter(shipId => 
+      shipId !== selectedShipId.value && !assignedShipIds.includes(shipId)
+    )
+  })
+
   return {
     money,
     totalMoneyEarned,
@@ -111,6 +176,11 @@ export function usePlayerData() {
     completeQuest,
     isQuestCompleted,
     getQuestProgress,
-    saveData
+    saveData,
+    teamMembers,
+    getTeamMemberShip,
+    assignShipToMember,
+    unassignShipFromMember,
+    availableShipsForAssignment
   }
 }

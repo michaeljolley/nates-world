@@ -1,47 +1,120 @@
-// Quest definitions for War Ships game
+// Quest definitions for War Ships game - Full catalog matching game2 (104 quests)
 export const questTemplates = [
-  // Kill quests
+  // Kill quests (15)
   { id: 'kill1', name: 'First Blood', desc: 'Destroy 1 enemy ship', type: 'kills', target: 1, reward: 100 },
   { id: 'kill3', name: 'Triple Threat', desc: 'Destroy 3 enemy ships', type: 'kills', target: 3, reward: 300 },
   { id: 'kill5', name: 'Ace Captain', desc: 'Destroy 5 enemy ships', type: 'kills', target: 5, reward: 500 },
   { id: 'kill10', name: 'Fleet Destroyer', desc: 'Destroy 10 enemy ships', type: 'kills', target: 10, reward: 1000 },
+  { id: 'kill15', name: 'Naval Terror', desc: 'Destroy 15 enemy ships', type: 'kills', target: 15, reward: 1500 },
   { id: 'kill25', name: 'Sea Wolf', desc: 'Destroy 25 enemy ships', type: 'kills', target: 25, reward: 2500 },
   { id: 'kill50', name: 'Admiral of Death', desc: 'Destroy 50 enemy ships', type: 'kills', target: 50, reward: 5000 },
+  { id: 'kill75', name: 'Ocean Reaper', desc: 'Destroy 75 enemy ships', type: 'kills', target: 75, reward: 7500 },
   { id: 'kill100', name: 'Legendary Captain', desc: 'Destroy 100 enemy ships', type: 'kills', target: 100, reward: 10000 },
-  
-  // Shots fired quests
+  { id: 'kill150', name: 'Fleet Annihilator', desc: 'Destroy 150 enemy ships', type: 'kills', target: 150, reward: 15000 },
+  { id: 'kill200', name: 'Dreadnought', desc: 'Destroy 200 enemy ships', type: 'kills', target: 200, reward: 20000 },
+  { id: 'kill300', name: 'Kraken', desc: 'Destroy 300 enemy ships', type: 'kills', target: 300, reward: 30000 },
+  { id: 'kill500', name: "Poseidon's Wrath", desc: 'Destroy 500 enemy ships', type: 'kills', target: 500, reward: 50000 },
+  { id: 'kill750', name: 'God of War', desc: 'Destroy 750 enemy ships', type: 'kills', target: 750, reward: 75000 },
+  { id: 'kill1000', name: 'Immortal Admiral', desc: 'Destroy 1000 enemy ships', type: 'kills', target: 1000, reward: 100000 },
+
+  // Shots fired quests (15)
+  { id: 'shots10', name: 'Trigger Happy', desc: 'Fire 10 shots', type: 'shotsFired', target: 10, reward: 50 },
   { id: 'shots50', name: 'Artillery Barrage', desc: 'Fire 50 shots', type: 'shotsFired', target: 50, reward: 200 },
   { id: 'shots100', name: 'Gunner', desc: 'Fire 100 shots', type: 'shotsFired', target: 100, reward: 400 },
+  { id: 'shots250', name: 'Heavy Artillery', desc: 'Fire 250 shots', type: 'shotsFired', target: 250, reward: 800 },
   { id: 'shots500', name: 'Bombardment', desc: 'Fire 500 shots', type: 'shotsFired', target: 500, reward: 1500 },
   { id: 'shots1000', name: 'Shell Storm', desc: 'Fire 1000 shots', type: 'shotsFired', target: 1000, reward: 3000 },
-  
-  // Accuracy quests
+  { id: 'shots2000', name: 'Endless Barrage', desc: 'Fire 2000 shots', type: 'shotsFired', target: 2000, reward: 5000 },
+  { id: 'shots3500', name: 'Lead Rain', desc: 'Fire 3500 shots', type: 'shotsFired', target: 3500, reward: 8000 },
+  { id: 'shots5000', name: 'Arsenal Master', desc: 'Fire 5000 shots', type: 'shotsFired', target: 5000, reward: 12000 },
+  { id: 'shots7500', name: 'Cannon King', desc: 'Fire 7500 shots', type: 'shotsFired', target: 7500, reward: 18000 },
+  { id: 'shots10000', name: 'Thunder God', desc: 'Fire 10000 shots', type: 'shotsFired', target: 10000, reward: 25000 },
+  { id: 'shots15000', name: 'Infinite Ammo', desc: 'Fire 15000 shots', type: 'shotsFired', target: 15000, reward: 35000 },
+  { id: 'shots20000', name: 'Bullet Hell', desc: 'Fire 20000 shots', type: 'shotsFired', target: 20000, reward: 50000 },
+  { id: 'shots30000', name: 'Apocalypse', desc: 'Fire 30000 shots', type: 'shotsFired', target: 30000, reward: 75000 },
+  { id: 'shots50000', name: 'Armageddon', desc: 'Fire 50000 shots', type: 'shotsFired', target: 50000, reward: 100000 },
+
+  // Accuracy quests (15)
   { id: 'hit5', name: 'Sharpshooter', desc: 'Hit enemies 5 times', type: 'shotsHit', target: 5, reward: 150 },
   { id: 'hit20', name: 'Master Gunner', desc: 'Hit enemies 20 times', type: 'shotsHit', target: 20, reward: 400 },
   { id: 'hit50', name: 'Sniper', desc: 'Hit enemies 50 times', type: 'shotsHit', target: 50, reward: 800 },
   { id: 'hit100', name: 'Deadshot', desc: 'Hit enemies 100 times', type: 'shotsHit', target: 100, reward: 1500 },
-  
-  // Damage quests
+  { id: 'hit200', name: 'Eagle Eye', desc: 'Hit enemies 200 times', type: 'shotsHit', target: 200, reward: 2500 },
+  { id: 'hit350', name: 'Precision Master', desc: 'Hit enemies 350 times', type: 'shotsHit', target: 350, reward: 4000 },
+  { id: 'hit500', name: 'Perfect Aim', desc: 'Hit enemies 500 times', type: 'shotsHit', target: 500, reward: 6000 },
+  { id: 'hit750', name: 'Bullseye', desc: 'Hit enemies 750 times', type: 'shotsHit', target: 750, reward: 9000 },
+  { id: 'hit1000', name: 'Hawkeye', desc: 'Hit enemies 1000 times', type: 'shotsHit', target: 1000, reward: 12000 },
+  { id: 'hit1500', name: 'Marksman Elite', desc: 'Hit enemies 1500 times', type: 'shotsHit', target: 1500, reward: 18000 },
+  { id: 'hit2000', name: 'Legendary Aim', desc: 'Hit enemies 2000 times', type: 'shotsHit', target: 2000, reward: 25000 },
+  { id: 'hit3000', name: 'Aimbot', desc: 'Hit enemies 3000 times', type: 'shotsHit', target: 3000, reward: 35000 },
+  { id: 'hit5000', name: 'Inhuman Accuracy', desc: 'Hit enemies 5000 times', type: 'shotsHit', target: 5000, reward: 50000 },
+  { id: 'hit7500', name: 'Godlike Precision', desc: 'Hit enemies 7500 times', type: 'shotsHit', target: 7500, reward: 75000 },
+  { id: 'hit10000', name: 'Omniscient Gunner', desc: 'Hit enemies 10000 times', type: 'shotsHit', target: 10000, reward: 100000 },
+
+  // Damage quests (15)
   { id: 'damage500', name: 'Heavy Hitter', desc: 'Deal 500 damage', type: 'damageDealt', target: 500, reward: 250 },
   { id: 'damage1000', name: 'Pain Dealer', desc: 'Deal 1000 damage', type: 'damageDealt', target: 1000, reward: 500 },
+  { id: 'damage2500', name: 'Hull Breaker', desc: 'Deal 2500 damage', type: 'damageDealt', target: 2500, reward: 1000 },
   { id: 'damage5000', name: 'Destroyer', desc: 'Deal 5000 damage', type: 'damageDealt', target: 5000, reward: 2000 },
   { id: 'damage10000', name: 'Devastator', desc: 'Deal 10000 damage', type: 'damageDealt', target: 10000, reward: 4000 },
-  
-  // Survival quests
+  { id: 'damage20000', name: 'Annihilator', desc: 'Deal 20000 damage', type: 'damageDealt', target: 20000, reward: 7000 },
+  { id: 'damage35000', name: 'Obliterator', desc: 'Deal 35000 damage', type: 'damageDealt', target: 35000, reward: 11000 },
+  { id: 'damage50000', name: 'Decimator', desc: 'Deal 50000 damage', type: 'damageDealt', target: 50000, reward: 16000 },
+  { id: 'damage75000', name: 'Eradicator', desc: 'Deal 75000 damage', type: 'damageDealt', target: 75000, reward: 22000 },
+  { id: 'damage100000', name: 'Exterminator', desc: 'Deal 100000 damage', type: 'damageDealt', target: 100000, reward: 30000 },
+  { id: 'damage150000', name: 'Cataclysm', desc: 'Deal 150000 damage', type: 'damageDealt', target: 150000, reward: 40000 },
+  { id: 'damage200000', name: 'Ragnarok', desc: 'Deal 200000 damage', type: 'damageDealt', target: 200000, reward: 55000 },
+  { id: 'damage300000', name: 'Apocalypse Bringer', desc: 'Deal 300000 damage', type: 'damageDealt', target: 300000, reward: 75000 },
+  { id: 'damage500000', name: 'World Ender', desc: 'Deal 500000 damage', type: 'damageDealt', target: 500000, reward: 100000 },
+  { id: 'damage1000000', name: 'Universe Destroyer', desc: 'Deal 1000000 damage', type: 'damageDealt', target: 1000000, reward: 200000 },
+
+  // Survival quests (15)
   { id: 'survive1', name: 'Survivor', desc: 'Win 1 battle', type: 'survived', target: 1, reward: 500 },
+  { id: 'survive3', name: 'Victor', desc: 'Win 3 battles', type: 'survived', target: 3, reward: 1200 },
   { id: 'survive5', name: 'Champion', desc: 'Win 5 battles', type: 'survived', target: 5, reward: 2000 },
   { id: 'survive10', name: 'Veteran', desc: 'Win 10 battles', type: 'survived', target: 10, reward: 4000 },
+  { id: 'survive15', name: 'War Hero', desc: 'Win 15 battles', type: 'survived', target: 15, reward: 6000 },
   { id: 'survive25', name: 'Battle Master', desc: 'Win 25 battles', type: 'survived', target: 25, reward: 10000 },
-  
-  // Games played quests
+  { id: 'survive40', name: 'Unbreakable', desc: 'Win 40 battles', type: 'survived', target: 40, reward: 15000 },
+  { id: 'survive60', name: 'Invincible', desc: 'Win 60 battles', type: 'survived', target: 60, reward: 22000 },
+  { id: 'survive80', name: 'Unstoppable', desc: 'Win 80 battles', type: 'survived', target: 80, reward: 30000 },
+  { id: 'survive100', name: 'Legendary Victor', desc: 'Win 100 battles', type: 'survived', target: 100, reward: 40000 },
+  { id: 'survive150', name: 'Eternal Champion', desc: 'Win 150 battles', type: 'survived', target: 150, reward: 55000 },
+  { id: 'survive200', name: 'Mythic Admiral', desc: 'Win 200 battles', type: 'survived', target: 200, reward: 75000 },
+  { id: 'survive300', name: 'Godlike Captain', desc: 'Win 300 battles', type: 'survived', target: 300, reward: 100000 },
+  { id: 'survive500', name: 'Immortal Legend', desc: 'Win 500 battles', type: 'survived', target: 500, reward: 150000 },
+  { id: 'survive1000', name: 'Eternal God', desc: 'Win 1000 battles', type: 'survived', target: 1000, reward: 300000 },
+
+  // Games played quests (15)
   { id: 'games1', name: 'Rookie', desc: 'Play 1 game', type: 'gamesPlayed', target: 1, reward: 50 },
+  { id: 'games5', name: 'Enlisted', desc: 'Play 5 games', type: 'gamesPlayed', target: 5, reward: 200 },
   { id: 'games10', name: 'Sailor', desc: 'Play 10 games', type: 'gamesPlayed', target: 10, reward: 400 },
   { id: 'games25', name: 'Seaman', desc: 'Play 25 games', type: 'gamesPlayed', target: 25, reward: 800 },
   { id: 'games50', name: 'Officer', desc: 'Play 50 games', type: 'gamesPlayed', target: 50, reward: 1500 },
-  
-  // Money earned quests
+  { id: 'games75', name: 'Lieutenant', desc: 'Play 75 games', type: 'gamesPlayed', target: 75, reward: 2500 },
+  { id: 'games100', name: 'Commander', desc: 'Play 100 games', type: 'gamesPlayed', target: 100, reward: 4000 },
+  { id: 'games150', name: 'Captain', desc: 'Play 150 games', type: 'gamesPlayed', target: 150, reward: 6000 },
+  { id: 'games200', name: 'Rear Admiral', desc: 'Play 200 games', type: 'gamesPlayed', target: 200, reward: 8000 },
+  { id: 'games300', name: 'Vice Admiral', desc: 'Play 300 games', type: 'gamesPlayed', target: 300, reward: 12000 },
+  { id: 'games400', name: 'Admiral', desc: 'Play 400 games', type: 'gamesPlayed', target: 400, reward: 16000 },
+  { id: 'games500', name: 'Fleet Admiral', desc: 'Play 500 games', type: 'gamesPlayed', target: 500, reward: 22000 },
+  { id: 'games750', name: 'Grand Admiral', desc: 'Play 750 games', type: 'gamesPlayed', target: 750, reward: 35000 },
+  { id: 'games1000', name: 'Supreme Admiral', desc: 'Play 1000 games', type: 'gamesPlayed', target: 1000, reward: 50000 },
+  { id: 'games2000', name: 'Eternal Mariner', desc: 'Play 2000 games', type: 'gamesPlayed', target: 2000, reward: 100000 },
+
+  // Money earned quests (14)
   { id: 'earn1000', name: 'Penny Pincher', desc: 'Earn $1,000 total', type: 'moneyEarned', target: 1000, reward: 200 },
+  { id: 'earn5000', name: 'Coin Collector', desc: 'Earn $5,000 total', type: 'moneyEarned', target: 5000, reward: 500 },
   { id: 'earn10000', name: 'Wealthy Sailor', desc: 'Earn $10,000 total', type: 'moneyEarned', target: 10000, reward: 1000 },
+  { id: 'earn25000', name: 'Rich Captain', desc: 'Earn $25,000 total', type: 'moneyEarned', target: 25000, reward: 2500 },
   { id: 'earn50000', name: 'Treasure Hunter', desc: 'Earn $50,000 total', type: 'moneyEarned', target: 50000, reward: 5000 },
-  { id: 'earn100000', name: 'Fortune Seeker', desc: 'Earn $100,000 total', type: 'moneyEarned', target: 100000, reward: 10000 }
+  { id: 'earn100000', name: 'Fortune Seeker', desc: 'Earn $100,000 total', type: 'moneyEarned', target: 100000, reward: 10000 },
+  { id: 'earn250000', name: 'Wealthy Admiral', desc: 'Earn $250,000 total', type: 'moneyEarned', target: 250000, reward: 25000 },
+  { id: 'earn500000', name: 'Naval Tycoon', desc: 'Earn $500,000 total', type: 'moneyEarned', target: 500000, reward: 50000 },
+  { id: 'earn1000000', name: 'Millionaire', desc: 'Earn $1,000,000 total', type: 'moneyEarned', target: 1000000, reward: 100000 },
+  { id: 'earn2500000', name: 'Multi-Millionaire', desc: 'Earn $2,500,000 total', type: 'moneyEarned', target: 2500000, reward: 200000 },
+  { id: 'earn5000000', name: 'Billionaire', desc: 'Earn $5,000,000 total', type: 'moneyEarned', target: 5000000, reward: 400000 },
+  { id: 'earn10000000', name: 'Naval Empire', desc: 'Earn $10,000,000 total', type: 'moneyEarned', target: 10000000, reward: 750000 },
+  { id: 'earn25000000', name: 'Ocean Mogul', desc: 'Earn $25,000,000 total', type: 'moneyEarned', target: 25000000, reward: 1500000 },
+  { id: 'earn50000000', name: 'Infinite Wealth', desc: 'Earn $50,000,000 total', type: 'moneyEarned', target: 50000000, reward: 3000000 }
 ]
