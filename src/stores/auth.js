@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
     if (!url || !anonKey || url === 'YOUR_SUPABASE_URL') {
-      console.warn('Supabase not configured. Authentication disabled.')
+      // Supabase not configured - running in guest mode (this is fine)
       initialized.value = true
       return
     }
