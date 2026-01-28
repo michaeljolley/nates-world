@@ -752,7 +752,7 @@
         let keys = {};
         let playerShip = null;
         let clock = new THREE.Clock();
-        const WORLD_SIZE = 1200;
+        const WORLD_SIZE = 450;
         let islands = [];
         
         // ============ BACKGROUND MUSIC SYSTEM ============
@@ -2020,13 +2020,13 @@
             createOcean();
             
             // Islands scattered across the battlefield
-            createIslands();
+            // createIslands(); // Disabled
             
             // Add god rays / volumetric light
             // createGodRays(); // Disabled for performance
             
             // Add sea spray particle system
-            createSeaSpray();
+            // createSeaSpray(); // Disabled
             
             // Add cinematic lens flare
             createLensFlare();
@@ -6215,13 +6215,13 @@
                 }
                 
                 // Update sea spray particles
-                updateSeaSpray(delta);
+                // updateSeaSpray(delta); // Disabled
                 
                 // Update lens flare
                 updateLensFlare();
                 
                 // Update island animations (seagulls, waves, butterflies, seaweed)
-                updateIslandAnimations(delta, clock.getElapsedTime());
+                // updateIslandAnimations(delta, clock.getElapsedTime()); // Disabled
 
                 // Update ships
                 for (const ship of ships) {

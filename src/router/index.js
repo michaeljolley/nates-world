@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Lazy load game components
 const TicTacToe = () => import('@/games/tictactoe').then(m => m.TicTacToe)
 const WarShips = () => import('@/games/warships').then(m => m.WarShips)
+const Plantation = () => import('@/games/plantation').then(m => m.Plantation)
 
 const routes = [
   {
@@ -21,6 +22,12 @@ const routes = [
     name: 'warships',
     component: WarShips,
     meta: { title: 'War Ships 3D' }
+  },
+  {
+    path: '/plantation',
+    name: 'plantation',
+    component: Plantation,
+    meta: { title: 'Plantation' }
   }
 ]
 

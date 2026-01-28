@@ -15,7 +15,13 @@ const games = [
     id: 'warships',
     icon: '🚢💥',
     title: 'War Ships 3D',
-    description: 'An epic 3D battleship game! Sink the enemy fleet before they sink yours!',
+    description: 'An epic 3D battleship game! Sink the enemy fleet before they sink yours!'
+  },
+  {
+    id: 'plantation',
+    icon: '🌱🌿',
+    title: 'Plantation',
+    description: 'Tower defense! Place plants to stop the invading weeds from overrunning your garden!',
     wip: true
   }
 ]
