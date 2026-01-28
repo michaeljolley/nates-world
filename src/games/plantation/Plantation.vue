@@ -6,11 +6,15 @@ import GameScreen from './components/GameScreen.vue'
 const gameState = ref('menu') // 'menu' | 'playing' | 'paused' | 'won' | 'lost'
 const selectedMap = ref('garden')
 const difficultySettings = ref(null)
+const gameScreenRef = ref(null)
+const menuScreenRef = ref(null)
+const earnedNewToken = ref(false)
 
 function startGame(settings) {
   selectedMap.value = settings.mapId
   difficultySettings.value = settings
   gameState.value = 'playing'
+  earnedNewToken.value = false
 }
 
 function exitToMenu() {
@@ -18,7 +22,32 @@ function exitToMenu() {
 }
 
 function gameOver(won) {
+  if (won) {
+    earnedNewToken.value = awardToken(selectedMap.value, difficultySettings.value.difficulty)
+  }
   gameState.value = won ? 'won' : 'lost'
+}
+
+function awardToken(mapId, difficulty) {
+  const saved = localStorage.getItem('plantation-tokens')
+  const tokens = saved ? JSON.parse(saved) : {}
+  
+  if (!tokens[mapId]) {
+    tokens[mapId] = {}
+  }
+  
+  const isNew = !tokens[mapId][difficulty]
+  tokens[mapId][difficulty] = true
+  
+  localStorage.setItem('plantation-tokens', JSON.stringify(tokens))
+  return isNew
+}
+
+function continueGame() {
+  if (gameScreenRef.value) {
+    gameScreenRef.value.enableEndless()
+  }
+  gameState.value = 'playing'
 }
 </script>
 
@@ -30,7 +59,9 @@ function gameOver(won) {
     />
     
     <GameScreen
-      v-else-if="gameState === 'playing'"
+      v-if="gameState === 'playing' || gameState === 'won'"
+      v-show="gameState === 'playing'"
+      ref="gameScreenRef"
       :map-id="selectedMap"
       :difficulty="difficultySettings"
       @exit="exitToMenu"
@@ -38,11 +69,18 @@ function gameOver(won) {
     />
     
     <!-- Victory/Defeat overlays -->
-    <div v-else-if="gameState === 'won'" class="result-overlay victory">
+    <div v-if="gameState === 'won'" class="result-overlay victory">
       <div class="result-modal">
         <h1>🏆 Victory!</h1>
         <p>You defended the garden!</p>
-        <button @click="exitToMenu">Back to Menu</button>
+        <div v-if="earnedNewToken" class="token-earned">
+          <span class="token-star" :style="{ background: difficultySettings?.color }">★</span>
+          <span>New {{ difficultySettings?.name }} token earned!</span>
+        </div>
+        <div class="button-row">
+          <button class="continue-btn" @click="continueGame">Keep Playing</button>
+          <button @click="exitToMenu">Back to Menu</button>
+        </div>
       </div>
     </div>
     
@@ -98,7 +136,38 @@ function gameOver(won) {
 .result-modal p {
   font-size: 1.2rem;
   color: #666;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+}
+
+.token-earned {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+  border: 2px solid #FFD54F;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  color: #F57F17;
+}
+
+.token-star {
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.button-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .result-modal button {
@@ -110,6 +179,10 @@ function gameOver(won) {
   border-radius: 10px;
   cursor: pointer;
   transition: transform 0.2s;
+}
+
+.result-modal button.continue-btn {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
 }
 
 .result-modal button:hover {

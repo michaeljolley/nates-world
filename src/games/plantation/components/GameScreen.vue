@@ -9,7 +9,7 @@ const props = defineProps({
   difficulty: { type: Object, default: () => ({ seedMult: 1, lifeMult: 1, enemyHealthMult: 1, enemySpeedMult: 1, rewardMult: 1 }) }
 })
 
-const emit = defineEmits(['exit', 'gameover'])
+const emit = defineEmits(['exit', 'gameover', 'continue'])
 
 // Game state
 const canvas = ref(null)
@@ -21,6 +21,7 @@ const lives = ref(10)
 const currentWave = ref(0)
 const waveInProgress = ref(false)
 const isPaused = ref(false)
+const endlessMode = ref(false)
 
 const placedPlants = ref([])
 const activeWeeds = ref([])
@@ -114,11 +115,18 @@ function update(dt) {
     waveInProgress.value = false
     
     const maxWaves = props.difficulty.waves || 20
-    if (currentWave.value >= maxWaves) {
+    if (currentWave.value >= maxWaves && !endlessMode.value) {
       emit('gameover', true)
     }
   }
 }
+
+// Enable endless mode (called from parent when continuing after win)
+function enableEndless() {
+  endlessMode.value = true
+}
+
+defineExpose({ enableEndless })
 
 function updateWeed(weed, dt) {
   const path = currentMap.value.path
@@ -281,7 +289,14 @@ function render() {
     const isOccupied = placedPlants.value.some(p => p.col === cell.col && p.row === cell.row)
     const onPath = isOnPath(cell.x, cell.y)
     
-    if (!isOccupied && !onPath) {
+    // Path-only plants (can only be placed ON the path)
+    const pathOnlyPlants = ['thornybush', 'oaksapling', 'pumpkinguard']
+    const isPathOnly = pathOnlyPlants.includes(selectedPlant.value)
+    
+    // Valid placement: path-only on path, or regular off path
+    const validPlacement = !isOccupied && ((isPathOnly && onPath) || (!isPathOnly && !onPath))
+    
+    if (validPlacement) {
       c.fillStyle = 'rgba(76, 175, 80, 0.6)'
       c.fillRect(cell.x - 18, cell.y - 18, 36, 36)
       c.strokeStyle = '#4CAF50'
@@ -357,7 +372,7 @@ function render() {
 // Wave spawning
 function startWave() {
   const maxWaves = props.difficulty.waves || 20
-  if (waveInProgress.value || currentWave.value >= maxWaves) return
+  if (waveInProgress.value || (!endlessMode.value && currentWave.value >= maxWaves)) return
   
   waveInProgress.value = true
   // Use modulo to loop waves if we have more waves than defined
@@ -454,8 +469,14 @@ function handleCanvasClick(e) {
   
   if (!selectedPlant.value) return
   
-  // Check if on path
-  if (isOnPath(snapX, snapY)) return
+  // Path-only plants (can only be placed ON the path)
+  const pathOnlyPlants = ['thornybush', 'oaksapling', 'pumpkinguard']
+  const isPathOnly = pathOnlyPlants.includes(selectedPlant.value)
+  const onPath = isOnPath(snapX, snapY)
+  
+  // Check placement validity
+  if (isPathOnly && !onPath) return  // Path-only plants must be on path
+  if (!isPathOnly && onPath) return  // Regular plants cannot be on path
   
   // Check if occupied
   const isOccupied = placedPlants.value.some(p => p.col === col && p.row === row)
@@ -493,6 +514,7 @@ function cancelSelection() {
 }
 
 const maxWaves = computed(() => props.difficulty.waves || 20)
+const waveDisplay = computed(() => endlessMode.value ? `Wave ${currentWave.value} (Endless)` : `Wave ${currentWave.value}/${maxWaves.value}`)
 </script>
 
 <template>
@@ -502,13 +524,13 @@ const maxWaves = computed(() => props.difficulty.waves || 20)
       <button class="exit-btn" @click="$emit('exit')">← Exit</button>
       <div class="stat">🌰 {{ seeds }}</div>
       <div class="stat">❤️ {{ lives }}</div>
-      <div class="stat">Wave {{ currentWave }}/{{ maxWaves }}</div>
+      <div class="stat">{{ waveDisplay }}</div>
       <button 
         class="wave-btn"
-        :disabled="waveInProgress || currentWave >= maxWaves"
+        :disabled="waveInProgress || (!endlessMode && currentWave >= maxWaves)"
         @click="startWave"
       >
-        {{ waveInProgress ? 'Wave in progress...' : currentWave >= maxWaves ? 'All waves complete!' : '▶ Start Wave' }}
+        {{ waveInProgress ? 'Wave in progress...' : (!endlessMode && currentWave >= maxWaves) ? 'All waves complete!' : '▶ Start Wave' }}
       </button>
     </div>
     
