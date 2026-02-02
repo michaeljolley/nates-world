@@ -9,6 +9,9 @@ const PaperAirplane = () => import('@/games/paperairplane').then(m => m.PaperAir
 const HotWheels = () => import('@/games/hotwheels').then(m => m.HotWheels)
 const Battlefields = () => import('@/games/battlefields').then(m => m.Battlefields)
 const ConnectFour = () => import('@/games/connectfour').then(m => m.ConnectFour)
+const TreeHoppers = () => import('@/games/treehoppers').then(m => m.TreeHoppers)
+const LilyPadHopper = () => import('@/games/lilypadhopper').then(m => m.LilyPadHopper)
+const SnakeRun = () => import('@/games/snakerun').then(m => m.SnakeRun)
 const routes = [
   {
     path: '/',
@@ -62,6 +65,24 @@ const routes = [
     name: 'connect-four',
     component: ConnectFour,
     meta: { title: 'Connect Four' }
+  },
+  {
+    path: '/lily-pad-hopper',
+    name: 'lily-pad-hopper',
+    component: LilyPadHopper,
+    meta: { title: 'Lily Pad Hopper' }
+  },
+  {
+    path: '/tree-hoppers',
+    name: 'tree-hoppers',
+    component: TreeHoppers,
+    meta: { title: 'Tree Hoppers' }
+  },
+  {
+    path: '/snake-run',
+    name: 'snake-run',
+    component: SnakeRun,
+    meta: { title: 'Snake Run' }
   }
 ]
 

@@ -57,6 +57,20 @@ const games = [
     title: 'Connect Four',
     description: 'Drop discs into the grid and connect 4 in a row before the AI does!',
     wip: true
+  },
+  {
+    id: 'lily-pad-hopper',
+    icon: '🐸🪷',
+    title: 'Lily Pad Hopper',
+    description: 'Jump from lily pad to lily pad! How many jumps can you make without falling in?',
+    wip: true
+  },
+  {
+    id: 'snake-run',
+    icon: '🐍🍎',
+    title: 'Snake Run',
+    description: 'Slither and grow! Compete against 1-20 AI snakes in this snake.io style game!',
+    wip: true
   }
 ]
 
