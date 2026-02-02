@@ -21,7 +21,41 @@ const games = [
     id: 'plantation',
     icon: '🌱🌿',
     title: 'Plantation',
-    description: 'Tower defense! Place plants to stop the invading weeds from overrunning your garden!',
+    description: 'Tower defense! Place plants to stop the invading weeds from overrunning your garden!'
+  },
+  {
+    id: 'animal-trivia',
+    icon: '🦁🐘',
+    title: 'Animal Trivia',
+    description: 'Test your animal knowledge! Answer 10 questions before time runs out.',
+    wip: true
+  },
+  {
+    id: 'paper-airplane',
+    icon: '✈️🏫',
+    title: 'Paper Airplane',
+    description: 'Fly a paper airplane through the school! Navigate 5 rooms and escape out the window!',
+    wip: true
+  },
+  {
+    id: 'battlefields',
+    icon: '⚔️👊',
+    title: 'Battlefields',
+    description: 'Choose from 25 fighters and battle random opponents! Best of 5 rounds wins the match.',
+    wip: true
+  },
+  {
+    id: 'hot-wheels',
+    icon: '🏎️🔥',
+    title: 'Hot Wheels Racing',
+    description: 'Race around the track in a blazing hot wheels car! Complete 3 laps to win!',
+    wip: true
+  },
+  {
+    id: 'connect-four',
+    icon: '🔴🟡',
+    title: 'Connect Four',
+    description: 'Drop discs into the grid and connect 4 in a row before the AI does!',
     wip: true
   }
 ]

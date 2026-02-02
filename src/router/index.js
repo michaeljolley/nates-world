@@ -4,7 +4,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 const TicTacToe = () => import('@/games/tictactoe').then(m => m.TicTacToe)
 const WarShips = () => import('@/games/warships').then(m => m.WarShips)
 const Plantation = () => import('@/games/plantation').then(m => m.Plantation)
-
+const AnimalTrivia = () => import('@/games/animaltrivia').then(m => m.AnimalTrivia)
+const PaperAirplane = () => import('@/games/paperairplane').then(m => m.PaperAirplane)
+const HotWheels = () => import('@/games/hotwheels').then(m => m.HotWheels)
+const Battlefields = () => import('@/games/battlefields').then(m => m.Battlefields)
+const ConnectFour = () => import('@/games/connectfour').then(m => m.ConnectFour)
 const routes = [
   {
     path: '/',
@@ -28,6 +32,36 @@ const routes = [
     name: 'plantation',
     component: Plantation,
     meta: { title: 'Plantation' }
+  },
+  {
+    path: '/animal-trivia',
+    name: 'animal-trivia',
+    component: AnimalTrivia,
+    meta: { title: 'Animal Trivia' }
+  },
+  {
+    path: '/paper-airplane',
+    name: 'paper-airplane',
+    component: PaperAirplane,
+    meta: { title: 'Paper Airplane' }
+  },
+  {
+    path: '/battlefields',
+    name: 'battlefields',
+    component: Battlefields,
+    meta: { title: 'Battlefields' }
+  },
+  {
+    path: '/hot-wheels',
+    name: 'hot-wheels',
+    component: HotWheels,
+    meta: { title: 'Hot Wheels Racing' }
+  },
+  {
+    path: '/connect-four',
+    name: 'connect-four',
+    component: ConnectFour,
+    meta: { title: 'Connect Four' }
   }
 ]
 
