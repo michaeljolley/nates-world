@@ -34,24 +34,31 @@ const playerSnake = reactive({
   direction: { x: 0, y: -1 },
   isAlive: true,
   color: playerColor,
-  SEGMENT_SIZE: 12
+  SEGMENT_SIZE: 12,
+  isBoosting: false
 })
 
 const {
   segments: playerSegments,
   direction: playerDirection,
   isAlive: playerIsAlive,
+  isBoosting: playerIsBoosting,
   init: initPlayer,
   setDirection,
+  setMouseTarget,
   update: updatePlayer,
   grow: growPlayer,
+  shrink: shrinkPlayer,
   die: diePlayer,
+  setBoosting,
   getLength
 } = useSnakePhysics(ARENA_SIZE)
 
 const { checkHeadToBody, checkFoodCollision, checkSelfCollision } = useCollision()
 
 const aiSnakes = ref([])
+const mousePos = ref({ x: 0, y: 0 })
+const canvasCenter = ref({ x: 400, y: 300 })
 let gameLoopId = null
 let lastTime = 0
 
@@ -71,7 +78,7 @@ function startGame() {
   startGameState()
   
   // Init player at center
-  initPlayer(ARENA_SIZE / 2, ARENA_SIZE / 2, 5)
+  initPlayer(ARENA_SIZE / 2, ARENA_SIZE / 2, 10)
   playerSnake.isAlive = true
   
   // Create AI
@@ -96,17 +103,30 @@ function gameLoop() {
   if (playerIsAlive.value) {
     updatePlayer(delta)
     
+    // Shrink while boosting (slither.io mechanic)
+    if (playerIsBoosting.value && playerSegments.value.length > 10) {
+      if (Math.random() < 0.1) { // 10% chance per frame to drop a segment
+        shrinkPlayer(1)
+        // Drop food behind when boosting
+        const tail = playerSegments.value[playerSegments.value.length - 1]
+        if (tail) {
+          spawnFoodAt(tail.x, tail.y, 1)
+        }
+      }
+    }
+    
     // Sync reactive object
     playerSnake.segments = [...playerSegments.value]
     playerSnake.direction = { ...playerDirection.value }
     playerSnake.isAlive = playerIsAlive.value
+    playerSnake.isBoosting = playerIsBoosting.value
 
     // Check food collision
     const head = playerSegments.value[0]
     if (head) {
       const foodIdx = checkFoodCollision(head, food.value)
       if (foodIdx >= 0) {
-        growPlayer(3)
+        growPlayer(food.value[foodIdx].value || 1)
         removeFood(foodIdx)
       }
 
@@ -118,19 +138,13 @@ function gameLoop() {
           // Player died
           diePlayer()
           playerSnake.isAlive = false
-          spawnFoodAt(head.x, head.y, Math.floor(playerSegments.value.length / 2))
+          spawnFoodAt(head.x, head.y, playerSegments.value.length)
           endGame()
           break
         }
       }
 
-      // Check self collision
-      if (checkSelfCollision({ segments: playerSegments.value })) {
-        diePlayer()
-        playerSnake.isAlive = false
-        spawnFoodAt(head.x, head.y, Math.floor(playerSegments.value.length / 2))
-        endGame()
-      }
+      // Player can go through their own snake - no self collision check
     }
   }
 
@@ -151,7 +165,7 @@ function gameLoop() {
     if (aiHead) {
       const foodIdx = checkFoodCollision(aiHead, food.value)
       if (foodIdx >= 0) {
-        ai.grow(3)
+        ai.grow(food.value[foodIdx].value || 1)
         removeFood(foodIdx)
       }
 
@@ -159,7 +173,7 @@ function gameLoop() {
       if (playerIsAlive.value && checkHeadToBody(aiHead, { segments: playerSegments.value }, false)) {
         // AI died hitting player
         ai.die()
-        spawnFoodAt(aiHead.x, aiHead.y, Math.floor(ai.segments.length / 2))
+        spawnFoodAt(aiHead.x, aiHead.y, ai.segments.length)
         playerKills.value++
       }
 
@@ -168,15 +182,15 @@ function gameLoop() {
         if (other === ai || !other.isAlive) continue
         if (checkHeadToBody(aiHead, other, false)) {
           ai.die()
-          spawnFoodAt(aiHead.x, aiHead.y, Math.floor(ai.segments.length / 2))
+          spawnFoodAt(aiHead.x, aiHead.y, ai.segments.length)
           break
         }
       }
 
       // Check self collision
-      if (checkSelfCollision(ai)) {
+      if (ai.segments.length > 30 && checkSelfCollision(ai)) {
         ai.die()
-        spawnFoodAt(aiHead.x, aiHead.y, Math.floor(ai.segments.length / 2))
+        spawnFoodAt(aiHead.x, aiHead.y, ai.segments.length)
       }
     }
   }
@@ -188,9 +202,47 @@ function gameLoop() {
   gameLoopId = requestAnimationFrame(gameLoop)
 }
 
+function handleMouseMove(e) {
+  if (gameState.value !== 'playing' || !playerIsAlive.value) return
+  
+  // Get mouse position relative to canvas center
+  const rect = e.target.getBoundingClientRect()
+  const centerX = rect.width / 2
+  const centerY = rect.height / 2
+  
+  const dx = e.clientX - rect.left - centerX
+  const dy = e.clientY - rect.top - centerY
+  
+  // Set direction towards mouse - smaller dead zone for more responsive controls
+  const len = Math.sqrt(dx * dx + dy * dy)
+  if (len > 5) { // Very small dead zone
+    setDirection(dx / len, dy / len)
+  }
+}
+
+function handleMouseDown(e) {
+  if (gameState.value !== 'playing' || !playerIsAlive.value) return
+  if (e.button === 0) { // Left click
+    setBoosting(true)
+  }
+}
+
+function handleMouseUp(e) {
+  if (e.button === 0) {
+    setBoosting(false)
+  }
+}
+
 function handleKeyDown(e) {
   if (gameState.value !== 'playing' || !playerIsAlive.value) return
 
+  // Space or Shift for boost
+  if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+    setBoosting(true)
+    e.preventDefault()
+  }
+
+  // Arrow keys still work as backup
   switch (e.code) {
     case 'ArrowUp':
     case 'KeyW':
@@ -215,6 +267,12 @@ function handleKeyDown(e) {
   }
 }
 
+function handleKeyUp(e) {
+  if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+    setBoosting(false)
+  }
+}
+
 function handleBackToMenu() {
   if (gameState.value === 'menu') {
     router.push('/')
@@ -230,10 +288,12 @@ function handlePlayAgain() {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('keyup', handleKeyUp)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
+  window.removeEventListener('keyup', handleKeyUp)
   if (gameLoopId) cancelAnimationFrame(gameLoopId)
 })
 </script>
@@ -247,6 +307,10 @@ onUnmounted(() => {
       :food="food"
       :arena-size="ARENA_SIZE"
       :game-state="gameState"
+      @mousemove="handleMouseMove"
+      @mousedown="handleMouseDown"
+      @mouseup="handleMouseUp"
+      @mouseleave="() => setBoosting(false)"
     />
 
     <GameUI

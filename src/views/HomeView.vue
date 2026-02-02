@@ -34,7 +34,7 @@ const games = [
     id: 'paper-airplane',
     icon: '✈️🏫',
     title: 'Paper Airplane',
-    description: 'Fly a paper airplane through the school! Navigate 5 rooms and escape out the window!',
+    description: 'Fly a paper airplane through the school! Navigate 10 rooms and escape out the stage!',
     wip: true
   },
   {
@@ -55,8 +55,7 @@ const games = [
     id: 'connect-four',
     icon: '🔴🟡',
     title: 'Connect Four',
-    description: 'Drop discs into the grid and connect 4 in a row before the AI does!',
-    wip: true
+    description: 'Drop discs into the grid and connect 4 in a row before the AI does!'
   },
   {
     id: 'lily-pad-hopper',
@@ -70,6 +69,34 @@ const games = [
     icon: '🐍🍎',
     title: 'Snake Run',
     description: 'Slither and grow! Compete against 1-20 AI snakes in this snake.io style game!',
+    wip: true
+  },
+  {
+    id: 'tree-hoppers',
+    icon: '🌳🐒',
+    title: 'Tree Hoppers',
+    description: 'Hop through trees to save monkeys while being chased by hunters! Don\'t get caught!',
+    wip: true
+  },
+  {
+    id: 'fruit-ninja',
+    icon: '🍉🗡️',
+    title: 'Fruit Ninja',
+    description: 'Slice flying fruit while avoiding bombs! You have 5 lives - don\'t blow them all!',
+    wip: true
+  },
+  {
+    id: 'archery',
+    icon: '🏹🎯',
+    title: 'Archery',
+    description: 'Aim your bow and shoot arrows at the target! Get closer to the bullseye for more points!',
+    wip: true
+  },
+  {
+    id: 'alien-invasion',
+    icon: '👽🌍',
+    title: 'Alien Invasion',
+    description: 'Control aliens to destroy buildings and take over the world! Buy and upgrade 50 unique aliens!',
     wip: true
   }
 ]

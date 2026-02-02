@@ -94,11 +94,18 @@ function makeAIMove() {
     let col
     
     if (difficulty.value === 'easy') {
-      col = getRandomMove()
+      // Easy: Mostly random, occasionally blocks obvious wins
+      if (Math.random() > 0.7) {
+        col = getBlockingMove() ?? getRandomMove()
+      } else {
+        col = getRandomMove()
+      }
     } else if (difficulty.value === 'medium') {
-      col = Math.random() > 0.4 ? getBestMove() : getRandomMove()
+      // Medium: Always blocks wins, sometimes makes smart moves
+      col = getWinningMove() ?? getBlockingMove() ?? (Math.random() > 0.5 ? getSmartMove() : getRandomMove())
     } else {
-      col = getBestMove()
+      // Hard: Uses minimax with look-ahead for best possible play
+      col = getWinningMove() ?? getBlockingMove() ?? getMiniMaxMove()
     }
     
     const row = getLowestEmptyRow(col)
@@ -131,8 +138,7 @@ function getRandomMove() {
   return validCols[Math.floor(Math.random() * validCols.length)]
 }
 
-function getBestMove() {
-  // Check if AI can win
+function getWinningMove() {
   for (let col = 0; col < COLS; col++) {
     const row = getLowestEmptyRow(col)
     if (row !== -1) {
@@ -144,8 +150,10 @@ function getBestMove() {
       board.value[row][col] = EMPTY
     }
   }
-  
-  // Check if need to block player
+  return null
+}
+
+function getBlockingMove() {
   for (let col = 0; col < COLS; col++) {
     const row = getLowestEmptyRow(col)
     if (row !== -1) {
@@ -157,6 +165,157 @@ function getBestMove() {
       board.value[row][col] = EMPTY
     }
   }
+  return null
+}
+
+function getSmartMove() {
+  // Prefer center, then evaluate positions
+  if (getLowestEmptyRow(3) !== -1 && Math.random() > 0.3) {
+    return 3
+  }
+  
+  let bestCol = -1
+  let bestScore = -1
+  
+  for (let col = 0; col < COLS; col++) {
+    const row = getLowestEmptyRow(col)
+    if (row !== -1) {
+      const score = evaluatePosition(row, col, AI)
+      if (score > bestScore) {
+        bestScore = score
+        bestCol = col
+      }
+    }
+  }
+  
+  return bestCol !== -1 ? bestCol : getRandomMove()
+}
+
+function getMiniMaxMove() {
+  let bestCol = 3
+  let bestScore = -Infinity
+  
+  // Check center columns first (better moves usually)
+  const colOrder = [3, 2, 4, 1, 5, 0, 6]
+  
+  for (const col of colOrder) {
+    const row = getLowestEmptyRow(col)
+    if (row !== -1) {
+      board.value[row][col] = AI
+      const score = minimax(4, false, -Infinity, Infinity)
+      board.value[row][col] = EMPTY
+      
+      if (score > bestScore) {
+        bestScore = score
+        bestCol = col
+      }
+    }
+  }
+  
+  return bestCol
+}
+
+function minimax(depth, isMaximizing, alpha, beta) {
+  // Check for terminal states
+  for (let c = 0; c < COLS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      if (board.value[r][c] === AI && checkWinAt(r, c, AI)) {
+        return 1000 + depth
+      }
+      if (board.value[r][c] === PLAYER && checkWinAt(r, c, PLAYER)) {
+        return -1000 - depth
+      }
+    }
+  }
+  
+  if (depth === 0 || isBoardFull()) {
+    return evaluateBoard()
+  }
+  
+  if (isMaximizing) {
+    let maxScore = -Infinity
+    for (let col = 0; col < COLS; col++) {
+      const row = getLowestEmptyRow(col)
+      if (row !== -1) {
+        board.value[row][col] = AI
+        const score = minimax(depth - 1, false, alpha, beta)
+        board.value[row][col] = EMPTY
+        maxScore = Math.max(maxScore, score)
+        alpha = Math.max(alpha, score)
+        if (beta <= alpha) break
+      }
+    }
+    return maxScore
+  } else {
+    let minScore = Infinity
+    for (let col = 0; col < COLS; col++) {
+      const row = getLowestEmptyRow(col)
+      if (row !== -1) {
+        board.value[row][col] = PLAYER
+        const score = minimax(depth - 1, true, alpha, beta)
+        board.value[row][col] = EMPTY
+        minScore = Math.min(minScore, score)
+        beta = Math.min(beta, score)
+        if (beta <= alpha) break
+      }
+    }
+    return minScore
+  }
+}
+
+function checkWinAt(row, col, player) {
+  if (board.value[row][col] !== player) return false
+  
+  const directions = [[0, 1], [1, 0], [1, 1], [1, -1]]
+  
+  for (const [dr, dc] of directions) {
+    let count = 1
+    for (let i = 1; i < 4; i++) {
+      const r = row + dr * i, c = col + dc * i
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS && board.value[r][c] === player) count++
+      else break
+    }
+    for (let i = 1; i < 4; i++) {
+      const r = row - dr * i, c = col - dc * i
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS && board.value[r][c] === player) count++
+      else break
+    }
+    if (count >= 4) return true
+  }
+  return false
+}
+
+function evaluateBoard() {
+  let score = 0
+  
+  // Evaluate all positions
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      if (board.value[row][col] === AI) {
+        score += evaluatePosition(row, col, AI)
+      } else if (board.value[row][col] === PLAYER) {
+        score -= evaluatePosition(row, col, PLAYER)
+      }
+    }
+  }
+  
+  // Center column bonus
+  for (let row = 0; row < ROWS; row++) {
+    if (board.value[row][3] === AI) score += 3
+    if (board.value[row][3] === PLAYER) score -= 3
+  }
+  
+  return score
+}
+
+function getBestMove() {
+  // Check if AI can win
+  const winMove = getWinningMove()
+  if (winMove !== null) return winMove
+  
+  // Check if need to block player
+  const blockMove = getBlockingMove()
+  if (blockMove !== null) return blockMove
   
   // Prefer center column
   if (getLowestEmptyRow(3) !== -1) {

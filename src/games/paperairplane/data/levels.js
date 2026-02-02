@@ -277,6 +277,242 @@ export const levels = [
       { type: 'flag', position: { x: -3.5, y: 0, z: 18 }, size: { x: 0.2, y: 4, z: 0.2 } },
       { type: 'flag', position: { x: 3.5, y: 0, z: 18 }, size: { x: 0.2, y: 4, z: 0.2 } },
     ]
+  },
+  {
+    id: 6,
+    name: 'Library',
+    description: 'Quietly glide through the bookshelves!',
+    roomSize: { width: 18, height: 4, depth: 22 },
+    startPosition: { x: 0, y: 2.5, z: 1 },
+    goal: {
+      min: { x: -1.5, y: 0.5, z: 21 },
+      max: { x: 1.5, y: 3.5, z: 23 }
+    },
+    obstacles: [
+      // Tall bookshelves creating maze-like paths
+      { type: 'bookshelf', position: { x: -6, y: 0, z: 4 }, size: { x: 0.8, y: 3.2, z: 5 } },
+      { type: 'bookshelf', position: { x: -2, y: 0, z: 4 }, size: { x: 0.8, y: 3.2, z: 5 } },
+      { type: 'bookshelf', position: { x: 2, y: 0, z: 4 }, size: { x: 0.8, y: 3.2, z: 5 } },
+      { type: 'bookshelf', position: { x: 6, y: 0, z: 4 }, size: { x: 0.8, y: 3.2, z: 5 } },
+      // Second row offset
+      { type: 'bookshelf', position: { x: -4, y: 0, z: 11 }, size: { x: 0.8, y: 3.2, z: 5 } },
+      { type: 'bookshelf', position: { x: 0, y: 0, z: 11 }, size: { x: 0.8, y: 3.2, z: 5 } },
+      { type: 'bookshelf', position: { x: 4, y: 0, z: 11 }, size: { x: 0.8, y: 3.2, z: 5 } },
+      // Third row
+      { type: 'bookshelf', position: { x: -6, y: 0, z: 17 }, size: { x: 0.8, y: 3.2, z: 4 } },
+      { type: 'bookshelf', position: { x: 6, y: 0, z: 17 }, size: { x: 0.8, y: 3.2, z: 4 } },
+      // Librarian's desk
+      { type: 'desk', position: { x: 0, y: 0, z: 19 }, size: { x: 3, y: 1, z: 1.5 } },
+      { type: 'student', position: { x: 0, y: 0, z: 20 }, size: { x: 0.6, y: 1.7, z: 0.5 } },
+      // Reading tables
+      { type: 'table', position: { x: -7, y: 0, z: 10 }, size: { x: 2, y: 0.8, z: 2 } },
+      { type: 'table', position: { x: 7, y: 0, z: 10 }, size: { x: 2, y: 0.8, z: 2 } },
+      // Study carrels along walls
+      { type: 'desk', position: { x: -8, y: 0, z: 3 }, size: { x: 1, y: 1.4, z: 1 } },
+      { type: 'desk', position: { x: -8, y: 0, z: 5 }, size: { x: 1, y: 1.4, z: 1 } },
+      { type: 'desk', position: { x: 8, y: 0, z: 3 }, size: { x: 1, y: 1.4, z: 1 } },
+      { type: 'desk', position: { x: 8, y: 0, z: 5 }, size: { x: 1, y: 1.4, z: 1 } },
+      // Hanging lights
+      { type: 'light', position: { x: -4, y: 3.5, z: 6 }, size: { x: 1.2, y: 0.3, z: 0.4 } },
+      { type: 'light', position: { x: 4, y: 3.5, z: 6 }, size: { x: 1.2, y: 0.3, z: 0.4 } },
+      { type: 'light', position: { x: 0, y: 3.5, z: 12 }, size: { x: 1.2, y: 0.3, z: 0.4 } },
+      { type: 'light', position: { x: -4, y: 3.5, z: 18 }, size: { x: 1.2, y: 0.3, z: 0.4 } },
+      { type: 'light', position: { x: 4, y: 3.5, z: 18 }, size: { x: 1.2, y: 0.3, z: 0.4 } },
+      // Globe near entrance
+      { type: 'globe', position: { x: 7, y: 0, z: 2 }, size: { x: 0.6, y: 1.5, z: 0.6 } },
+      // Students reading
+      { type: 'student', position: { x: -7, y: 0, z: 10 }, size: { x: 0.5, y: 1.4, z: 0.4 } },
+      { type: 'student', position: { x: 3, y: 0, z: 8 }, size: { x: 0.5, y: 1.6, z: 0.4 } },
+      // Computer stations
+      { type: 'desk', position: { x: -8, y: 0, z: 15 }, size: { x: 1.5, y: 0.8, z: 1 } },
+      { type: 'computer', position: { x: -8, y: 0.8, z: 15 }, size: { x: 0.4, y: 0.5, z: 0.3 } },
+    ]
+  },
+  {
+    id: 7,
+    name: 'Science Lab',
+    description: 'Watch out for the experiments!',
+    roomSize: { width: 14, height: 4, depth: 18 },
+    startPosition: { x: 0, y: 2, z: 1 },
+    goal: {
+      min: { x: -1.5, y: 0.5, z: 17 },
+      max: { x: 1.5, y: 3.5, z: 19 }
+    },
+    obstacles: [
+      // Lab benches with equipment
+      { type: 'counter', position: { x: -4, y: 0, z: 4 }, size: { x: 3, y: 1, z: 1.2 } },
+      { type: 'counter', position: { x: 4, y: 0, z: 4 }, size: { x: 3, y: 1, z: 1.2 } },
+      { type: 'counter', position: { x: -4, y: 0, z: 8 }, size: { x: 3, y: 1, z: 1.2 } },
+      { type: 'counter', position: { x: 4, y: 0, z: 8 }, size: { x: 3, y: 1, z: 1.2 } },
+      { type: 'counter', position: { x: -4, y: 0, z: 12 }, size: { x: 3, y: 1, z: 1.2 } },
+      { type: 'counter', position: { x: 4, y: 0, z: 12 }, size: { x: 3, y: 1, z: 1.2 } },
+      // Tall equipment on benches
+      { type: 'rack', position: { x: -4, y: 1, z: 4 }, size: { x: 0.4, y: 0.8, z: 0.4 } },
+      { type: 'rack', position: { x: 4.5, y: 1, z: 8 }, size: { x: 0.5, y: 1, z: 0.5 } },
+      { type: 'rack', position: { x: -3.5, y: 1, z: 12 }, size: { x: 0.4, y: 0.6, z: 0.4 } },
+      // Fume hood at back
+      { type: 'counter', position: { x: 0, y: 0, z: 15 }, size: { x: 2.5, y: 2.5, z: 1 } },
+      // Skeleton model
+      { type: 'student', position: { x: -6, y: 0, z: 14 }, size: { x: 0.4, y: 1.8, z: 0.4 } },
+      // Emergency shower
+      { type: 'column', position: { x: 6, y: 0, z: 2 }, size: { x: 0.3, y: 3, z: 0.3 } },
+      // Hanging lights
+      { type: 'light', position: { x: -3, y: 3.5, z: 5 }, size: { x: 1.5, y: 0.2, z: 0.4 } },
+      { type: 'light', position: { x: 3, y: 3.5, z: 5 }, size: { x: 1.5, y: 0.2, z: 0.4 } },
+      { type: 'light', position: { x: 0, y: 3.5, z: 10 }, size: { x: 1.5, y: 0.2, z: 0.4 } },
+      { type: 'light', position: { x: -3, y: 3.5, z: 14 }, size: { x: 1.5, y: 0.2, z: 0.4 } },
+      { type: 'light', position: { x: 3, y: 3.5, z: 14 }, size: { x: 1.5, y: 0.2, z: 0.4 } },
+      // Periodic table on wall
+      { type: 'bulletin', position: { x: -6.8, y: 1.5, z: 8 }, size: { x: 0.2, y: 1.5, z: 3 } },
+      // Stools at benches
+      { type: 'chair', position: { x: -2.5, y: 0, z: 4.5 }, size: { x: 0.4, y: 0.7, z: 0.4 } },
+      { type: 'chair', position: { x: 2.5, y: 0, z: 8.5 }, size: { x: 0.4, y: 0.7, z: 0.4 } },
+      // Teacher at front
+      { type: 'student', position: { x: 2, y: 0, z: 15 }, size: { x: 0.6, y: 1.7, z: 0.5 } },
+    ]
+  },
+  {
+    id: 8,
+    name: 'Art Room',
+    description: 'Weave through the easels and sculptures!',
+    roomSize: { width: 16, height: 5, depth: 20 },
+    startPosition: { x: 0, y: 3, z: 1 },
+    goal: {
+      min: { x: -1.5, y: 0.5, z: 19 },
+      max: { x: 1.5, y: 4, z: 21 }
+    },
+    obstacles: [
+      // Easels scattered around
+      { type: 'rack', position: { x: -5, y: 0, z: 4 }, size: { x: 0.6, y: 2, z: 0.6 } },
+      { type: 'rack', position: { x: -2, y: 0, z: 5 }, size: { x: 0.6, y: 2.2, z: 0.6 } },
+      { type: 'rack', position: { x: 2, y: 0, z: 4 }, size: { x: 0.6, y: 1.8, z: 0.6 } },
+      { type: 'rack', position: { x: 5, y: 0, z: 5.5 }, size: { x: 0.6, y: 2.1, z: 0.6 } },
+      { type: 'rack', position: { x: -4, y: 0, z: 9 }, size: { x: 0.6, y: 2, z: 0.6 } },
+      { type: 'rack', position: { x: 0, y: 0, z: 8 }, size: { x: 0.6, y: 2.3, z: 0.6 } },
+      { type: 'rack', position: { x: 4, y: 0, z: 9.5 }, size: { x: 0.6, y: 1.9, z: 0.6 } },
+      // Large sculpture in center
+      { type: 'column', position: { x: 0, y: 0, z: 13 }, size: { x: 1.5, y: 3, z: 1.5 } },
+      // Pottery wheels
+      { type: 'counter', position: { x: -6, y: 0, z: 15 }, size: { x: 1, y: 0.8, z: 1 } },
+      { type: 'counter', position: { x: 6, y: 0, z: 15 }, size: { x: 1, y: 0.8, z: 1 } },
+      // Long work tables
+      { type: 'table', position: { x: -5, y: 0, z: 12 }, size: { x: 3, y: 0.8, z: 1.2 } },
+      { type: 'table', position: { x: 5, y: 0, z: 12 }, size: { x: 3, y: 0.8, z: 1.2 } },
+      // Drying rack with paintings
+      { type: 'rack', position: { x: -7, y: 0, z: 6 }, size: { x: 0.8, y: 2.5, z: 2 } },
+      // Supply shelves
+      { type: 'bookshelf', position: { x: 7, y: 0, z: 3 }, size: { x: 0.8, y: 2.2, z: 2 } },
+      // Mobile hanging from ceiling
+      { type: 'chandelier', position: { x: -3, y: 3.5, z: 7 }, size: { x: 1.5, y: 1.5, z: 1.5 } },
+      { type: 'chandelier', position: { x: 3, y: 3.8, z: 14 }, size: { x: 1.2, y: 1.2, z: 1.2 } },
+      // Hanging lights
+      { type: 'light', position: { x: 0, y: 4.5, z: 5 }, size: { x: 2, y: 0.3, z: 0.5 } },
+      { type: 'light', position: { x: 0, y: 4.5, z: 16 }, size: { x: 2, y: 0.3, z: 0.5 } },
+      // Students working
+      { type: 'student', position: { x: -5, y: 0, z: 4 }, size: { x: 0.5, y: 1.5, z: 0.4 } },
+      { type: 'student', position: { x: 4, y: 0, z: 9.5 }, size: { x: 0.5, y: 1.5, z: 0.4 } },
+      // Kiln in corner
+      { type: 'counter', position: { x: -7, y: 0, z: 17 }, size: { x: 1.2, y: 1.5, z: 1.2 } },
+    ]
+  },
+  {
+    id: 9,
+    name: 'Music Room',
+    description: 'Dodge the instruments!',
+    roomSize: { width: 14, height: 5, depth: 18 },
+    startPosition: { x: 0, y: 3, z: 1 },
+    goal: {
+      min: { x: -1.5, y: 0.5, z: 17 },
+      max: { x: 1.5, y: 4, z: 19 }
+    },
+    obstacles: [
+      // Grand piano
+      { type: 'counter', position: { x: -4, y: 0, z: 14 }, size: { x: 2, y: 1, z: 2.5 } },
+      { type: 'rack', position: { x: -4, y: 1, z: 13 }, size: { x: 1.5, y: 0.6, z: 0.3 } },
+      // Drum kit
+      { type: 'counter', position: { x: 4, y: 0, z: 14 }, size: { x: 2, y: 1.2, z: 2 } },
+      { type: 'rack', position: { x: 4, y: 1.2, z: 14.5 }, size: { x: 0.5, y: 0.8, z: 0.5 } },
+      // Music stands in rows
+      { type: 'rack', position: { x: -4, y: 0, z: 4 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: -2, y: 0, z: 4 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: 0, y: 0, z: 4 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: 2, y: 0, z: 4 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: 4, y: 0, z: 4 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: -3, y: 0, z: 7 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: -1, y: 0, z: 7 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: 1, y: 0, z: 7 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      { type: 'rack', position: { x: 3, y: 0, z: 7 }, size: { x: 0.4, y: 1.3, z: 0.4 } },
+      // Chairs for musicians
+      { type: 'chair', position: { x: -4, y: 0, z: 5 }, size: { x: 0.5, y: 0.5, z: 0.5 } },
+      { type: 'chair', position: { x: 0, y: 0, z: 5 }, size: { x: 0.5, y: 0.5, z: 0.5 } },
+      { type: 'chair', position: { x: 4, y: 0, z: 5 }, size: { x: 0.5, y: 0.5, z: 0.5 } },
+      // Conductor's podium
+      { type: 'counter', position: { x: 0, y: 0, z: 10 }, size: { x: 1, y: 0.4, z: 1 } },
+      // Instrument storage rack
+      { type: 'rack', position: { x: -6, y: 0, z: 8 }, size: { x: 0.8, y: 2.5, z: 2 } },
+      { type: 'rack', position: { x: 6, y: 0, z: 8 }, size: { x: 0.8, y: 2.5, z: 2 } },
+      // Hanging acoustic panels
+      { type: 'bulletin', position: { x: -6.8, y: 2, z: 4 }, size: { x: 0.3, y: 2, z: 3 } },
+      { type: 'bulletin', position: { x: 6.8, y: 2, z: 4 }, size: { x: 0.3, y: 2, z: 3 } },
+      // Ceiling lights
+      { type: 'light', position: { x: 0, y: 4.5, z: 5 }, size: { x: 1.5, y: 0.3, z: 0.5 } },
+      { type: 'light', position: { x: 0, y: 4.5, z: 12 }, size: { x: 1.5, y: 0.3, z: 0.5 } },
+      // Tuba on stand
+      { type: 'rack', position: { x: 5, y: 0, z: 2 }, size: { x: 0.8, y: 1.4, z: 0.8 } },
+    ]
+  },
+  {
+    id: 10,
+    name: 'Auditorium',
+    description: 'The final stretch! Escape through the stage!',
+    roomSize: { width: 24, height: 10, depth: 35 },
+    startPosition: { x: 0, y: 6, z: 1 },
+    goal: {
+      min: { x: -2, y: 3, z: 34 },
+      max: { x: 2, y: 7, z: 36 }
+    },
+    obstacles: [
+      // Rows of theater seats
+      { type: 'bleacher', position: { x: -8, y: 0, z: 5 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 0, y: 0, z: 5 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 8, y: 0, z: 5 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: -8, y: 0.3, z: 8 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 0, y: 0.3, z: 8 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 8, y: 0.3, z: 8 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: -8, y: 0.6, z: 11 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 0, y: 0.6, z: 11 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 8, y: 0.6, z: 11 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: -8, y: 0.9, z: 14 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 0, y: 0.9, z: 14 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      { type: 'bleacher', position: { x: 8, y: 0.9, z: 14 }, size: { x: 6, y: 1.2, z: 1.5 } },
+      // Stage platform
+      { type: 'counter', position: { x: 0, y: 0, z: 28 }, size: { x: 18, y: 1.5, z: 8 } },
+      // Stage curtains on sides
+      { type: 'curtain', position: { x: -10, y: 1.5, z: 30 }, size: { x: 1, y: 7, z: 6 } },
+      { type: 'curtain', position: { x: 10, y: 1.5, z: 30 }, size: { x: 1, y: 7, z: 6 } },
+      // Backdrop curtain
+      { type: 'curtain', position: { x: 0, y: 1.5, z: 33 }, size: { x: 18, y: 7, z: 0.5 } },
+      // Stage lights hanging
+      { type: 'light', position: { x: -6, y: 8, z: 26 }, size: { x: 1, y: 1.5, z: 1 } },
+      { type: 'light', position: { x: 0, y: 8, z: 26 }, size: { x: 1, y: 1.5, z: 1 } },
+      { type: 'light', position: { x: 6, y: 8, z: 26 }, size: { x: 1, y: 1.5, z: 1 } },
+      { type: 'light', position: { x: -4, y: 7.5, z: 30 }, size: { x: 0.8, y: 1.2, z: 0.8 } },
+      { type: 'light', position: { x: 4, y: 7.5, z: 30 }, size: { x: 0.8, y: 1.2, z: 0.8 } },
+      // Chandelier in center
+      { type: 'chandelier', position: { x: 0, y: 7, z: 10 }, size: { x: 3, y: 2.5, z: 3 } },
+      // Balcony overhang
+      { type: 'counter', position: { x: 0, y: 5, z: 3 }, size: { x: 20, y: 0.5, z: 4 } },
+      // Columns on sides
+      { type: 'column', position: { x: -11, y: 0, z: 10 }, size: { x: 1, y: 10, z: 1 } },
+      { type: 'column', position: { x: 11, y: 0, z: 10 }, size: { x: 1, y: 10, z: 1 } },
+      { type: 'column', position: { x: -11, y: 0, z: 20 }, size: { x: 1, y: 10, z: 1 } },
+      { type: 'column', position: { x: 11, y: 0, z: 20 }, size: { x: 1, y: 10, z: 1 } },
+      // Microphone stands on stage
+      { type: 'rack', position: { x: -3, y: 1.5, z: 27 }, size: { x: 0.2, y: 1.8, z: 0.2 } },
+      { type: 'rack', position: { x: 3, y: 1.5, z: 27 }, size: { x: 0.2, y: 1.8, z: 0.2 } },
+      // Piano on stage
+      { type: 'counter', position: { x: -6, y: 1.5, z: 29 }, size: { x: 2, y: 1, z: 2 } },
+    ]
   }
 ]
 
@@ -308,8 +544,13 @@ export const obstacleColors = {
   scoreboard: 0x1C1C1C,
   cart: 0x696969,
   mat: 0x4169E1,
-  curtain: 0x8FBC8F,
+  curtain: 0x8B0000,
   plant: 0x228B22,
   flag: 0xB8860B,
   cone: 0xFF6600,
+  computer: 0x333333,
+  whiteboard: 0xFFFFF0,
+  clock: 0x222222,
+  backpack: 0x4682B4,
+  extinguisher: 0xFF0000,
 }

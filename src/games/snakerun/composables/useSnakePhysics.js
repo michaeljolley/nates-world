@@ -1,18 +1,21 @@
 import { ref } from 'vue'
 
-export function useSnakePhysics(arenaSize = 2000) {
+export function useSnakePhysics(arenaSize = 3000) {
   const segments = ref([])
   const direction = ref({ x: 0, y: -1 })
   const targetDirection = ref({ x: 0, y: -1 })
-  const speed = ref(150) // pixels per second
+  const speed = ref(120) // Slower base speed for more control
+  const baseSpeed = 120
+  const boostSpeed = 220
   const isAlive = ref(true)
+  const isBoosting = ref(false)
   const segmentsToGrow = ref(0)
   
   const SEGMENT_SIZE = 12
-  const SEGMENT_SPACING = 10
-  const TURN_SPEED = 8 // How fast snake turns
+  const SEGMENT_SPACING = 8
+  const TURN_SPEED = 15 // Much faster turning for better control
 
-  function init(startX, startY, initialLength = 5) {
+  function init(startX, startY, initialLength = 10) {
     segments.value = []
     for (let i = 0; i < initialLength; i++) {
       segments.value.push({
@@ -23,7 +26,9 @@ export function useSnakePhysics(arenaSize = 2000) {
     direction.value = { x: 0, y: -1 }
     targetDirection.value = { x: 0, y: -1 }
     isAlive.value = true
+    isBoosting.value = false
     segmentsToGrow.value = 0
+    speed.value = baseSpeed
   }
 
   function setDirection(dx, dy) {
@@ -34,13 +39,27 @@ export function useSnakePhysics(arenaSize = 2000) {
     }
   }
 
+  function setBoosting(boosting) {
+    isBoosting.value = boosting
+    speed.value = boosting ? boostSpeed : baseSpeed
+  }
+
   function update(delta) {
     if (!isAlive.value || segments.value.length === 0) return
 
-    // Smooth turning
+    // Instant turning for maximum control
     const turnAmount = TURN_SPEED * delta
-    direction.value.x += (targetDirection.value.x - direction.value.x) * turnAmount
-    direction.value.y += (targetDirection.value.y - direction.value.y) * turnAmount
+    const dx = targetDirection.value.x - direction.value.x
+    const dy = targetDirection.value.y - direction.value.y
+    
+    // Faster interpolation for snappier controls
+    if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
+      direction.value.x = targetDirection.value.x
+      direction.value.y = targetDirection.value.y
+    } else {
+      direction.value.x += dx * turnAmount
+      direction.value.y += dy * turnAmount
+    }
     
     // Normalize direction
     const len = Math.sqrt(direction.value.x ** 2 + direction.value.y ** 2)
@@ -75,12 +94,20 @@ export function useSnakePhysics(arenaSize = 2000) {
     }
   }
 
-  function grow(amount = 3) {
+  function grow(amount = 1) {
     segmentsToGrow.value += amount
+  }
+
+  function shrink(amount = 1) {
+    // Remove from tail
+    for (let i = 0; i < amount && segments.value.length > 5; i++) {
+      segments.value.pop()
+    }
   }
 
   function die() {
     isAlive.value = false
+    isBoosting.value = false
   }
 
   function getHead() {
@@ -97,12 +124,15 @@ export function useSnakePhysics(arenaSize = 2000) {
     targetDirection,
     speed,
     isAlive,
+    isBoosting,
     SEGMENT_SIZE,
     SEGMENT_SPACING,
     init,
     setDirection,
+    setBoosting,
     update,
     grow,
+    shrink,
     die,
     getHead,
     getLength

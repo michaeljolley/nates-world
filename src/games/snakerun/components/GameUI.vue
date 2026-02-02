@@ -50,11 +50,16 @@ const playerRank = computed(() => {
         <div class="controls-info">
           <h3>Controls</h3>
           <div class="control-row">
-            <span class="key">↑ ← ↓ →</span>
-            <span>or</span>
-            <span class="key">W A S D</span>
+            <span class="key">MOUSE</span>
+            <span>Move to steer</span>
           </div>
-          <p class="control-hint">Move your snake to collect food and grow!</p>
+          <div class="control-row">
+            <span class="key">CLICK</span>
+            <span>or</span>
+            <span class="key">SPACE</span>
+            <span>Boost (uses length)</span>
+          </div>
+          <p class="control-hint">Eat orbs to grow! Make others crash into you!</p>
         </div>
 
         <button class="btn btn-back" @click="emit('back-to-menu')">

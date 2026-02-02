@@ -12,6 +12,9 @@ const ConnectFour = () => import('@/games/connectfour').then(m => m.ConnectFour)
 const TreeHoppers = () => import('@/games/treehoppers').then(m => m.TreeHoppers)
 const LilyPadHopper = () => import('@/games/lilypadhopper').then(m => m.LilyPadHopper)
 const SnakeRun = () => import('@/games/snakerun').then(m => m.SnakeRun)
+const FruitNinja = () => import('@/games/fruitninja').then(m => m.FruitNinja)
+const Archery = () => import('@/games/archery').then(m => m.Archery)
+const AlienInvasion = () => import('@/games/alieninvasion').then(m => m.AlienInvasion)
 const routes = [
   {
     path: '/',
@@ -83,6 +86,24 @@ const routes = [
     name: 'snake-run',
     component: SnakeRun,
     meta: { title: 'Snake Run' }
+  },
+  {
+    path: '/fruit-ninja',
+    name: 'fruit-ninja',
+    component: FruitNinja,
+    meta: { title: 'Fruit Ninja' }
+  },
+  {
+    path: '/archery',
+    name: 'archery',
+    component: Archery,
+    meta: { title: 'Archery' }
+  },
+  {
+    path: '/alien-invasion',
+    name: 'alien-invasion',
+    component: AlienInvasion,
+    meta: { title: 'Alien Invasion' }
   }
 ]
 

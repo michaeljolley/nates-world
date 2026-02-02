@@ -231,8 +231,53 @@ function render() {
 
   // Draw minimap
   drawMinimap(offsetX, offsetY)
+  
+  // Draw boost indicator
+  drawBoostIndicator()
 
   animationId = requestAnimationFrame(render)
+}
+
+function drawBoostIndicator() {
+  if (!props.playerSnake) return
+  
+  const x = 20
+  const y = viewportHeight.value - 50
+  const width = 150
+  const height = 20
+  
+  // Background
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+  ctx.fillRect(x - 5, y - 25, width + 10, height + 35)
+  
+  // Label
+  ctx.fillStyle = '#fff'
+  ctx.font = 'bold 12px Arial'
+  ctx.fillText('BOOST (Hold Click/Space)', x, y - 8)
+  
+  // Track
+  ctx.fillStyle = '#333'
+  ctx.fillRect(x, y, width, height)
+  
+  // Boost availability based on length
+  const minLength = 10
+  const canBoost = props.playerSnake.segments?.length > minLength
+  const boostPercent = canBoost ? Math.min(1, (props.playerSnake.segments.length - minLength) / 50) : 0
+  
+  // Fill
+  if (props.playerSnake.isBoosting) {
+    ctx.fillStyle = '#ff4444'
+  } else if (canBoost) {
+    ctx.fillStyle = '#44ff44'
+  } else {
+    ctx.fillStyle = '#666'
+  }
+  ctx.fillRect(x, y, width * boostPercent, height)
+  
+  // Border
+  ctx.strokeStyle = props.playerSnake.isBoosting ? '#ff8888' : '#888'
+  ctx.lineWidth = 2
+  ctx.strokeRect(x, y, width, height)
 }
 
 onMounted(() => {

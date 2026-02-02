@@ -9,10 +9,12 @@ const props = defineProps({
   raceTime: Number,
   bestTime: Number,
   speed: Number,
-  racePosition: Number
+  racePosition: Number,
+  tracks: Array,
+  currentTrack: Number
 })
 
-const emit = defineEmits(['start', 'resume', 'restart', 'back-to-menu'])
+const emit = defineEmits(['start', 'resume', 'restart', 'back-to-menu', 'show-track-select', 'select-track'])
 
 const formattedTime = computed(() => {
   const minutes = Math.floor(props.raceTime / 60)
@@ -54,8 +56,8 @@ const positionSuffix = computed(() => {
         
         <div class="car-preview">🏎️</div>
         
-        <button class="btn btn-start" @click="emit('start')">
-          START RACE
+        <button class="btn btn-start" @click="emit('show-track-select')">
+          SELECT TRACK
         </button>
         
         <div class="controls-info">
@@ -84,6 +86,49 @@ const positionSuffix = computed(() => {
 
         <button class="btn btn-back" @click="emit('back-to-menu')">
           ← Back to Games
+        </button>
+      </div>
+    </div>
+
+    <!-- Track Selection -->
+    <div v-if="gameState === 'trackSelect'" class="menu-overlay">
+      <div class="menu-content track-select">
+        <h2 class="track-title">🏁 SELECT YOUR TRACK 🏁</h2>
+        
+        <div class="track-grid">
+          <div 
+            v-for="track in tracks" 
+            :key="track.id"
+            class="track-card"
+            :class="{ selected: currentTrack === track.id }"
+            @click="emit('select-track', track.id)"
+          >
+            <div class="track-preview" :style="{ borderColor: '#' + track.theme.primary.toString(16).padStart(6, '0') }">
+              <div class="track-icon">
+                <span v-if="track.id === 1">🔥</span>
+                <span v-else-if="track.id === 2">💜</span>
+                <span v-else>🐉</span>
+              </div>
+              <div class="track-stats">
+                <span class="stat">🔄 {{ track.loops.length }} Loops</span>
+                <span class="stat">🚀 {{ track.jumps.length }} Jumps</span>
+              </div>
+            </div>
+            <h3 class="track-name">{{ track.name }}</h3>
+            <p class="track-desc">{{ track.description }}</p>
+            <div class="track-difficulty">
+              <span v-for="n in 3" :key="n" :class="{ filled: n <= track.difficulty }">⭐</span>
+            </div>
+            <div class="track-laps">{{ track.laps }} Laps</div>
+          </div>
+        </div>
+        
+        <button class="btn btn-start" @click="emit('start')">
+          START RACE
+        </button>
+        
+        <button class="btn btn-back" @click="emit('back-to-menu')">
+          ← Back to Menu
         </button>
       </div>
     </div>
@@ -481,5 +526,106 @@ const positionSuffix = computed(() => {
 .best-time .time {
   font-size: 2rem;
   color: #00ff00;
+}
+
+/* Track Selection */
+.track-select {
+  max-width: 900px;
+}
+
+.track-title {
+  font-size: 2.5rem;
+  color: #ffcc00;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+}
+
+.track-grid {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.track-card {
+  background: rgba(20, 20, 40, 0.9);
+  border: 3px solid #444;
+  border-radius: 15px;
+  padding: 1rem;
+  width: 250px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.track-card:hover {
+  border-color: #ff6600;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(255, 102, 0, 0.3);
+}
+
+.track-card.selected {
+  border-color: #00ff00;
+  box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+}
+
+.track-preview {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  border: 2px solid;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.track-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.track-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.track-stats .stat {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+}
+
+.track-name {
+  color: #fff;
+  margin: 0.5rem 0 0.3rem;
+  font-size: 1.2rem;
+}
+
+.track-desc {
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+  font-weight: normal;
+}
+
+.track-difficulty {
+  margin-bottom: 0.3rem;
+}
+
+.track-difficulty span {
+  opacity: 0.3;
+  font-size: 1rem;
+}
+
+.track-difficulty span.filled {
+  opacity: 1;
+}
+
+.track-laps {
+  color: #ff6600;
+  font-size: 0.9rem;
+  font-weight: bold;
 }
 </style>

@@ -920,66 +920,309 @@ function renderFighter(fighter) {
   ctx.translate(x, y)
   ctx.scale(facing, 1)
   
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)'
+  // Shadow with gradient
+  const shadowGrad = ctx.createRadialGradient(0, 62, 0, 0, 62, 30)
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.4)')
+  shadowGrad.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = shadowGrad
   ctx.beginPath()
-  ctx.ellipse(0, 60, 25, 8, 0, 0, Math.PI * 2)
+  ctx.ellipse(0, 62, 30, 10, 0, 0, Math.PI * 2)
   ctx.fill()
   
   // Body color based on state
   let bodyColor = fighter.color
+  let skinColor = fighter.skinTone
   if (fighter.state === 'hit') {
-    bodyColor = '#ff0000'
+    bodyColor = '#ff4444'
+    skinColor = '#ffaaaa'
   } else if (fighter.state === 'block') {
-    bodyColor = '#888888'
+    bodyColor = '#666688'
   }
   
-  // Legs
-  ctx.fillStyle = '#333355'
-  const legOffset = fighter.state === 'walk' ? Math.sin(Date.now() / 100) * 8 : 0
-  const kickOffset = fighter.state === 'kick' ? 25 : 0
+  // Darker shade for clothing depth
+  const darkerBody = shadeColor(bodyColor, -30)
+  const lighterBody = shadeColor(bodyColor, 20)
+  const darkerSkin = shadeColor(skinColor, -20)
   
-  // Left leg
-  ctx.fillRect(-12, 20, 10, 40 + legOffset)
-  // Right leg
-  ctx.fillRect(2, 20, 10 + kickOffset, 40 - legOffset)
+  // Animation values
+  const legOffset = fighter.state === 'walk' ? Math.sin(Date.now() / 100) * 10 : 0
+  const kickOffset = fighter.state === 'kick' ? 30 : 0
+  const punchOffset = fighter.state === 'punch' ? 30 : 0
+  const breathe = Math.sin(Date.now() / 400) * 1.5
   
-  // Body
-  ctx.fillStyle = bodyColor
-  ctx.fillRect(-18, -30, 36, 55)
-  
-  // Arms
-  const punchOffset = fighter.state === 'punch' ? 25 : 0
-  
-  // Left arm
-  ctx.fillRect(-28, -20, 12, 35)
-  // Right arm (punch arm)
-  ctx.fillRect(16, -20, 12 + punchOffset, 35)
-  
-  // Head
-  ctx.fillStyle = fighter.skinTone
-  ctx.beginPath()
-  ctx.arc(0, -45, 20, 0, Math.PI * 2)
+  // Left leg (back leg)
+  ctx.fillStyle = '#2a2a44'
+  drawLimb(-10, 22, 12, 42 + legOffset, '#2a2a44', '#1a1a33')
+  // Left shoe
+  ctx.fillStyle = darkerBody
+  roundRect(-14, 60 + legOffset, 16, 8, 3)
   ctx.fill()
   
-  // Eyes
-  ctx.fillStyle = '#000'
-  ctx.fillRect(-8, -50, 5, 5)
-  ctx.fillRect(3, -50, 5, 5)
+  // Right leg (front leg)
+  const rightLegAngle = fighter.state === 'kick' ? -0.8 : 0
+  ctx.save()
+  ctx.translate(6, 22)
+  ctx.rotate(rightLegAngle)
+  drawLimb(0, 0, 12, 42 - legOffset + kickOffset * 0.3, '#333355', '#222244')
+  // Right shoe
+  ctx.fillStyle = bodyColor
+  roundRect(-2, 38 - legOffset + kickOffset * 0.3, 16, 8, 3)
+  ctx.fill()
+  ctx.restore()
   
-  // Special effect
+  // Torso with gradient
+  const torsoGrad = ctx.createLinearGradient(-16, -28, 16, 25)
+  torsoGrad.addColorStop(0, lighterBody)
+  torsoGrad.addColorStop(0.5, bodyColor)
+  torsoGrad.addColorStop(1, darkerBody)
+  ctx.fillStyle = torsoGrad
+  roundRect(-16, -28 + breathe, 32, 52, 4)
+  ctx.fill()
+  
+  // Torso detail line
+  ctx.strokeStyle = darkerBody
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(0, -20 + breathe)
+  ctx.lineTo(0, 18 + breathe)
+  ctx.stroke()
+  
+  // Belt
+  ctx.fillStyle = '#222'
+  roundRect(-17, 16 + breathe, 34, 6, 2)
+  ctx.fill()
+  ctx.fillStyle = '#888'
+  roundRect(-4, 17 + breathe, 8, 4, 1)
+  ctx.fill()
+  
+  // Left arm (back arm)
+  ctx.save()
+  ctx.translate(-16, -18 + breathe)
+  drawArm(0, 0, 10, 32, skinColor, darkerSkin, bodyColor, darkerBody, 0)
+  ctx.restore()
+  
+  // Right arm (punch arm)
+  const rightArmAngle = fighter.state === 'punch' ? -0.5 : 0.1
+  ctx.save()
+  ctx.translate(16, -18 + breathe)
+  ctx.rotate(rightArmAngle)
+  drawArm(0, 0, 10, 32 + punchOffset * 0.6, skinColor, darkerSkin, bodyColor, darkerBody, punchOffset)
+  ctx.restore()
+  
+  // Neck
+  ctx.fillStyle = skinColor
+  roundRect(-6, -34 + breathe, 12, 10, 2)
+  ctx.fill()
+  
+  // Head
+  ctx.fillStyle = skinColor
+  ctx.beginPath()
+  ctx.ellipse(0, -50, 18, 20, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Head shading
+  ctx.fillStyle = darkerSkin
+  ctx.beginPath()
+  ctx.ellipse(-12, -45, 6, 10, 0.3, 0, Math.PI * 2)
+  ctx.globalAlpha = 0.3
+  ctx.fill()
+  ctx.globalAlpha = 1
+  
+  // Hair/helmet based on character color
+  ctx.fillStyle = darkerBody
+  ctx.beginPath()
+  ctx.ellipse(0, -58, 17, 14, 0, Math.PI, 0)
+  ctx.fill()
+  
+  // Ears
+  ctx.fillStyle = skinColor
+  ctx.beginPath()
+  ctx.ellipse(-17, -48, 4, 6, 0, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.ellipse(17, -48, 4, 6, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Inner ear
+  ctx.fillStyle = darkerSkin
+  ctx.beginPath()
+  ctx.ellipse(-17, -48, 2, 3, 0, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.ellipse(17, -48, 2, 3, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Eyebrows
+  ctx.fillStyle = '#333'
+  ctx.fillRect(-11, -58, 8, 2)
+  ctx.fillRect(3, -58, 8, 2)
+  
+  // Eyes - whites
+  ctx.fillStyle = '#fff'
+  roundRect(-11, -54, 9, 7, 2)
+  ctx.fill()
+  roundRect(2, -54, 9, 7, 2)
+  ctx.fill()
+  
+  // Eyes - irises
+  ctx.fillStyle = '#4a3020'
+  ctx.beginPath()
+  ctx.arc(-6, -50, 3, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(6, -50, 3, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Eyes - pupils
+  ctx.fillStyle = '#000'
+  ctx.beginPath()
+  ctx.arc(-6, -50, 1.5, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(6, -50, 1.5, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Eye highlights
+  ctx.fillStyle = '#fff'
+  ctx.beginPath()
+  ctx.arc(-5, -51, 1, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(7, -51, 1, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Nose
+  ctx.fillStyle = darkerSkin
+  ctx.beginPath()
+  ctx.moveTo(-2, -46)
+  ctx.lineTo(0, -40)
+  ctx.lineTo(2, -46)
+  ctx.fill()
+  
+  // Mouth
+  ctx.strokeStyle = darkerSkin
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  if (fighter.state === 'hit') {
+    ctx.arc(0, -36, 4, 0.2, Math.PI - 0.2) // Grimace
+  } else if (fighter.state === 'punch' || fighter.state === 'kick') {
+    ctx.moveTo(-4, -36)
+    ctx.lineTo(4, -36) // Determined
+  } else {
+    ctx.arc(0, -40, 4, 0.3, Math.PI - 0.3) // Slight smile
+  }
+  ctx.stroke()
+  
+  // Special effect with enhanced visuals
   if (fighter.state === 'special') {
     ctx.strokeStyle = fighter.special.color
-    ctx.lineWidth = 3
+    ctx.lineWidth = 4
     ctx.shadowColor = fighter.special.color
-    ctx.shadowBlur = 20
+    ctx.shadowBlur = 30
+    
+    // Outer aura
     ctx.beginPath()
-    ctx.arc(0, -10, 40, 0, Math.PI * 2)
+    ctx.arc(0, -10, 45, 0, Math.PI * 2)
     ctx.stroke()
+    
+    // Inner aura
+    ctx.globalAlpha = 0.5
+    ctx.beginPath()
+    ctx.arc(0, -10, 35, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.globalAlpha = 1
+    
+    // Energy particles
+    for (let i = 0; i < 8; i++) {
+      const angle = (Date.now() / 200 + i * Math.PI / 4) % (Math.PI * 2)
+      const px = Math.cos(angle) * 50
+      const py = Math.sin(angle) * 50 - 10
+      ctx.fillStyle = fighter.special.color
+      ctx.beginPath()
+      ctx.arc(px, py, 4, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    
     ctx.shadowBlur = 0
   }
   
   ctx.restore()
+}
+
+// Helper: draw rounded rectangle
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+
+// Helper: shade a color lighter or darker
+function shadeColor(color, percent) {
+  const num = parseInt(color.replace('#', ''), 16)
+  const amt = Math.round(2.55 * percent)
+  const R = Math.min(255, Math.max(0, (num >> 16) + amt))
+  const G = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amt))
+  const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt))
+  return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)
+}
+
+// Helper: draw a limb with shading
+function drawLimb(x, y, w, h, color, shadowColor) {
+  const grad = ctx.createLinearGradient(x, y, x + w, y)
+  grad.addColorStop(0, shadowColor)
+  grad.addColorStop(0.5, color)
+  grad.addColorStop(1, shadowColor)
+  ctx.fillStyle = grad
+  roundRect(x - w/2, y, w, h, 3)
+  ctx.fill()
+}
+
+// Helper: draw arm with hand
+function drawArm(x, y, w, h, skinColor, skinShadow, clothColor, clothShadow, punchOffset) {
+  // Upper arm (clothed)
+  const upperGrad = ctx.createLinearGradient(x - w/2, y, x + w/2, y)
+  upperGrad.addColorStop(0, clothShadow)
+  upperGrad.addColorStop(0.5, clothColor)
+  upperGrad.addColorStop(1, clothShadow)
+  ctx.fillStyle = upperGrad
+  roundRect(x - w/2, y, w, h * 0.6, 3)
+  ctx.fill()
+  
+  // Forearm (skin)
+  const forearmY = y + h * 0.55
+  const forearmH = h * 0.45
+  const skinGrad = ctx.createLinearGradient(x - w/2, forearmY, x + w/2, forearmY)
+  skinGrad.addColorStop(0, skinShadow)
+  skinGrad.addColorStop(0.5, skinColor)
+  skinGrad.addColorStop(1, skinShadow)
+  ctx.fillStyle = skinGrad
+  roundRect(x - w/2 + 1, forearmY, w - 2, forearmH, 2)
+  ctx.fill()
+  
+  // Hand
+  ctx.fillStyle = skinColor
+  const handY = y + h - 2
+  ctx.beginPath()
+  ctx.ellipse(x, handY, w/2 + 1, 5, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Fist fingers when punching
+  if (punchOffset > 10) {
+    ctx.fillStyle = skinShadow
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath()
+      ctx.ellipse(x - 3 + i * 2, handY + 4, 1.5, 3, 0, 0, Math.PI * 2)
+      ctx.fill()
+    }
+  }
 }
 
 function renderUI() {
@@ -1171,6 +1414,11 @@ function playSound(type) {
           >
             <div class="char-avatar" :style="{ backgroundColor: char.color }">
               <div class="char-head" :style="{ backgroundColor: char.skinTone }"></div>
+              <div class="char-body" :style="{ backgroundColor: char.color }"></div>
+              <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+              </div>
             </div>
             <span class="char-name">{{ char.name }}</span>
           </div>
@@ -1471,18 +1719,82 @@ h1 {
 
 .char-avatar {
   width: 40px;
-  height: 50px;
-  border-radius: 5px;
+  height: 55px;
+  border-radius: 8px;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 5px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 4px;
+  position: relative;
+  box-shadow: inset 0 -15px 20px -10px rgba(0, 0, 0, 0.4);
+}
+
+.char-avatar::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 20px;
+  background: linear-gradient(to bottom, transparent, rgba(40, 40, 60, 0.9));
+  border-radius: 0 0 6px 6px;
 }
 
 .char-head {
-  width: 20px;
+  width: 18px;
   height: 20px;
   border-radius: 50%;
+  position: relative;
+  box-shadow: 
+    inset -3px -2px 6px rgba(0, 0, 0, 0.3),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.char-head::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 3px;
+  width: 3px;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  box-shadow: 8px 0 0 rgba(0, 0, 0, 0.6);
+}
+
+.char-head::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  right: 2px;
+  height: 10px;
+  background: inherit;
+  filter: brightness(0.7);
+  border-radius: 50% 50% 0 0;
+  clip-path: polygon(0 50%, 100% 50%, 100% 0, 0 0);
+}
+
+.char-avatar .char-body {
+  width: 22px;
+  height: 18px;
+  margin-top: -2px;
+  border-radius: 4px 4px 2px 2px;
+  position: relative;
+}
+
+.char-avatar .char-legs {
+  display: flex;
+  gap: 4px;
+  margin-top: -1px;
+}
+
+.char-avatar .char-leg {
+  width: 6px;
+  height: 14px;
+  background: #333355;
+  border-radius: 2px;
 }
 
 .char-name {

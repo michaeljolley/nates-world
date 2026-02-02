@@ -1,7 +1,8 @@
 import { ref, computed } from 'vue'
+import { tracks, getTrackById } from './tracks'
 
 export function useGameState() {
-  const gameState = ref('menu') // menu, playing, paused, finished, crashed
+  const gameState = ref('menu') // menu, trackSelect, playing, paused, finished, crashed
   const currentTrack = ref(1)
   const lapCount = ref(0)
   const totalLaps = ref(3)
@@ -10,6 +11,17 @@ export function useGameState() {
   const countdown = ref(0)
 
   const isRacing = computed(() => gameState.value === 'playing' && countdown.value === 0)
+  const selectedTrackData = computed(() => getTrackById(currentTrack.value))
+
+  function showTrackSelect() {
+    gameState.value = 'trackSelect'
+  }
+
+  function selectTrack(trackId) {
+    currentTrack.value = trackId
+    const track = getTrackById(trackId)
+    totalLaps.value = track.laps
+  }
 
   function startGame() {
     gameState.value = 'countdown'
@@ -63,10 +75,6 @@ export function useGameState() {
     countdown.value = 0
   }
 
-  function selectTrack(track) {
-    currentTrack.value = track
-  }
-
   function updateTime(delta) {
     if (isRacing.value) {
       raceTime.value += delta
@@ -76,12 +84,15 @@ export function useGameState() {
   return {
     gameState,
     currentTrack,
+    selectedTrackData,
     lapCount,
     totalLaps,
     raceTime,
     bestTime,
     countdown,
     isRacing,
+    tracks,
+    showTrackSelect,
     startGame,
     pauseGame,
     resumeGame,

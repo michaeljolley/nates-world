@@ -1,23 +1,27 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
-import { useCarPhysics, AICar, trackWaypoints } from '../composables/useCarPhysics'
+import { useCarPhysics, AICar } from '../composables/useCarPhysics'
+import { getTrackById } from '../composables/tracks'
 
 const props = defineProps({
   gameState: String,
-  countdown: Number
+  countdown: Number,
+  currentTrack: Number
 })
 
-const emit = defineEmits(['lap-complete', 'update-time', 'position-update'])
+const emit = defineEmits(['lap-complete', 'update-time', 'position-update', 'speed-update'])
 
 const containerRef = ref(null)
-const { position, rotation, speed, updatePhysics, handleKeyDown, handleKeyUp, reset } = useCarPhysics(trackWaypoints)
 
+let trackData = null
+let carPhysics = null
 let scene, camera, renderer, playerCar
 let animationId = null
 let clock = new THREE.Clock()
 let lastWaypointIdx = 0
 let waypointsPassed = 0
+let playerLapCount = 0
 
 // AI opponents
 const aiCars = []
@@ -32,6 +36,10 @@ const AI_COLORS = [
 ]
 
 function createScene() {
+  // Load track data based on current track selection
+  trackData = getTrackById(props.currentTrack)
+  carPhysics = useCarPhysics(trackData.waypoints, trackData.startPosition)
+  
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0x0a0a1a)
   scene.fog = new THREE.Fog(0x0a0a1a, 100, 400)
@@ -82,6 +90,8 @@ function createScene() {
 
 function createTrack() {
   const trackWidth = 25
+  const waypoints = trackData.waypoints
+  const theme = trackData.theme
 
   // Ground
   const groundGeometry = new THREE.PlaneGeometry(500, 500)
@@ -95,21 +105,21 @@ function createTrack() {
   ground.receiveShadow = true
   scene.add(ground)
 
-  // Neon grid
-  const gridHelper = new THREE.GridHelper(500, 50, 0xff6600, 0x002244)
+  // Neon grid with track theme
+  const gridHelper = new THREE.GridHelper(500, 50, theme.primary, 0x002244)
   gridHelper.position.y = -0.4
   scene.add(gridHelper)
 
   // Create track segments between waypoints
-  const neonOrange = new THREE.MeshStandardMaterial({
-    color: 0xff6600,
-    emissive: 0xff4400,
+  const neonPrimary = new THREE.MeshStandardMaterial({
+    color: theme.primary,
+    emissive: theme.primary,
     emissiveIntensity: 0.5
   })
   
-  const neonBlue = new THREE.MeshStandardMaterial({
-    color: 0x00aaff,
-    emissive: 0x0066ff,
+  const neonSecondary = new THREE.MeshStandardMaterial({
+    color: theme.secondary,
+    emissive: theme.secondary,
     emissiveIntensity: 0.5
   })
 
@@ -120,9 +130,9 @@ function createTrack() {
   })
 
   // Draw track path
-  for (let i = 0; i < trackWaypoints.length; i++) {
-    const curr = trackWaypoints[i]
-    const next = trackWaypoints[(i + 1) % trackWaypoints.length]
+  for (let i = 0; i < waypoints.length; i++) {
+    const curr = waypoints[i]
+    const next = waypoints[(i + 1) % waypoints.length]
     
     const dx = next.x - curr.x
     const dz = next.z - curr.z
@@ -143,7 +153,7 @@ function createTrack() {
 
     // Left border (neon)
     const borderGeometry = new THREE.BoxGeometry(1.5, 2, length)
-    const leftBorder = new THREE.Mesh(borderGeometry, neonOrange)
+    const leftBorder = new THREE.Mesh(borderGeometry, neonPrimary)
     leftBorder.position.set(
       curr.x + dx / 2 - Math.cos(angle) * (trackWidth / 2 + 0.75),
       1,
@@ -152,8 +162,8 @@ function createTrack() {
     leftBorder.rotation.y = angle
     scene.add(leftBorder)
 
-    // Right border (neon blue)
-    const rightBorder = new THREE.Mesh(borderGeometry, neonBlue)
+    // Right border (neon)
+    const rightBorder = new THREE.Mesh(borderGeometry, neonSecondary)
     rightBorder.position.set(
       curr.x + dx / 2 + Math.cos(angle) * (trackWidth / 2 + 0.75),
       1,
@@ -180,21 +190,22 @@ function createTrack() {
     scene.add(stripe)
   }
 
-  // LOOP THE LOOPS!
-  createLoop(100, 0, Math.PI / 2, 0xff6600)   // Right side loop
-  createLoop(-100, 0, -Math.PI / 2, 0x00aaff)  // Left side loop
+  // Create loops from track data
+  for (const loop of trackData.loops) {
+    createLoop(loop.x, loop.z, loop.rotation, loop.color, loop.size || 20)
+  }
 
-  // BIG JUMPS!
-  createJump(80, -100, 0)      // Jump 1
-  createJump(-80, -100, Math.PI) // Jump 2
-  createJump(0, -120, Math.PI / 2) // Center jump
+  // Create jumps from track data
+  for (const jump of trackData.jumps) {
+    createJump(jump.x, jump.z, jump.rotation)
+  }
 
   // Start/Finish gantry
   createFinishLine()
 }
 
-function createLoop(x, z, rotationY, color) {
-  const loopRadius = 20
+function createLoop(x, z, rotationY, color, size = 20) {
+  const loopRadius = size
   const tubeRadius = 3
 
   // Main loop structure
@@ -226,13 +237,15 @@ function createLoop(x, z, rotationY, color) {
     scene.add(support)
   }
 
-  // Neon rings on loop
+  // Neon rings on loop with track theme colors
+  const theme = trackData.theme
   for (let i = 0; i < 8; i++) {
     const ringAngle = (i / 8) * Math.PI * 2
     const ringGeometry = new THREE.TorusGeometry(tubeRadius + 0.5, 0.3, 8, 32)
+    const ringColor = i % 2 === 0 ? theme.primary : theme.secondary
     const ringMaterial = new THREE.MeshStandardMaterial({
-      color: i % 2 === 0 ? 0xff6600 : 0x00aaff,
-      emissive: i % 2 === 0 ? 0xff6600 : 0x00aaff,
+      color: ringColor,
+      emissive: ringColor,
       emissiveIntensity: 1
     })
     const ring = new THREE.Mesh(ringGeometry, ringMaterial)
@@ -321,7 +334,10 @@ function createJump(x, z, rotationY) {
 }
 
 function createFinishLine() {
-  // Finish gantry
+  const startPos = trackData.startPosition
+  const startZ = startPos.z
+  const startX = startPos.x
+  
   const gantryWidth = 30
   const gantryHeight = 15
   
@@ -330,18 +346,18 @@ function createFinishLine() {
   const poleGeometry = new THREE.CylinderGeometry(1, 1, gantryHeight, 8)
   
   const leftPole = new THREE.Mesh(poleGeometry, poleMaterial)
-  leftPole.position.set(-gantryWidth / 2, gantryHeight / 2, 100)
+  leftPole.position.set(startX - gantryWidth / 2, gantryHeight / 2, startZ)
   scene.add(leftPole)
   
   const rightPole = new THREE.Mesh(poleGeometry, poleMaterial)
-  rightPole.position.set(gantryWidth / 2, gantryHeight / 2, 100)
+  rightPole.position.set(startX + gantryWidth / 2, gantryHeight / 2, startZ)
   scene.add(rightPole)
 
   // Top bar with checkered pattern
   const topBarGeometry = new THREE.BoxGeometry(gantryWidth, 3, 2)
   const topBarMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff })
   const topBar = new THREE.Mesh(topBarGeometry, topBarMaterial)
-  topBar.position.set(0, gantryHeight, 100)
+  topBar.position.set(startX, gantryHeight, startZ)
   scene.add(topBar)
 
   // Checkered pattern
@@ -353,14 +369,15 @@ function createFinishLine() {
           new THREE.BoxGeometry(checkerSize, checkerSize, 0.1),
           new THREE.MeshStandardMaterial({ color: 0x000000 })
         )
-        checker.position.set(-gantryWidth / 2 + i * checkerSize + checkerSize / 2, gantryHeight - 1.5 + j * checkerSize + checkerSize / 2, 101)
+        checker.position.set(startX - gantryWidth / 2 + i * checkerSize + checkerSize / 2, gantryHeight - 1.5 + j * checkerSize + checkerSize / 2, startZ + 1)
         scene.add(checker)
       }
     }
   }
 
-  // Ground finish line
-  const finishLineGeometry = new THREE.PlaneGeometry(30, 8)
+  // Ground start/finish line - spans wall to wall
+  const trackWidth = 25
+  const finishLineGeometry = new THREE.PlaneGeometry(trackWidth, 3)
   const finishLineMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     emissive: 0xffffff,
@@ -368,40 +385,24 @@ function createFinishLine() {
   })
   const finishLine = new THREE.Mesh(finishLineGeometry, finishLineMaterial)
   finishLine.rotation.x = -Math.PI / 2
-  finishLine.position.set(0, 0.05, 100)
+  finishLine.position.set(startX, 0.05, startZ)
   scene.add(finishLine)
 
-  // Checkered ground pattern
-  for (let i = 0; i < 15; i++) {
-    for (let j = 0; j < 4; j++) {
+  // Checkered ground pattern - wall to wall
+  const checkerSize = 2.5
+  const checkersAcross = Math.floor(trackWidth / checkerSize)
+  for (let i = 0; i < checkersAcross; i++) {
+    for (let j = 0; j < 2; j++) {
       if ((i + j) % 2 === 0) {
         const checker = new THREE.Mesh(
-          new THREE.PlaneGeometry(2, 2),
+          new THREE.PlaneGeometry(checkerSize, checkerSize),
           new THREE.MeshStandardMaterial({ color: 0x000000 })
         )
         checker.rotation.x = -Math.PI / 2
-        checker.position.set(-14 + i * 2, 0.06, 96 + j * 2)
+        checker.position.set(startX - trackWidth / 2 + i * checkerSize + checkerSize / 2, 0.06, startZ - checkerSize / 2 + j * checkerSize)
         scene.add(checker)
       }
     }
-  }
-
-  // Starting grid positions
-  for (let i = 0; i < 8; i++) {
-    const row = Math.floor(i / 2)
-    const col = i % 2
-    const gridMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffff00,
-      emissive: 0xffff00,
-      emissiveIntensity: 0.3
-    })
-    const gridLine = new THREE.Mesh(
-      new THREE.PlaneGeometry(8, 0.5),
-      gridMaterial
-    )
-    gridLine.rotation.x = -Math.PI / 2
-    gridLine.position.set(-5 + col * 10, 0.03, 90 - row * 6)
-    scene.add(gridLine)
   }
 }
 
@@ -481,13 +482,16 @@ function createPlayerCar() {
   playerCar.add(headlightR)
 
   scene.add(playerCar)
-  reset()
+  carPhysics.reset()
 }
 
 function createAICars() {
+  // Clear existing AI cars
+  aiCars.length = 0
+  
   // Create 7 AI opponents
   for (let i = 0; i < 7; i++) {
-    const aiCar = new AICar(AI_COLORS[i], i + 1, trackWaypoints)
+    const aiCar = new AICar(AI_COLORS[i], i + 1, trackData.waypoints, trackData.startPosition)
     const mesh = aiCar.createMesh()
     scene.add(mesh)
     aiCars.push(aiCar)
@@ -618,25 +622,37 @@ function createEnvironment() {
 }
 
 function updateCamera() {
+  if (!carPhysics) return
+  
   const cameraDistance = 15
   const cameraHeight = 8
   
-  const targetX = position.value.x - Math.sin(rotation.value) * cameraDistance
-  const targetZ = position.value.z - Math.cos(rotation.value) * cameraDistance
+  const pos = carPhysics.position.value
+  const rot = carPhysics.rotation.value
+  
+  const targetX = pos.x - Math.sin(rot) * cameraDistance
+  const targetZ = pos.z - Math.cos(rot) * cameraDistance
   
   camera.position.lerp(
     new THREE.Vector3(targetX, cameraHeight, targetZ),
     0.08
   )
-  camera.lookAt(position.value.x, 2, position.value.z)
+  camera.lookAt(pos.x, 2, pos.z)
 }
 
 function checkLapCompletion() {
-  // Check if passed through start/finish (z around 100, x around 0)
-  if (position.value.z > 95 && position.value.z < 105 && 
-      Math.abs(position.value.x) < 15) {
+  if (!carPhysics) return
+  
+  const pos = carPhysics.position.value
+  const startPos = trackData.startPosition
+  const waypoints = trackData.waypoints
+  
+  // Check if passed through start/finish
+  if (pos.z > startPos.z - 5 && pos.z < startPos.z + 5 && 
+      Math.abs(pos.x - startPos.x) < 15) {
     // Going forward through finish
-    if (waypointsPassed > 10) {
+    if (waypointsPassed > Math.floor(waypoints.length * 0.7)) {
+      playerLapCount++
       emit('lap-complete')
       waypointsPassed = 0
     }
@@ -645,11 +661,11 @@ function checkLapCompletion() {
   // Track progress through waypoints
   let closestDist = Infinity
   let closestIdx = 0
-  for (let i = 0; i < trackWaypoints.length; i++) {
-    const wp = trackWaypoints[i]
+  for (let i = 0; i < waypoints.length; i++) {
+    const wp = waypoints[i]
     const dist = Math.sqrt(
-      Math.pow(position.value.x - wp.x, 2) + 
-      Math.pow(position.value.z - wp.z, 2)
+      Math.pow(pos.x - wp.x, 2) + 
+      Math.pow(pos.z - wp.z, 2)
     )
     if (dist < closestDist) {
       closestDist = dist
@@ -664,12 +680,13 @@ function checkLapCompletion() {
 }
 
 function getPlayerPosition() {
-  // Calculate position among all racers
-  const playerProgress = waypointsPassed
+  // Calculate position among all racers based on laps and waypoints
+  const waypoints = trackData.waypoints
+  const playerProgress = playerLapCount * waypoints.length + waypointsPassed
   let pos = 1
   
   for (const ai of aiCars) {
-    const aiProgress = ai.lapCount * trackWaypoints.length + ai.currentWaypoint
+    const aiProgress = ai.lapCount * waypoints.length + ai.currentWaypoint
     if (aiProgress > playerProgress) {
       pos++
     }
@@ -683,11 +700,11 @@ function animate() {
   
   const delta = Math.min(clock.getDelta(), 0.1)
   
-  if (props.gameState === 'playing') {
+  if (props.gameState === 'playing' && carPhysics) {
     // Update player
-    updatePhysics(delta)
-    playerCar.position.copy(position.value)
-    playerCar.rotation.y = rotation.value
+    carPhysics.updatePhysics(delta)
+    playerCar.position.copy(carPhysics.position.value)
+    playerCar.rotation.y = carPhysics.rotation.value
     
     // Update AI cars
     for (const ai of aiCars) {
@@ -697,6 +714,7 @@ function animate() {
     checkLapCompletion()
     emit('update-time', delta)
     emit('position-update', getPlayerPosition())
+    emit('speed-update', Math.abs(carPhysics.speed.value))
   }
   
   updateCamera()
@@ -711,13 +729,16 @@ function handleResize() {
 }
 
 function resetRace() {
-  reset()
+  if (!carPhysics) return
+  
+  carPhysics.reset()
   waypointsPassed = 0
   lastWaypointIdx = 0
+  playerLapCount = 0
   
   if (playerCar) {
-    playerCar.position.copy(position.value)
-    playerCar.rotation.y = rotation.value
+    playerCar.position.copy(carPhysics.position.value)
+    playerCar.rotation.y = carPhysics.rotation.value
   }
   
   // Reset AI cars
@@ -732,6 +753,14 @@ watch(() => props.gameState, (newVal) => {
     clock.start()
   }
 })
+
+function handleKeyDown(event) {
+  if (carPhysics) carPhysics.handleKeyDown(event)
+}
+
+function handleKeyUp(event) {
+  if (carPhysics) carPhysics.handleKeyUp(event)
+}
 
 onMounted(() => {
   createScene()

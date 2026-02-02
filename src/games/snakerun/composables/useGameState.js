@@ -2,18 +2,18 @@ import { ref, computed } from 'vue'
 
 export function useGameState() {
   const gameState = ref('menu') // menu, playing, gameover
-  const aiCount = ref(5)
+  const aiCount = ref(10) // More AI snakes like slither.io
   const food = ref([])
   const playerScore = ref(0)
   const playerKills = ref(0)
   const leaderboard = ref([])
   
-  const ARENA_SIZE = 2000
-  const FOOD_COUNT = 100
-  const FOOD_SIZE = 8
+  const ARENA_SIZE = 3000 // Bigger arena like slither.io
+  const FOOD_COUNT = 300 // More food like slither.io
+  const FOOD_SIZE = 6
 
   function setAiCount(count) {
-    aiCount.value = Math.max(1, Math.min(20, count))
+    aiCount.value = Math.max(1, Math.min(30, count))
   }
 
   function startGame() {
@@ -48,7 +48,8 @@ export function useGameState() {
       x: padding + Math.random() * (ARENA_SIZE - padding * 2),
       y: padding + Math.random() * (ARENA_SIZE - padding * 2),
       size: FOOD_SIZE + Math.random() * 4,
-      color: Math.floor(Math.random() * 6)
+      color: Math.floor(Math.random() * 6),
+      value: 1 // How much this food grows the snake
     })
   }
 
@@ -61,15 +62,16 @@ export function useGameState() {
   }
 
   function spawnFoodAt(x, y, count = 5) {
-    // Spawn food when a snake dies
+    // Spawn food when a snake dies - like slither.io
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2
-      const dist = 20 + Math.random() * 30
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5
+      const dist = 10 + Math.random() * 40
       food.value.push({
         x: x + Math.cos(angle) * dist,
         y: y + Math.sin(angle) * dist,
-        size: FOOD_SIZE + Math.random() * 6,
-        color: Math.floor(Math.random() * 6)
+        size: FOOD_SIZE + Math.random() * 8, // Bigger orbs from dead snakes
+        color: Math.floor(Math.random() * 6),
+        value: 2 // Worth more than regular food
       })
     }
   }

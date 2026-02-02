@@ -1,31 +1,13 @@
 import { ref, computed } from 'vue'
 import * as THREE from 'three'
 
-// Track waypoints for the big racing circuit
-export const trackWaypoints = [
-  { x: 0, z: 100 },      // Start/Finish
-  { x: 50, z: 100 },     // Straight
-  { x: 100, z: 80 },     // Turn 1
-  { x: 120, z: 40 },     // Into loop area
-  { x: 100, z: 0 },      // After loop
-  { x: 120, z: -50 },    // Big sweeper
-  { x: 80, z: -100 },    // Jump section
-  { x: 0, z: -120 },     // Back straight start
-  { x: -80, z: -100 },   // Turn
-  { x: -120, z: -50 },   // Sweeper
-  { x: -100, z: 0 },     // Loop 2 area
-  { x: -120, z: 40 },    // Exit loop
-  { x: -100, z: 80 },    // Final turn
-  { x: -50, z: 100 },    // Back to start
-]
-
-export function useCarPhysics(trackPoints = trackWaypoints) {
-  const position = ref(new THREE.Vector3(0, 0.5, 100))
-  const rotation = ref(0)
+export function useCarPhysics(trackPoints, startPosition = { x: 0, z: -100, rotation: Math.PI }) {
+  const position = ref(new THREE.Vector3(startPosition.x, 0.5, startPosition.z))
+  const rotation = ref(startPosition.rotation)
   const velocity = ref(new THREE.Vector3(0, 0, 0))
   const speed = ref(0)
   
-  // SLOWER car properties
+  // Car properties
   const maxSpeed = 35
   const acceleration = 15
   const brakeForce = 25
@@ -106,24 +88,65 @@ export function useCarPhysics(trackPoints = trackWaypoints) {
     )
     
     velocity.value.copy(direction.multiplyScalar(speed.value))
+    
+    // Store old position for collision rollback
+    const oldPosition = position.value.clone()
     position.value.add(velocity.value.clone().multiplyScalar(delta))
 
-    // Track boundaries - wider track
-    const trackHalfWidth = 15
+    // Track boundary collision - stay on track between waypoints
+    const trackHalfWidth = 12
     const closestIdx = getClosestWaypoint()
     const nextIdx = (closestIdx + 1) % trackPoints.length
-    const prevIdx = (closestIdx - 1 + trackPoints.length) % trackPoints.length
     
-    // Simple boundary check - keep within 150 units of center
+    // Get the track segment we're on
+    const wp1 = trackPoints[closestIdx]
+    const wp2 = trackPoints[nextIdx]
+    
+    // Calculate distance from track centerline
+    const trackDirX = wp2.x - wp1.x
+    const trackDirZ = wp2.z - wp1.z
+    const trackLen = Math.sqrt(trackDirX * trackDirX + trackDirZ * trackDirZ)
+    
+    if (trackLen > 0) {
+      // Normalized track direction
+      const trackNormX = trackDirX / trackLen
+      const trackNormZ = trackDirZ / trackLen
+      
+      // Vector from waypoint to car
+      const toCarX = position.value.x - wp1.x
+      const toCarZ = position.value.z - wp1.z
+      
+      // Perpendicular distance from track centerline
+      const perpDist = Math.abs(toCarX * (-trackNormZ) + toCarZ * trackNormX)
+      
+      // If too far from track, push back and slow down
+      if (perpDist > trackHalfWidth) {
+        // Calculate push direction (perpendicular to track)
+        const pushX = -trackNormZ
+        const pushZ = trackNormX
+        
+        // Determine which side and push back
+        const side = Math.sign(toCarX * pushX + toCarZ * pushZ)
+        const pushDist = perpDist - trackHalfWidth + 0.5
+        
+        position.value.x -= pushX * side * pushDist
+        position.value.z -= pushZ * side * pushDist
+        
+        // Bounce effect - reduce speed
+        speed.value *= 0.3
+      }
+    }
+    
+    // Also keep within overall arena bounds
     const distFromCenter = Math.sqrt(
       position.value.x * position.value.x + 
       position.value.z * position.value.z
     )
     
-    if (distFromCenter > 160) {
+    if (distFromCenter > 180) {
       const normal = position.value.clone().normalize()
-      position.value.copy(normal.multiplyScalar(155))
-      speed.value *= 0.5
+      position.value.copy(normal.multiplyScalar(175))
+      speed.value *= 0.3
     }
 
     return {
@@ -182,8 +205,8 @@ export function useCarPhysics(trackPoints = trackWaypoints) {
   }
 
   function reset() {
-    position.value.set(0, 0.5, 100)
-    rotation.value = 0
+    position.value.set(startPosition.x, 0.5, startPosition.z)
+    rotation.value = startPosition.rotation
     velocity.value.set(0, 0, 0)
     speed.value = 0
     keys.value = {
@@ -212,13 +235,18 @@ export function useCarPhysics(trackPoints = trackWaypoints) {
 
 // AI Car class
 export class AICar {
-  constructor(color, startOffset, trackPoints) {
+  constructor(color, startOffset, trackPoints, startPosition = { x: 0, z: -100, rotation: Math.PI }) {
     this.trackPoints = trackPoints
+    this.startPosition = startPosition
     this.currentWaypoint = 0
-    this.position = new THREE.Vector3(startOffset * 3, 0.5, 95 - startOffset * 2)
-    this.rotation = 0
+    this.position = new THREE.Vector3(
+      startPosition.x + startOffset * 3, 
+      0.5, 
+      startPosition.z + 5 + startOffset * 2
+    )
+    this.rotation = startPosition.rotation
     this.speed = 0
-    this.maxSpeed = 25 + Math.random() * 8 // Varied speeds
+    this.maxSpeed = 25 + Math.random() * 8
     this.acceleration = 12 + Math.random() * 5
     this.color = color
     this.mesh = null
@@ -324,8 +352,12 @@ export class AICar {
   }
 
   reset(startOffset) {
-    this.position.set(startOffset * 3, 0.5, 95 - startOffset * 2)
-    this.rotation = 0
+    this.position.set(
+      this.startPosition.x + startOffset * 3, 
+      0.5, 
+      this.startPosition.z + 5 + startOffset * 2
+    )
+    this.rotation = this.startPosition.rotation
     this.speed = 0
     this.currentWaypoint = 0
     this.lapCount = 0
