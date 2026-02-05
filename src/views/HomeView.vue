@@ -75,14 +75,14 @@ const games = [
     id: 'tree-hoppers',
     icon: '🌳🐒',
     title: 'Tree Hoppers',
-    description: 'Hop through trees to save monkeys while being chased by hunters! Don\'t get caught!',
+    description: 'Jump from tree to tree and swing on vines as a monkey! Don\'t fall to the ground!',
     wip: true
   },
   {
     id: 'fruit-ninja',
     icon: '🍉🗡️',
     title: 'Fruit Ninja',
-    description: 'Slice flying fruit while avoiding bombs! You have 5 lives - don\'t blow them all!',
+    description: 'Slice flying fruit while avoiding bombs! You have 3 lives - don\'t blow them all!',
     wip: true
   },
   {
@@ -98,7 +98,8 @@ const games = [
     title: 'Alien Invasion',
     description: 'Control aliens to destroy buildings and take over the world! Buy and upgrade 50 unique aliens!',
     wip: true
-  }
+  },
+
 ]
 
 function openGame(game) {

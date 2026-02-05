@@ -124,10 +124,14 @@ export function useGameState() {
   }
 
   function winRegion() {
-    if (currentRegionId.value && !conqueredRegions.value.includes(currentRegionId.value)) {
-      conqueredRegions.value.push(currentRegionId.value)
-      const region = getRegionById(currentRegionId.value)
-      if (region) {
+    const region = getRegionById(currentRegionId.value)
+    if (region) {
+      if (conqueredRegions.value.includes(currentRegionId.value)) {
+        // Replay - give half reward
+        coins.value += Math.floor(region.coinReward / 2)
+      } else {
+        // First time - full reward and mark as conquered
+        conqueredRegions.value.push(currentRegionId.value)
         coins.value += region.coinReward
       }
     }

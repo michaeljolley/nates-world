@@ -1,7 +1,8 @@
 <script setup>
 const props = defineProps({
   region: { type: Object, default: null },
-  coinsEarned: { type: Number, default: 0 }
+  coinsEarned: { type: Number, default: 0 },
+  isReplay: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['continue'])
@@ -10,14 +11,15 @@ const emit = defineEmits(['continue'])
 <template>
   <div class="victory-screen">
     <div class="victory-content">
-      <div class="trophy">🏆</div>
-      <h1>VICTORY!</h1>
-      <h2 v-if="region">{{ region.name }} Conquered!</h2>
+      <div class="trophy">{{ isReplay ? '🔄' : '🏆' }}</div>
+      <h1>{{ isReplay ? 'COMPLETE!' : 'VICTORY!' }}</h1>
+      <h2 v-if="region">{{ region.name }} {{ isReplay ? 'Replayed!' : 'Conquered!' }}</h2>
       
       <div class="rewards">
         <div class="reward-item">
           <span class="reward-icon">💰</span>
           <span class="reward-value">+{{ coinsEarned.toLocaleString() }}</span>
+          <span v-if="isReplay" class="replay-note">(replay bonus)</span>
         </div>
       </div>
       
@@ -95,6 +97,12 @@ h2 {
   font-size: 2rem;
   color: #ffd700;
   font-weight: bold;
+}
+
+.replay-note {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-left: 0.5rem;
 }
 
 .continue-btn {

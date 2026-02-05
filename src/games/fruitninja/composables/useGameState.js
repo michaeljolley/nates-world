@@ -6,7 +6,7 @@ export function useGameState() {
   const gameState = ref('menu') // menu, playing, gameover
   const score = ref(0)
   const highScore = ref(loadHighScore())
-  const lives = ref(5)
+  const lives = ref(3)
   const combo = ref(0)
   const maxCombo = ref(0)
 
@@ -29,7 +29,7 @@ export function useGameState() {
 
   function startGame() {
     score.value = 0
-    lives.value = 5
+    lives.value = 3
     combo.value = 0
     maxCombo.value = 0
     gameState.value = 'playing'

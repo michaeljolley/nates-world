@@ -101,14 +101,15 @@ function getDifficultyColor(difficulty) {
           <h3>{{ currentRegion.name }}</h3>
           <p>Difficulty: <span :style="{ color: getDifficultyColor(currentRegion.difficulty) }">{{ '⭐'.repeat(currentRegion.difficulty) }}</span></p>
           <p>Buildings: {{ currentRegion.buildings }}</p>
-          <p>Reward: 💰 {{ currentRegion.coinReward }}</p>
+          <p>Reward: 💰 {{ currentRegion.coinReward }}{{ isConquered(currentRegion.id) ? ' (replay: half)' : '' }}</p>
         </div>
         <button 
           class="start-btn" 
+          :class="{ 'replay': isConquered(currentRegion.id) }"
           @click="emit('startMission')"
-          :disabled="!currentAlien || isConquered(currentRegion.id)"
+          :disabled="!currentAlien"
         >
-          {{ isConquered(currentRegion.id) ? '✅ Conquered' : '🚀 Start Mission' }}
+          {{ isConquered(currentRegion.id) ? '🔄 Replay' : '🚀 Start Mission' }}
         </button>
       </div>
       <div class="mission-panel empty" v-else>
@@ -348,5 +349,13 @@ function getDifficultyColor(difficulty) {
 .start-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.start-btn.replay {
+  background: linear-gradient(135deg, #aa00ff 0%, #6600aa 100%);
+}
+
+.start-btn.replay:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(170, 0, 255, 0.5);
 }
 </style>

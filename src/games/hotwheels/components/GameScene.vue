@@ -22,33 +22,35 @@ let clock = new THREE.Clock()
 let lastWaypointIdx = 0
 let waypointsPassed = 0
 let playerLapCount = 0
+let lastFinishCross = 0
 
-// AI opponents
+// AI opponents - Hot Wheels metallic colors
 const aiCars = []
 const AI_COLORS = [
-  0x00ff00, // Green
-  0x0066ff, // Blue  
-  0xffff00, // Yellow
-  0xff00ff, // Pink
-  0x00ffff, // Cyan
-  0xff8800, // Orange
-  0x8800ff, // Purple
+  0xFF0000, // Candy Red
+  0x00AA00, // Racing Green
+  0xFFCC00, // Gold
+  0xFF00FF, // Hot Pink
+  0x00CCCC, // Teal
+  0xFF6600, // Orange Flame
+  0x6600FF, // Purple Haze
 ]
 
 function createScene() {
   // Load track data based on current track selection
   trackData = getTrackById(props.currentTrack)
-  carPhysics = useCarPhysics(trackData.waypoints, trackData.startPosition)
+  carPhysics = useCarPhysics(trackData.waypoints, trackData.startPosition, trackData.loops, trackData.jumps)
   
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x0a0a1a)
-  scene.fog = new THREE.Fog(0x0a0a1a, 100, 400)
+  // Warm bedroom lighting feel
+  scene.background = new THREE.Color(0xD4C4A8)  // Warm beige/cream
+  scene.fog = new THREE.Fog(0xD4C4A8, 400, 900)
 
   camera = new THREE.PerspectiveCamera(
     70,
     containerRef.value.clientWidth / containerRef.value.clientHeight,
     0.1,
-    1000
+    1200
   )
 
   renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -56,29 +58,30 @@ function createScene() {
   renderer.shadowMap.enabled = true
   containerRef.value.appendChild(renderer.domElement)
 
-  // Lighting
-  const ambientLight = new THREE.AmbientLight(0x404060, 0.6)
+  // Warm indoor lighting
+  const ambientLight = new THREE.AmbientLight(0xFFF8E7, 0.7)  // Warm white
   scene.add(ambientLight)
 
-  const sunLight = new THREE.DirectionalLight(0xffffff, 0.8)
-  sunLight.position.set(100, 200, 100)
-  sunLight.castShadow = true
-  sunLight.shadow.mapSize.width = 4096
-  sunLight.shadow.mapSize.height = 4096
-  sunLight.shadow.camera.near = 0.5
-  sunLight.shadow.camera.far = 600
-  sunLight.shadow.camera.left = -200
-  sunLight.shadow.camera.right = 200
-  sunLight.shadow.camera.top = 200
-  sunLight.shadow.camera.bottom = -200
-  scene.add(sunLight)
+  // Main room light (like ceiling light)
+  const roomLight = new THREE.DirectionalLight(0xFFFAF0, 0.9)
+  roomLight.position.set(0, 300, 0)
+  roomLight.castShadow = true
+  roomLight.shadow.mapSize.width = 4096
+  roomLight.shadow.mapSize.height = 4096
+  roomLight.shadow.camera.near = 0.5
+  roomLight.shadow.camera.far = 800
+  roomLight.shadow.camera.left = -600
+  roomLight.shadow.camera.right = 600
+  roomLight.shadow.camera.top = 600
+  roomLight.shadow.camera.bottom = -600
+  scene.add(roomLight)
 
-  // Colored spotlights
-  const colors = [0xff6600, 0x00aaff, 0xff00ff, 0x00ff66]
-  colors.forEach((color, i) => {
+  // Orange accent lights (like Hot Wheels themed lamps)
+  const accentColors = [0xFF6600, 0xFF6600, 0xFFCC00, 0xFF3300]
+  accentColors.forEach((color, i) => {
     const angle = (i / 4) * Math.PI * 2
-    const spotlight = new THREE.SpotLight(color, 3, 200, Math.PI / 3)
-    spotlight.position.set(Math.cos(angle) * 80, 60, Math.sin(angle) * 80)
+    const spotlight = new THREE.SpotLight(color, 2, 400, Math.PI / 4)
+    spotlight.position.set(Math.cos(angle) * 200, 100, Math.sin(angle) * 200)
     scene.add(spotlight)
   })
 
@@ -89,15 +92,14 @@ function createScene() {
 }
 
 function createTrack() {
-  const trackWidth = 25
+  const trackWidth = 12  // Narrower like real Hot Wheels tracks
   const waypoints = trackData.waypoints
-  const theme = trackData.theme
 
-  // Ground
-  const groundGeometry = new THREE.PlaneGeometry(500, 500)
+  // Ground - looks like a bedroom floor / wood
+  const groundGeometry = new THREE.PlaneGeometry(1200, 1200)
   const groundMaterial = new THREE.MeshStandardMaterial({
-    color: 0x1a1a2a,
-    roughness: 0.9
+    color: 0x8B7355,  // Tan wood/carpet color
+    roughness: 0.95
   })
   const ground = new THREE.Mesh(groundGeometry, groundMaterial)
   ground.rotation.x = -Math.PI / 2
@@ -105,31 +107,27 @@ function createTrack() {
   ground.receiveShadow = true
   scene.add(ground)
 
-  // Neon grid with track theme
-  const gridHelper = new THREE.GridHelper(500, 50, theme.primary, 0x002244)
-  gridHelper.position.y = -0.4
-  scene.add(gridHelper)
-
-  // Create track segments between waypoints
-  const neonPrimary = new THREE.MeshStandardMaterial({
-    color: theme.primary,
-    emissive: theme.primary,
-    emissiveIntensity: 0.5
+  // Hot Wheels iconic orange track material
+  const orangeTrackMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFF6600,  // Hot Wheels orange
+    roughness: 0.4,
+    metalness: 0.1
   })
   
-  const neonSecondary = new THREE.MeshStandardMaterial({
-    color: theme.secondary,
-    emissive: theme.secondary,
-    emissiveIntensity: 0.5
+  // Blue connector material
+  const blueConnectorMaterial = new THREE.MeshStandardMaterial({
+    color: 0x0066CC,  // Hot Wheels blue
+    roughness: 0.3,
+    metalness: 0.2
   })
 
-  const trackMaterial = new THREE.MeshStandardMaterial({
-    color: 0x333344,
-    roughness: 0.7,
-    metalness: 0.3
+  // Track groove material (darker orange for depth)
+  const grooveMaterial = new THREE.MeshStandardMaterial({
+    color: 0xCC5500,
+    roughness: 0.5
   })
 
-  // Draw track path
+  // Draw track path with Hot Wheels style
   for (let i = 0; i < waypoints.length; i++) {
     const curr = waypoints[i]
     const next = waypoints[(i + 1) % waypoints.length]
@@ -139,55 +137,59 @@ function createTrack() {
     const length = Math.sqrt(dx * dx + dz * dz)
     const angle = Math.atan2(dx, dz)
 
-    // Track segment
-    const segmentGeometry = new THREE.PlaneGeometry(trackWidth, length)
-    const segment = new THREE.Mesh(segmentGeometry, trackMaterial)
-    segment.rotation.x = -Math.PI / 2
-    segment.rotation.z = -angle
-    segment.position.set(
+    // Main orange track base
+    const trackBaseGeometry = new THREE.BoxGeometry(trackWidth, 0.8, length)
+    const trackBase = new THREE.Mesh(trackBaseGeometry, orangeTrackMaterial)
+    trackBase.position.set(
       curr.x + dx / 2,
-      0.01,
+      0.4,
       curr.z + dz / 2
     )
-    scene.add(segment)
+    trackBase.rotation.y = angle
+    trackBase.castShadow = true
+    trackBase.receiveShadow = true
+    scene.add(trackBase)
 
-    // Left border (neon)
-    const borderGeometry = new THREE.BoxGeometry(1.5, 2, length)
-    const leftBorder = new THREE.Mesh(borderGeometry, neonPrimary)
-    leftBorder.position.set(
-      curr.x + dx / 2 - Math.cos(angle) * (trackWidth / 2 + 0.75),
-      1,
-      curr.z + dz / 2 + Math.sin(angle) * (trackWidth / 2 + 0.75)
+    // Raised edges/rails on sides (characteristic Hot Wheels look)
+    const railGeometry = new THREE.BoxGeometry(1.5, 1.2, length)
+    
+    const leftRail = new THREE.Mesh(railGeometry, orangeTrackMaterial)
+    leftRail.position.set(
+      curr.x + dx / 2 - Math.cos(angle) * (trackWidth / 2 - 0.75),
+      0.6,
+      curr.z + dz / 2 + Math.sin(angle) * (trackWidth / 2 - 0.75)
     )
-    leftBorder.rotation.y = angle
-    scene.add(leftBorder)
+    leftRail.rotation.y = angle
+    scene.add(leftRail)
 
-    // Right border (neon)
-    const rightBorder = new THREE.Mesh(borderGeometry, neonSecondary)
-    rightBorder.position.set(
-      curr.x + dx / 2 + Math.cos(angle) * (trackWidth / 2 + 0.75),
-      1,
-      curr.z + dz / 2 - Math.sin(angle) * (trackWidth / 2 + 0.75)
+    const rightRail = new THREE.Mesh(railGeometry, orangeTrackMaterial)
+    rightRail.position.set(
+      curr.x + dx / 2 + Math.cos(angle) * (trackWidth / 2 - 0.75),
+      0.6,
+      curr.z + dz / 2 - Math.sin(angle) * (trackWidth / 2 - 0.75)
     )
-    rightBorder.rotation.y = angle
-    scene.add(rightBorder)
+    rightRail.rotation.y = angle
+    scene.add(rightRail)
 
-    // Racing stripes on track
-    const stripeGeometry = new THREE.PlaneGeometry(1, length - 5)
-    const stripeMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0xffffff,
-      emissiveIntensity: 0.2
-    })
-    const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial)
-    stripe.rotation.x = -Math.PI / 2
-    stripe.rotation.z = -angle
-    stripe.position.set(
+    // Center groove (where cars drive)
+    const grooveGeometry = new THREE.BoxGeometry(trackWidth - 3, 0.3, length)
+    const groove = new THREE.Mesh(grooveGeometry, grooveMaterial)
+    groove.position.set(
       curr.x + dx / 2,
-      0.02,
+      0.15,
       curr.z + dz / 2
     )
-    scene.add(stripe)
+    groove.rotation.y = angle
+    scene.add(groove)
+
+    // Blue connectors every few segments
+    if (i % 3 === 0) {
+      const connectorGeometry = new THREE.BoxGeometry(trackWidth + 2, 1.4, 3)
+      const connector = new THREE.Mesh(connectorGeometry, blueConnectorMaterial)
+      connector.position.set(curr.x, 0.7, curr.z)
+      connector.rotation.y = angle
+      scene.add(connector)
+    }
   }
 
   // Create loops from track data
@@ -206,142 +208,166 @@ function createTrack() {
 
 function createLoop(x, z, rotationY, color, size = 20) {
   const loopRadius = size
-  const tubeRadius = 3
+  const tubeRadius = 6  // Wider like Hot Wheels track
 
-  // Main loop structure
-  const loopGeometry = new THREE.TorusGeometry(loopRadius, tubeRadius, 32, 64)
-  const loopMaterial = new THREE.MeshStandardMaterial({
-    color: color,
-    emissive: color,
-    emissiveIntensity: 0.4,
-    metalness: 0.8,
-    roughness: 0.2
+  // Hot Wheels orange loop
+  const orangeLoopMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFF6600,  // Hot Wheels orange
+    roughness: 0.4,
+    metalness: 0.1
   })
-  const loop = new THREE.Mesh(loopGeometry, loopMaterial)
+
+  // Main loop structure - orange plastic
+  const loopGeometry = new THREE.TorusGeometry(loopRadius, tubeRadius, 32, 64)
+  const loop = new THREE.Mesh(loopGeometry, orangeLoopMaterial)
   loop.position.set(x, loopRadius + 2, z)
   loop.rotation.y = rotationY
   scene.add(loop)
 
-  // Loop supports
-  const supportMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 })
+  // Blue plastic supports (like real Hot Wheels)
+  const blueSupportMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x0066CC,
+    roughness: 0.3,
+    metalness: 0.2
+  })
   
   for (let i = 0; i < 4; i++) {
     const angle = (i / 4) * Math.PI * 2
-    const supportGeometry = new THREE.CylinderGeometry(1, 1.5, loopRadius + 5, 8)
-    const support = new THREE.Mesh(supportGeometry, supportMaterial)
+    const supportGeometry = new THREE.CylinderGeometry(1.5, 2, loopRadius + 5, 8)
+    const support = new THREE.Mesh(supportGeometry, blueSupportMaterial)
     support.position.set(
-      x + Math.cos(rotationY) * Math.cos(angle) * (loopRadius + 5),
+      x + Math.cos(rotationY) * Math.cos(angle) * (loopRadius + 8),
       (loopRadius + 5) / 2,
-      z + Math.sin(rotationY) * Math.cos(angle) * (loopRadius + 5)
+      z + Math.sin(rotationY) * Math.cos(angle) * (loopRadius + 8)
     )
     scene.add(support)
   }
 
-  // Neon rings on loop with track theme colors
-  const theme = trackData.theme
-  for (let i = 0; i < 8; i++) {
-    const ringAngle = (i / 8) * Math.PI * 2
-    const ringGeometry = new THREE.TorusGeometry(tubeRadius + 0.5, 0.3, 8, 32)
-    const ringColor = i % 2 === 0 ? theme.primary : theme.secondary
-    const ringMaterial = new THREE.MeshStandardMaterial({
-      color: ringColor,
-      emissive: ringColor,
-      emissiveIntensity: 1
+  // Hot Wheels flame decals around loop (yellow/red accents)
+  for (let i = 0; i < 6; i++) {
+    const ringAngle = (i / 6) * Math.PI * 2
+    const flameGeometry = new THREE.ConeGeometry(1.5, 4, 8)
+    const flameColor = i % 2 === 0 ? 0xFFCC00 : 0xFF3300
+    const flameMaterial = new THREE.MeshStandardMaterial({
+      color: flameColor,
+      emissive: flameColor,
+      emissiveIntensity: 0.3
     })
-    const ring = new THREE.Mesh(ringGeometry, ringMaterial)
-    ring.position.set(
-      x + Math.sin(rotationY) * Math.cos(ringAngle) * loopRadius,
-      loopRadius + 2 + Math.sin(ringAngle) * loopRadius,
-      z + Math.cos(rotationY) * Math.cos(ringAngle) * loopRadius
+    const flame = new THREE.Mesh(flameGeometry, flameMaterial)
+    flame.position.set(
+      x + Math.sin(rotationY) * Math.cos(ringAngle) * (loopRadius + tubeRadius + 1),
+      loopRadius + 2 + Math.sin(ringAngle) * (loopRadius + tubeRadius + 1),
+      z + Math.cos(rotationY) * Math.cos(ringAngle) * (loopRadius + tubeRadius + 1)
     )
-    ring.rotation.y = rotationY
-    ring.rotation.x = ringAngle
-    scene.add(ring)
+    flame.rotation.z = ringAngle + Math.PI / 2
+    scene.add(flame)
   }
 }
 
 function createJump(x, z, rotationY) {
-  // Ramp up
-  const rampLength = 30
-  const rampHeight = 8
+  // Hot Wheels style jump ramp
+  const rampLength = 20
+  const rampHeight = 6
+  const rampWidth = 12  // Match track width
   
-  const rampGeometry = new THREE.BoxGeometry(20, 1, rampLength)
-  const rampMaterial = new THREE.MeshStandardMaterial({
-    color: 0xff6600,
-    emissive: 0xff3300,
-    emissiveIntensity: 0.3,
-    metalness: 0.7
+  // Orange plastic ramp material
+  const orangeRampMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFF6600,  // Hot Wheels orange
+    roughness: 0.4,
+    metalness: 0.1
   })
   
+  // Blue support material
+  const blueSupportMaterial = new THREE.MeshStandardMaterial({
+    color: 0x0066CC,
+    roughness: 0.3,
+    metalness: 0.2
+  })
+  
+  const rampGeometry = new THREE.BoxGeometry(rampWidth, 1, rampLength)
+  
   // Up ramp
-  const upRamp = new THREE.Mesh(rampGeometry, rampMaterial)
-  upRamp.position.set(x - 20, rampHeight / 2, z)
+  const upRamp = new THREE.Mesh(rampGeometry, orangeRampMaterial)
+  upRamp.position.set(x - 15, rampHeight / 2, z)
   upRamp.rotation.z = Math.atan2(rampHeight, rampLength)
   upRamp.rotation.y = rotationY
+  upRamp.castShadow = true
   scene.add(upRamp)
 
   // Down ramp
-  const downRamp = new THREE.Mesh(rampGeometry, rampMaterial)
-  downRamp.position.set(x + 20, rampHeight / 2, z)
+  const downRamp = new THREE.Mesh(rampGeometry, orangeRampMaterial)
+  downRamp.position.set(x + 15, rampHeight / 2, z)
   downRamp.rotation.z = -Math.atan2(rampHeight, rampLength)
   downRamp.rotation.y = rotationY
+  downRamp.castShadow = true
   scene.add(downRamp)
 
-  // Gap platform (floating)
-  const platformGeometry = new THREE.BoxGeometry(15, 1, 15)
-  const platformMaterial = new THREE.MeshStandardMaterial({
-    color: 0x00ff00,
-    emissive: 0x00ff00,
-    emissiveIntensity: 0.5
-  })
-  const platform = new THREE.Mesh(platformGeometry, platformMaterial)
-  platform.position.set(x, rampHeight + 2, z)
-  scene.add(platform)
+  // Blue connector at top of jump
+  const connectorGeometry = new THREE.BoxGeometry(rampWidth + 2, 1.5, 8)
+  const connector = new THREE.Mesh(connectorGeometry, blueSupportMaterial)
+  connector.position.set(x, rampHeight + 1, z)
+  connector.rotation.y = rotationY
+  scene.add(connector)
 
-  // Fire effects at jump
-  for (let i = 0; i < 6; i++) {
-    const flameGeometry = new THREE.ConeGeometry(1.5, 5, 8)
-    const flameMaterial = new THREE.MeshStandardMaterial({
-      color: 0xff4400,
-      emissive: 0xff2200,
-      emissiveIntensity: 1,
-      transparent: true,
-      opacity: 0.8
-    })
-    const flame = new THREE.Mesh(flameGeometry, flameMaterial)
-    flame.position.set(
-      x - 25 + (i % 3) * 25,
-      3,
-      z + (i < 3 ? -12 : 12)
-    )
-    scene.add(flame)
-  }
+  // Side rails on ramps (orange)
+  const railGeometry = new THREE.BoxGeometry(1.5, 1.5, rampLength)
+  
+  // Left rails
+  const leftUpRail = new THREE.Mesh(railGeometry, orangeRampMaterial)
+  leftUpRail.position.set(x - 15 - (rampWidth / 2 - 0.75) * Math.cos(rotationY), rampHeight / 2 + 0.5, z + (rampWidth / 2 - 0.75) * Math.sin(rotationY))
+  leftUpRail.rotation.z = Math.atan2(rampHeight, rampLength)
+  leftUpRail.rotation.y = rotationY
+  scene.add(leftUpRail)
+  
+  // Blue support pillars
+  const pillarGeometry = new THREE.CylinderGeometry(1, 1.5, rampHeight + 2, 8)
+  
+  const pillar1 = new THREE.Mesh(pillarGeometry, blueSupportMaterial)
+  pillar1.position.set(x - 8, (rampHeight + 2) / 2, z - 8)
+  scene.add(pillar1)
+  
+  const pillar2 = new THREE.Mesh(pillarGeometry, blueSupportMaterial)
+  pillar2.position.set(x - 8, (rampHeight + 2) / 2, z + 8)
+  scene.add(pillar2)
+  
+  const pillar3 = new THREE.Mesh(pillarGeometry, blueSupportMaterial)
+  pillar3.position.set(x + 8, (rampHeight + 2) / 2, z - 8)
+  scene.add(pillar3)
+  
+  const pillar4 = new THREE.Mesh(pillarGeometry, blueSupportMaterial)
+  pillar4.position.set(x + 8, (rampHeight + 2) / 2, z + 8)
+  scene.add(pillar4)
 
-  // Neon arrow signs
-  const arrowGeometry = new THREE.ConeGeometry(3, 6, 3)
-  const arrowMaterial = new THREE.MeshStandardMaterial({
-    color: 0x00ff00,
-    emissive: 0x00ff00,
-    emissiveIntensity: 1
+  // Hot Wheels flame decals on sides
+  const flameGeometry = new THREE.ConeGeometry(2, 5, 8)
+  const flameMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFFCC00,
+    emissive: 0xFF6600,
+    emissiveIntensity: 0.4
   })
   
-  for (let i = 0; i < 3; i++) {
-    const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial)
-    arrow.position.set(x - 30 + i * 30, rampHeight + 8, z)
-    arrow.rotation.z = -Math.PI / 2
-    scene.add(arrow)
+  for (let i = 0; i < 4; i++) {
+    const flame = new THREE.Mesh(flameGeometry, flameMaterial)
+    flame.position.set(
+      x - 20 + i * 13,
+      2,
+      z + (i % 2 === 0 ? -10 : 10)
+    )
+    flame.rotation.z = Math.PI  // Point up
+    scene.add(flame)
   }
 }
 
 function createFinishLine() {
-  const startPos = trackData.startPosition
-  const startZ = startPos.z
-  const startX = startPos.x
+  // Position finish line at first waypoint (where laps are counted)
+  const finishWp = trackData.waypoints[0]
+  const startZ = finishWp.z
+  const startX = finishWp.x
   
-  const gantryWidth = 30
+  const gantryWidth = 27 // Slightly wider than track (25) to place poles at walls
   const gantryHeight = 15
   
-  // Poles
+  // Poles - positioned at the walls
   const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 })
   const poleGeometry = new THREE.CylinderGeometry(1, 1, gantryHeight, 8)
   
@@ -360,16 +386,17 @@ function createFinishLine() {
   topBar.position.set(startX, gantryHeight, startZ)
   scene.add(topBar)
 
-  // Checkered pattern
-  const checkerSize = 1.5
-  for (let i = 0; i < 20; i++) {
+  // Checkered pattern on gantry
+  const gantryCheckerSize = 1.5
+  const numCheckers = Math.floor(gantryWidth / gantryCheckerSize)
+  for (let i = 0; i < numCheckers; i++) {
     for (let j = 0; j < 2; j++) {
       if ((i + j) % 2 === 0) {
         const checker = new THREE.Mesh(
-          new THREE.BoxGeometry(checkerSize, checkerSize, 0.1),
+          new THREE.BoxGeometry(gantryCheckerSize, gantryCheckerSize, 0.1),
           new THREE.MeshStandardMaterial({ color: 0x000000 })
         )
-        checker.position.set(startX - gantryWidth / 2 + i * checkerSize + checkerSize / 2, gantryHeight - 1.5 + j * checkerSize + checkerSize / 2, startZ + 1)
+        checker.position.set(startX - gantryWidth / 2 + i * gantryCheckerSize + gantryCheckerSize / 2, gantryHeight - 1.5 + j * gantryCheckerSize + gantryCheckerSize / 2, startZ + 1)
         scene.add(checker)
       }
     }
@@ -409,77 +436,161 @@ function createFinishLine() {
 function createPlayerCar() {
   playerCar = new THREE.Group()
 
-  // Main body - red race car
-  const bodyGeometry = new THREE.BoxGeometry(2, 0.6, 4)
+  // Hot Wheels die-cast style car - metallic blue with flames
+  // Low-slung muscle car body
+  const bodyGeometry = new THREE.BoxGeometry(1.8, 0.5, 3.5)
   const bodyMaterial = new THREE.MeshStandardMaterial({
-    color: 0xff0000,
-    roughness: 0.2,
-    metalness: 0.8
+    color: 0x0044AA,  // Metallic blue
+    roughness: 0.15,
+    metalness: 0.9
   })
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial)
-  body.position.y = 0.5
+  body.position.y = 0.4
   body.castShadow = true
   playerCar.add(body)
 
-  // Cabin
-  const cabinGeometry = new THREE.BoxGeometry(1.6, 0.5, 2)
-  const cabinMaterial = new THREE.MeshStandardMaterial({
+  // Hood scoop
+  const scoopGeometry = new THREE.BoxGeometry(0.6, 0.25, 0.8)
+  const scoopMaterial = new THREE.MeshStandardMaterial({
     color: 0x111111,
-    roughness: 0.1
+    roughness: 0.3,
+    metalness: 0.7
+  })
+  const scoop = new THREE.Mesh(scoopGeometry, scoopMaterial)
+  scoop.position.set(0, 0.75, 1)
+  playerCar.add(scoop)
+
+  // Cabin/windshield - tinted
+  const cabinGeometry = new THREE.BoxGeometry(1.5, 0.4, 1.4)
+  const cabinMaterial = new THREE.MeshStandardMaterial({
+    color: 0x222244,
+    roughness: 0.1,
+    metalness: 0.5,
+    transparent: true,
+    opacity: 0.7
   })
   const cabin = new THREE.Mesh(cabinGeometry, cabinMaterial)
-  cabin.position.set(0, 0.95, -0.3)
+  cabin.position.set(0, 0.75, -0.2)
   playerCar.add(cabin)
 
-  // Spoiler
-  const spoilerGeometry = new THREE.BoxGeometry(2.2, 0.1, 0.4)
-  const spoiler = new THREE.Mesh(spoilerGeometry, bodyMaterial)
-  spoiler.position.set(0, 1.1, -1.8)
+  // Rear spoiler - big racing spoiler
+  const spoilerGeometry = new THREE.BoxGeometry(2, 0.08, 0.35)
+  const spoilerMaterial = new THREE.MeshStandardMaterial({
+    color: 0x111111,
+    metalness: 0.8
+  })
+  const spoiler = new THREE.Mesh(spoilerGeometry, spoilerMaterial)
+  spoiler.position.set(0, 1, -1.6)
   playerCar.add(spoiler)
+  
+  // Spoiler supports
+  const supportGeometry = new THREE.BoxGeometry(0.08, 0.3, 0.08)
+  const leftSupport = new THREE.Mesh(supportGeometry, spoilerMaterial)
+  leftSupport.position.set(-0.8, 0.85, -1.6)
+  playerCar.add(leftSupport)
+  const rightSupport = new THREE.Mesh(supportGeometry, spoilerMaterial)
+  rightSupport.position.set(0.8, 0.85, -1.6)
+  playerCar.add(rightSupport)
 
-  // Wheels
-  const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16)
-  const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 })
+  // Hot Wheels style oversized wheels with chrome
+  const wheelGeometry = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 20)
+  const wheelMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x111111,
+    roughness: 0.4
+  })
+  const hubGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.3, 12)
+  const chromeMaterial = new THREE.MeshStandardMaterial({
+    color: 0xCCCCCC,
+    roughness: 0.1,
+    metalness: 1.0
+  })
   
   const wheelPositions = [
-    { x: -1.1, z: 1.3 },
-    { x: 1.1, z: 1.3 },
-    { x: -1.1, z: -1.3 },
-    { x: 1.1, z: -1.3 }
+    { x: -1, z: 1.2 },
+    { x: 1, z: 1.2 },
+    { x: -1, z: -1.2 },
+    { x: 1, z: -1.2 }
   ]
 
   wheelPositions.forEach(pos => {
     const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial)
     wheel.rotation.z = Math.PI / 2
-    wheel.position.set(pos.x, 0.4, pos.z)
+    wheel.position.set(pos.x, 0.38, pos.z)
     playerCar.add(wheel)
+    
+    // Chrome hubcap
+    const hub = new THREE.Mesh(hubGeometry, chromeMaterial)
+    hub.rotation.z = Math.PI / 2
+    hub.position.set(pos.x * 1.15, 0.38, pos.z)
+    playerCar.add(hub)
   })
 
-  // Number "1" on top
-  const numberGeometry = new THREE.PlaneGeometry(1, 1)
-  const numberMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    emissive: 0xffffff,
+  // Flame decals on sides (Hot Wheels signature look)
+  const flameGeometry = new THREE.ConeGeometry(0.3, 1.2, 6)
+  const flameMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFF6600,
+    emissive: 0xFF3300,
     emissiveIntensity: 0.3
   })
-  const number = new THREE.Mesh(numberGeometry, numberMaterial)
-  number.rotation.x = -Math.PI / 2
-  number.position.set(0, 0.81, 0)
-  playerCar.add(number)
+  
+  // Left side flames
+  for (let i = 0; i < 3; i++) {
+    const flame = new THREE.Mesh(flameGeometry, flameMaterial)
+    flame.rotation.z = Math.PI / 2
+    flame.rotation.y = Math.PI / 2
+    flame.position.set(-0.91, 0.4, 0.8 - i * 0.5)
+    flame.scale.set(0.8 - i * 0.2, 1, 0.5)
+    playerCar.add(flame)
+  }
+  
+  // Right side flames
+  for (let i = 0; i < 3; i++) {
+    const flame = new THREE.Mesh(flameGeometry, flameMaterial)
+    flame.rotation.z = -Math.PI / 2
+    flame.rotation.y = -Math.PI / 2
+    flame.position.set(0.91, 0.4, 0.8 - i * 0.5)
+    flame.scale.set(0.8 - i * 0.2, 1, 0.5)
+    playerCar.add(flame)
+  }
+
+  // Chrome exhaust pipes
+  const exhaustGeometry = new THREE.CylinderGeometry(0.08, 0.1, 0.4, 8)
+  const exhaustL = new THREE.Mesh(exhaustGeometry, chromeMaterial)
+  exhaustL.rotation.x = Math.PI / 2
+  exhaustL.position.set(-0.5, 0.25, -1.8)
+  playerCar.add(exhaustL)
+  const exhaustR = new THREE.Mesh(exhaustGeometry, chromeMaterial)
+  exhaustR.rotation.x = Math.PI / 2
+  exhaustR.position.set(0.5, 0.25, -1.8)
+  playerCar.add(exhaustR)
 
   // Headlights
-  const headlightGeometry = new THREE.CircleGeometry(0.2, 16)
+  const headlightGeometry = new THREE.CircleGeometry(0.15, 16)
   const headlightMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffcc,
-    emissive: 0xffffcc,
-    emissiveIntensity: 1
+    emissive: 0xffffaa,
+    emissiveIntensity: 0.8
   })
   const headlightL = new THREE.Mesh(headlightGeometry, headlightMaterial)
-  headlightL.position.set(-0.6, 0.5, 2.01)
+  headlightL.position.set(-0.55, 0.4, 1.76)
   playerCar.add(headlightL)
   const headlightR = new THREE.Mesh(headlightGeometry, headlightMaterial)
-  headlightR.position.set(0.6, 0.5, 2.01)
+  headlightR.position.set(0.55, 0.4, 1.76)
   playerCar.add(headlightR)
+
+  // Taillights (red)
+  const taillightGeometry = new THREE.BoxGeometry(0.3, 0.15, 0.05)
+  const taillightMaterial = new THREE.MeshStandardMaterial({
+    color: 0xff0000,
+    emissive: 0xff0000,
+    emissiveIntensity: 0.5
+  })
+  const taillightL = new THREE.Mesh(taillightGeometry, taillightMaterial)
+  taillightL.position.set(-0.6, 0.4, -1.76)
+  playerCar.add(taillightL)
+  const taillightR = new THREE.Mesh(taillightGeometry, taillightMaterial)
+  taillightR.position.set(0.6, 0.4, -1.76)
+  playerCar.add(taillightR)
 
   scene.add(playerCar)
   carPhysics.reset()
@@ -499,163 +610,195 @@ function createAICars() {
 }
 
 function createEnvironment() {
-  // Stadium structures
-  const standMaterial = new THREE.MeshStandardMaterial({ 
-    color: 0x333344,
-    metalness: 0.3
+  // Kid's bedroom environment with toys
+  
+  // Toy boxes around the track area
+  const toyBoxMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x3366CC,  // Blue plastic
+    roughness: 0.5
+  })
+  const redToyBoxMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xCC3333,
+    roughness: 0.5
   })
 
-  // Grandstands around track
-  for (let i = 0; i < 8; i++) {
-    const angle = (i / 8) * Math.PI * 2
-    const radius = 180
+  // Scattered toy boxes like storage bins
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2
+    const radius = 450 + Math.random() * 100
     
-    const standGeometry = new THREE.BoxGeometry(50, 20, 15)
-    const stand = new THREE.Mesh(standGeometry, standMaterial)
-    stand.position.set(
+    const boxGeometry = new THREE.BoxGeometry(40 + Math.random() * 20, 25, 30 + Math.random() * 15)
+    const box = new THREE.Mesh(boxGeometry, i % 2 === 0 ? toyBoxMaterial : redToyBoxMaterial)
+    box.position.set(
+      Math.cos(angle) * radius,
+      12.5,
+      Math.sin(angle) * radius
+    )
+    box.rotation.y = angle + Math.random() * 0.5
+    box.castShadow = true
+    scene.add(box)
+  }
+
+  // Giant Hot Wheels logo sign
+  const logoBaseMaterial = new THREE.MeshStandardMaterial({
+    color: 0xFF6600,
+    emissive: 0xFF3300,
+    emissiveIntensity: 0.3
+  })
+  const logoGeometry = new THREE.BoxGeometry(100, 30, 5)
+  const logo = new THREE.Mesh(logoGeometry, logoBaseMaterial)
+  logo.position.set(0, 60, -500)
+  scene.add(logo)
+  
+  // Flame decorations on logo
+  const flameColors = [0xFFCC00, 0xFF6600, 0xFF3300]
+  for (let i = 0; i < 8; i++) {
+    const flameGeometry = new THREE.ConeGeometry(8, 25, 8)
+    const flameMaterial = new THREE.MeshStandardMaterial({
+      color: flameColors[i % 3],
+      emissive: flameColors[i % 3],
+      emissiveIntensity: 0.4
+    })
+    const flame = new THREE.Mesh(flameGeometry, flameMaterial)
+    flame.position.set(-35 + i * 10, 85, -500)
+    scene.add(flame)
+  }
+
+  // Scattered toy dinosaurs and action figures (representing other toys)
+  const greenToyMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.6 })
+  const brownToyMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.6 })
+  
+  // Toy dinosaurs around the edges
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 + 0.3
+    const radius = 520
+    
+    // Simple dino shape (blocky toy style)
+    const dinoBody = new THREE.Mesh(
+      new THREE.BoxGeometry(15, 20, 35),
+      greenToyMaterial
+    )
+    dinoBody.position.set(
       Math.cos(angle) * radius,
       10,
       Math.sin(angle) * radius
     )
-    stand.rotation.y = -angle
-    scene.add(stand)
-
-    // Neon trim
-    const trimColors = [0xff6600, 0x00aaff, 0xff00ff, 0x00ff00]
-    const trimGeometry = new THREE.BoxGeometry(52, 1, 1)
-    const trimMaterial = new THREE.MeshStandardMaterial({
-      color: trimColors[i % 4],
-      emissive: trimColors[i % 4],
-      emissiveIntensity: 1
-    })
-    const trim = new THREE.Mesh(trimGeometry, trimMaterial)
-    trim.position.set(
-      Math.cos(angle) * radius,
-      21,
-      Math.sin(angle) * radius
-    )
-    trim.rotation.y = -angle
-    scene.add(trim)
-  }
-
-  // Giant floating rings
-  for (let i = 0; i < 4; i++) {
-    const ringRadius = 200 + i * 30
-    const ringGeometry = new THREE.TorusGeometry(ringRadius, 1, 8, 128)
-    const colors = [0xff6600, 0x00aaff, 0xff00ff, 0x00ff00]
-    const ringMaterial = new THREE.MeshStandardMaterial({
-      color: colors[i],
-      emissive: colors[i],
-      emissiveIntensity: 0.4,
-      transparent: true,
-      opacity: 0.5
-    })
-    const ring = new THREE.Mesh(ringGeometry, ringMaterial)
-    ring.rotation.x = Math.PI / 2
-    ring.position.y = 50 + i * 15
-    scene.add(ring)
-  }
-
-  // Spotlights towers
-  for (let i = 0; i < 12; i++) {
-    const angle = (i / 12) * Math.PI * 2
-    const radius = 160
+    dinoBody.rotation.y = -angle
+    scene.add(dinoBody)
     
-    const towerGeometry = new THREE.CylinderGeometry(2, 3, 40, 8)
-    const towerMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 })
-    const tower = new THREE.Mesh(towerGeometry, towerMaterial)
-    tower.position.set(
-      Math.cos(angle) * radius,
-      20,
-      Math.sin(angle) * radius
+    // Dino head
+    const dinoHead = new THREE.Mesh(
+      new THREE.BoxGeometry(8, 10, 12),
+      greenToyMaterial
     )
-    scene.add(tower)
-
-    // Light on top
-    const lightGeometry = new THREE.SphereGeometry(3, 16, 16)
-    const colors = [0xff6600, 0x00aaff, 0xff00ff, 0x00ff00]
-    const lightMaterial = new THREE.MeshStandardMaterial({
-      color: colors[i % 4],
-      emissive: colors[i % 4],
-      emissiveIntensity: 1
-    })
-    const light = new THREE.Mesh(lightGeometry, lightMaterial)
-    light.position.set(
-      Math.cos(angle) * radius,
-      42,
-      Math.sin(angle) * radius
+    dinoHead.position.set(
+      Math.cos(angle) * (radius - 20),
+      18,
+      Math.sin(angle) * (radius - 20)
     )
-    scene.add(light)
+    scene.add(dinoHead)
   }
 
-  // Stars
-  const starGeometry = new THREE.BufferGeometry()
-  const starCount = 2000
-  const positions = new Float32Array(starCount * 3)
-  const colors = new Float32Array(starCount * 3)
-  
-  for (let i = 0; i < starCount * 3; i += 3) {
-    positions[i] = (Math.random() - 0.5) * 800
-    positions[i + 1] = Math.random() * 200 + 50
-    positions[i + 2] = (Math.random() - 0.5) * 800
+  // Building blocks scattered
+  const blockColors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF]
+  for (let i = 0; i < 15; i++) {
+    const angle = Math.random() * Math.PI * 2
+    const radius = 480 + Math.random() * 80
+    const blockSize = 8 + Math.random() * 12
     
-    const c = Math.random()
-    if (c < 0.33) {
-      colors[i] = 1; colors[i + 1] = 0.4; colors[i + 2] = 0
-    } else if (c < 0.66) {
-      colors[i] = 0; colors[i + 1] = 0.7; colors[i + 2] = 1
-    } else {
-      colors[i] = 1; colors[i + 1] = 1; colors[i + 2] = 1
-    }
+    const blockGeometry = new THREE.BoxGeometry(blockSize, blockSize * 1.5, blockSize)
+    const blockMaterial = new THREE.MeshStandardMaterial({
+      color: blockColors[i % 5],
+      roughness: 0.4
+    })
+    const block = new THREE.Mesh(blockGeometry, blockMaterial)
+    block.position.set(
+      Math.cos(angle) * radius,
+      blockSize * 0.75,
+      Math.sin(angle) * radius
+    )
+    block.rotation.y = Math.random() * Math.PI
+    scene.add(block)
   }
-  
-  starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-  const starMaterial = new THREE.PointsMaterial({
-    size: 1.5,
-    transparent: true,
-    opacity: 0.9,
-    vertexColors: true
+
+  // Bedroom walls in the far distance (suggesting indoor setting)
+  const wallMaterial = new THREE.MeshStandardMaterial({
+    color: 0xE8DCC8,  // Beige wall color
+    roughness: 0.9
   })
-  const stars = new THREE.Points(starGeometry, starMaterial)
-  scene.add(stars)
+  
+  // Back wall with poster
+  const backWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(1200, 200),
+    wallMaterial
+  )
+  backWall.position.set(0, 100, -600)
+  scene.add(backWall)
+  
+  // Side walls
+  const leftWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(1200, 200),
+    wallMaterial
+  )
+  leftWall.position.set(-600, 100, 0)
+  leftWall.rotation.y = Math.PI / 2
+  scene.add(leftWall)
+  
+  const rightWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(1200, 200),
+    wallMaterial
+  )
+  rightWall.position.set(600, 100, 0)
+  rightWall.rotation.y = -Math.PI / 2
+  scene.add(rightWall)
 }
 
 function updateCamera() {
   if (!carPhysics) return
   
   const cameraDistance = 15
-  const cameraHeight = 8
+  const cameraHeightOffset = 6
   
   const pos = carPhysics.position.value
   const rot = carPhysics.rotation.value
   
+  // Camera follows behind car and adjusts height based on car height
   const targetX = pos.x - Math.sin(rot) * cameraDistance
   const targetZ = pos.z - Math.cos(rot) * cameraDistance
+  const targetY = pos.y + cameraHeightOffset
   
   camera.position.lerp(
-    new THREE.Vector3(targetX, cameraHeight, targetZ),
+    new THREE.Vector3(targetX, targetY, targetZ),
     0.08
   )
-  camera.lookAt(pos.x, 2, pos.z)
+  camera.lookAt(pos.x, pos.y + 1, pos.z)
 }
 
 function checkLapCompletion() {
   if (!carPhysics) return
   
   const pos = carPhysics.position.value
-  const startPos = trackData.startPosition
   const waypoints = trackData.waypoints
   
-  // Check if passed through start/finish
-  if (pos.z > startPos.z - 5 && pos.z < startPos.z + 5 && 
-      Math.abs(pos.x - startPos.x) < 15) {
-    // Going forward through finish
-    if (waypointsPassed > Math.floor(waypoints.length * 0.7)) {
-      playerLapCount++
-      emit('lap-complete')
-      waypointsPassed = 0
-    }
+  // Get first waypoint as finish line reference
+  const finishWp = waypoints[0]
+  
+  // Check if passed through start/finish line (first waypoint area)
+  const distToFinish = Math.sqrt(
+    Math.pow(pos.x - finishWp.x, 2) + 
+    Math.pow(pos.z - finishWp.z, 2)
+  )
+  
+  const now = Date.now()
+  
+  // Within finish zone and enough waypoints passed and cooldown elapsed
+  if (distToFinish < 20 && 
+      waypointsPassed > Math.floor(waypoints.length * 0.6) &&
+      now - lastFinishCross > 3000) {
+    playerLapCount++
+    emit('lap-complete')
+    waypointsPassed = 0
+    lastFinishCross = now
   }
   
   // Track progress through waypoints
@@ -673,8 +816,14 @@ function checkLapCompletion() {
     }
   }
   
+  // Only count forward progress
   if (closestIdx !== lastWaypointIdx) {
-    waypointsPassed++
+    const expectedNext = (lastWaypointIdx + 1) % waypoints.length
+    // Allow some flexibility in waypoint detection
+    if (Math.abs(closestIdx - expectedNext) < 3 || 
+        (lastWaypointIdx > waypoints.length - 3 && closestIdx < 3)) {
+      waypointsPassed++
+    }
     lastWaypointIdx = closestIdx
   }
 }
@@ -705,6 +854,8 @@ function animate() {
     carPhysics.updatePhysics(delta)
     playerCar.position.copy(carPhysics.position.value)
     playerCar.rotation.y = carPhysics.rotation.value
+    playerCar.rotation.x = carPhysics.pitchRotation.value  // Tilt for ramps
+    playerCar.rotation.z = carPhysics.rollRotation.value   // Roll for loops
     
     // Update AI cars
     for (const ai of aiCars) {
@@ -735,10 +886,11 @@ function resetRace() {
   waypointsPassed = 0
   lastWaypointIdx = 0
   playerLapCount = 0
+  lastFinishCross = 0
   
   if (playerCar) {
     playerCar.position.copy(carPhysics.position.value)
-    playerCar.rotation.y = carPhysics.rotation.value
+    playerCar.rotation.set(0, carPhysics.rotation.value, 0)
   }
   
   // Reset AI cars

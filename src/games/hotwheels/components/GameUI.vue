@@ -97,13 +97,13 @@ const positionSuffix = computed(() => {
         
         <div class="track-grid">
           <div 
-            v-for="track in tracks" 
+            v-for="track in (tracks || [])" 
             :key="track.id"
             class="track-card"
             :class="{ selected: currentTrack === track.id }"
             @click="emit('select-track', track.id)"
           >
-            <div class="track-preview" :style="{ borderColor: '#' + track.theme.primary.toString(16).padStart(6, '0') }">
+            <div class="track-preview" :style="{ borderColor: track.theme ? '#' + track.theme.primary.toString(16).padStart(6, '0') : '#666' }">
               <div class="track-icon">
                 <span v-if="track.id === 1">🔥</span>
                 <span v-else-if="track.id === 2">💜</span>

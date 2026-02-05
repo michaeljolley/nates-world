@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import GameScene from './components/GameScene.vue'
 import GameUI from './components/GameUI.vue'
@@ -12,6 +12,7 @@ import DefeatScreen from './components/DefeatScreen.vue'
 import { useGameState } from './composables/useGameState'
 
 const router = useRouter()
+const isReplay = ref(false)
 
 const {
   gameState,
@@ -48,6 +49,8 @@ function handleBackToHome() {
 
 function handleStartMission() {
   if (currentAlien.value && currentRegion.value) {
+    // Track if this is a replay
+    isReplay.value = conqueredRegions.value.includes(currentRegion.value.id)
     startGame()
   }
 }
@@ -67,6 +70,11 @@ function handleCoinsEarned(amount) {
 function handleDamage(amount) {
   takeDamage(amount)
 }
+
+const victoryCoins = computed(() => {
+  if (!currentRegion.value) return 0
+  return isReplay.value ? Math.floor(currentRegion.value.coinReward / 2) : currentRegion.value.coinReward
+})
 </script>
 
 <template>
@@ -135,7 +143,8 @@ function handleDamage(amount) {
     <VictoryScreen
       v-if="gameState === 'victory'"
       :region="currentRegion"
-      :coins-earned="currentRegion?.coinReward || 0"
+      :coins-earned="victoryCoins"
+      :is-replay="isReplay"
       @continue="goToWorldMap"
     />
 

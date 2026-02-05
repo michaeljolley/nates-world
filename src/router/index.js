@@ -15,6 +15,7 @@ const SnakeRun = () => import('@/games/snakerun').then(m => m.SnakeRun)
 const FruitNinja = () => import('@/games/fruitninja').then(m => m.FruitNinja)
 const Archery = () => import('@/games/archery').then(m => m.Archery)
 const AlienInvasion = () => import('@/games/alieninvasion').then(m => m.AlienInvasion)
+
 const routes = [
   {
     path: '/',
@@ -104,7 +105,8 @@ const routes = [
     name: 'alien-invasion',
     component: AlienInvasion,
     meta: { title: 'Alien Invasion' }
-  }
+  },
+
 ]
 
 const router = createRouter({

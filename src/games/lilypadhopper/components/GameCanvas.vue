@@ -262,14 +262,18 @@ watch(() => props.isPlaying, (playing) => {
 })
 
 onMounted(() => {
+  // Initialize game immediately since component only mounts when playing
+  initGame()
   animationId = requestAnimationFrame(gameLoop)
   window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('keyup', handleKeyUp)
 })
 
 onUnmounted(() => {
   if (animationId) cancelAnimationFrame(animationId)
   if (spawnTimer) clearInterval(spawnTimer)
   window.removeEventListener('keydown', handleKeyDown)
+  window.removeEventListener('keyup', handleKeyUp)
 })
 </script>
 

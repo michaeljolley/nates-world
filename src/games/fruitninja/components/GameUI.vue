@@ -14,7 +14,7 @@ const props = defineProps({
   },
   lives: {
     type: Number,
-    default: 5
+    default: 3
   },
   combo: {
     type: Number,
@@ -28,7 +28,7 @@ const props = defineProps({
 
 const emit = defineEmits(['start', 'restart', 'back-to-menu'])
 
-const livesDisplay = () => '❤️'.repeat(props.lives) + '🖤'.repeat(5 - props.lives)
+const livesDisplay = () => '❤️'.repeat(props.lives) + '🖤'.repeat(3 - props.lives)
 </script>
 
 <template>
@@ -43,7 +43,7 @@ const livesDisplay = () => '❤️'.repeat(props.lives) + '🖤'.repeat(5 - prop
           <h3>How to Play</h3>
           <p>🍎 Swipe/drag through fruit to slice them</p>
           <p>💣 Avoid slicing bombs - you lose a life!</p>
-          <p>❤️ You have 5 lives</p>
+          <p>❤️ You have 3 lives</p>
           <p>🔥 Build combos for bonus points!</p>
         </div>
 
