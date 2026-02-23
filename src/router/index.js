@@ -119,4 +119,11 @@ router.beforeEach((to) => {
   document.title = to.meta.title ? `${to.meta.title} | Natorade` : 'Natorade'
 })
 
+// Track page view on route change for SPA analytics
+router.afterEach(() => {
+  if (window.bbbAnalytics && window.bbbAnalytics.track) {
+    window.bbbAnalytics.track()
+  }
+})
+
 export default router
