@@ -18,7 +18,6 @@ const isWipRoute = computed(() => route.name === 'warships')
         <span class="bolt-icon">⚡</span>
         <span class="logo-text">Natorade</span>
       </router-link>
-      <span v-if="isWipRoute" class="wip-header-badge">🚧 WIP: Still vibing on this one</span>
     </div>
     <div class="header-right">
       <AuthButton />

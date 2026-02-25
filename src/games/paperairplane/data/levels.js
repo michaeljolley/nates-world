@@ -4,13 +4,13 @@
 export const levels = [
   {
     id: 1,
-    name: 'Mega Classroom',
-    description: 'Navigate through the massive classroom maze!',
-    roomSize: { width: 16, height: 5, depth: 60 },
-    startPosition: { x: 0, y: 3, z: 1 },
+    name: 'Classroom',
+    description: 'Escape from the classroom!',
+    roomSize: { width: 12, height: 4, depth: 15 },
+    startPosition: { x: 0, y: 1, z: 1 },
     goal: {
-      min: { x: -1.5, y: 0.5, z: 58 },
-      max: { x: 1.5, y: 4, z: 61 }
+      min: { x: -1.5, y: 0.5, z: 14 },
+      max: { x: 1.5, y: 3.5, z: 15.5 }
     },
     obstacles: [
       // Student desks - row 1
@@ -139,13 +139,13 @@ export const levels = [
   },
   {
     id: 2,
-    name: 'Endless Hallway',
-    description: 'The longest hallway you have ever seen!',
-    roomSize: { width: 8, height: 5, depth: 120 },
-    startPosition: { x: 0, y: 3, z: 1 },
+    name: 'Hallway',
+    description: 'Navigate through the busy hallway!',
+    roomSize: { width: 6, height: 4, depth: 30 },
+    startPosition: { x: 0, y: 1, z: 1 },
     goal: {
-      min: { x: -1.5, y: 0.5, z: 118 },
-      max: { x: 1.5, y: 4, z: 121 }
+      min: { x: -1.5, y: 0.5, z: 29 },
+      max: { x: 1.5, y: 3.5, z: 31 }
     },
     obstacles: [
       // Lockers lining both walls - left side
@@ -236,13 +236,13 @@ export const levels = [
   },
   {
     id: 3,
-    name: 'Giant Cafeteria',
-    description: 'Endless rows of tables and hungry students!',
-    roomSize: { width: 30, height: 6, depth: 80 },
-    startPosition: { x: 0, y: 4, z: 1 },
+    name: 'Cafeteria',
+    description: 'Fly over the lunch tables!',
+    roomSize: { width: 20, height: 5, depth: 25 },
+    startPosition: { x: 0, y: 2, z: 1 },
     goal: {
-      min: { x: -2, y: 0.5, z: 78 },
-      max: { x: 2, y: 5, z: 81 }
+      min: { x: -2, y: 0.5, z: 24 },
+      max: { x: 2, y: 4, z: 26 }
     },
     obstacles: [
       // Long cafeteria tables - many rows

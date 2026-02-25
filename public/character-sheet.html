@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Creator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        /* Drawing Canvas Area */
+        .canvas-section {
+            background: #0f3460;
+            border-radius: 16px;
+            padding: 20px;
+            border: 3px solid #e94560;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        .toolbar button:hover { transform: scale(1.05); }
+        .toolbar button:active { transform: scale(0.95); }
+
+        .btn-draw { background: #4CAF50; color: white; }
+        .btn-erase { background: #ff9800; color: white; }
+        .btn-clear { background: #f44336; color: white; }
+        .btn-save { background: #2196F3; color: white; }
+        .btn-fill { background: #9c27b0; color: white; }
+
+        .toolbar input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .toolbar input[type="range"] {
+            width: 100px;
+        }
+
+        .toolbar label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        #drawingCanvas {
+            background: #ffffff;
+            border-radius: 12px;
+            cursor: crosshair;
+            display: block;
+            width: 100%;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel {
+            background: #0f3460;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e94560;
+        }
+
+        .panel h2 {
+            color: #e94560;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e94560;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #e94560;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: 2px solid #e94560;
+        }
+
+        /* Color Palette */
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-slot {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            border: 3px solid #fff;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .color-slot input {
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Abilities */
+        .ability-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .ability-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* Export Section */
+        .export-section {
+            margin-top: auto;
+        }
+
+        .export-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .export-btn:hover { transform: scale(1.02); }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Character Creator</h1>
+    
+    <div class="container">
+        <!-- Drawing Area -->
+        <div class="canvas-section">
+            <div class="toolbar">
+                <button class="btn-draw" onclick="setTool('draw')">✏️ Draw</button>
+                <button class="btn-erase" onclick="setTool('erase')">🧹 Erase</button>
+                <button class="btn-fill" onclick="setTool('fill')">🪣 Fill</button>
+                <button class="btn-clear" onclick="clearCanvas()">🗑️ Clear</button>
+                <button class="btn-save" onclick="saveDrawing()">💾 Save Image</button>
+                
+                <label>Color: <input type="color" id="colorPicker" value="#000000" onchange="currentColor = this.value"></label>
+                <label>Size: <input type="range" id="brushSize" min="1" max="50" value="5" onchange="lineWidth = this.value"></label>
+                <span id="sizeLabel">5px</span>
+            </div>
+            
+            <canvas id="drawingCanvas" width="900" height="600"></canvas>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <div class="panel">
+                <h2>📝 Character Info</h2>
+                <div class="form-group">
+                    <label>Character Name</label>
+                    <input type="text" id="charName" placeholder="Enter name...">
+                </div>
+                <div class="form-group">
+                    <label>Species / Type</label>
+                    <input type="text" id="charSpecies" placeholder="Human, Alien, Robot...">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="charRole">
+                        <option value="">Select role...</option>
+                        <option value="attacker">Attacker</option>
+                        <option value="defender">Defender</option>
+                        <option value="support">Support</option>
+                        <option value="tank">Tank</option>
+                        <option value="healer">Healer</option>
+                        <option value="assassin">Assassin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Personality</label>
+                    <input type="text" id="charPersonality" placeholder="Brave, shy, cunning...">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🎨 Color Palette</h2>
+                <div class="color-palette">
+                    <div class="color-slot" style="background: #7B68EE;">
+                        <input type="color" value="#7B68EE" onchange="this.parentElement.style.background = this.value; updatePalette()">
+                    </div>
+                    <div class="color-slot" style="background: #00CED1;">
+                        <input type="color" value="#00CED1" onchange="this.parentElement.style.background = this.value; updatePalette()">
+                    </div>
+                    <div class="color-slot" style="background: #FF6B6B;">
+                        <input type="color" value="#FF6B6B" onchange="this.parentElement.style.background = this.value; updatePalette()">
+                    </div>
+                    <div class="color-slot" style="background: #2D2D2D;">
+                        <input type="color" value="#2D2D2D" onchange="this.parentElement.style.background = this.value; updatePalette()">
+                    </div>
+                    <div class="color-slot" style="background: #F5F5F5;">
+                        <input type="color" value="#F5F5F5" onchange="this.parentElement.style.background = this.value; updatePalette()">
+                    </div>
+                    <div class="color-slot" style="background: #FFD93D;">
+                        <input type="color" value="#FFD93D" onchange="this.parentElement.style.background = this.value; updatePalette()">
+                    </div>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.8rem; color: #888;">Click a swatch to change its color. Click then use that color to draw!</p>
+            </div>
+
+            <div class="panel">
+                <h2>⚡ Abilities</h2>
+                <div class="ability-input">
+                    <input type="text" id="ability1" placeholder="Ability 1...">
+                </div>
+                <div class="ability-input">
+                    <input type="text" id="ability2" placeholder="Ability 2...">
+                </div>
+                <div class="ability-input">
+                    <input type="text" id="ability3" placeholder="Ability 3...">
+                </div>
+                <div class="ability-input">
+                    <input type="text" id="ultimate" placeholder="Ultimate ability...">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📖 Backstory</h2>
+                <div class="form-group">
+                    <textarea id="backstory" placeholder="Write your character's backstory here..."></textarea>
+                </div>
+            </div>
+
+            <div class="panel export-section">
+                <button class="export-btn" onclick="exportCharacter()">📤 Export Full Character Sheet</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let isDrawing = false;
+        let currentColor = '#000000';
+        let lineWidth = 5;
+        let currentTool = 'draw';
+        let lastX = 0;
+        let lastY = 0;
+
+        // Fill canvas with white
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Update size label
+        document.getElementById('brushSize').addEventListener('input', function() {
+            document.getElementById('sizeLabel').textContent = this.value + 'px';
+        });
+
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch events for tablets
+        canvas.addEventListener('touchstart', handleTouchStart);
+        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getMousePos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            
+            if (currentTool === 'fill') {
+                floodFill(Math.floor(pos.x), Math.floor(pos.y), currentColor);
+            }
+        }
+
+        function draw(e) {
+            if (!isDrawing || currentTool === 'fill') return;
+            
+            const pos = getMousePos(e);
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = currentTool === 'erase' ? '#ffffff' : currentColor;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+        }
+
+        function clearCanvas() {
+            if (confirm('Clear the entire canvas?')) {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function saveDrawing() {
+            const link = document.createElement('a');
+            link.download = (document.getElementById('charName').value || 'character') + '-drawing.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Simple flood fill
+        function floodFill(startX, startY, fillColor) {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            const startPos = (startY * canvas.width + startX) * 4;
+            const startR = data[startPos];
+            const startG = data[startPos + 1];
+            const startB = data[startPos + 2];
+            
+            const fillRGB = hexToRgb(fillColor);
+            if (startR === fillRGB.r && startG === fillRGB.g && startB === fillRGB.b) return;
+            
+            const stack = [[startX, startY]];
+            const visited = new Set();
+            
+            while (stack.length > 0 && stack.length < 100000) {
+                const [x, y] = stack.pop();
+                const key = `${x},${y}`;
+                
+                if (visited.has(key)) continue;
+                if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) continue;
+                
+                const pos = (y * canvas.width + x) * 4;
+                if (Math.abs(data[pos] - startR) > 10 || 
+                    Math.abs(data[pos + 1] - startG) > 10 || 
+                    Math.abs(data[pos + 2] - startB) > 10) continue;
+                
+                visited.add(key);
+                data[pos] = fillRGB.r;
+                data[pos + 1] = fillRGB.g;
+                data[pos + 2] = fillRGB.b;
+                data[pos + 3] = 255;
+                
+                stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : {r: 0, g: 0, b: 0};
+        }
+
+        function updatePalette() {
+            // Color slots now update when clicked
+        }
+
+        // Click palette to use that color
+        document.querySelectorAll('.color-slot').forEach(slot => {
+            slot.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'INPUT') {
+                    currentColor = this.querySelector('input').value;
+                    document.getElementById('colorPicker').value = currentColor;
+                }
+            });
+        });
+
+        function exportCharacter() {
+            // Create export canvas
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = 1400;
+            exportCanvas.height = 900;
+            const expCtx = exportCanvas.getContext('2d');
+            
+            // Background
+            expCtx.fillStyle = '#16213e';
+            expCtx.fillRect(0, 0, 1400, 900);
+            
+            // Title
+            expCtx.fillStyle = '#e94560';
+            expCtx.font = 'bold 36px Segoe UI';
+            expCtx.fillText('CHARACTER SHEET', 50, 50);
+            
+            // Draw the character drawing
+            expCtx.drawImage(canvas, 50, 80, 700, 470);
+            expCtx.strokeStyle = '#e94560';
+            expCtx.lineWidth = 3;
+            expCtx.strokeRect(50, 80, 700, 470);
+            
+            // Character info
+            expCtx.fillStyle = '#fff';
+            expCtx.font = 'bold 24px Segoe UI';
+            const name = document.getElementById('charName').value || 'Unnamed';
+            expCtx.fillText(name, 800, 100);
+            
+            expCtx.font = '18px Segoe UI';
+            expCtx.fillStyle = '#aaa';
+            expCtx.fillText('Species: ' + (document.getElementById('charSpecies').value || 'Unknown'), 800, 140);
+            expCtx.fillText('Role: ' + (document.getElementById('charRole').value || 'None'), 800, 170);
+            expCtx.fillText('Personality: ' + (document.getElementById('charPersonality').value || 'Unknown'), 800, 200);
+            
+            // Abilities
+            expCtx.fillStyle = '#e94560';
+            expCtx.font = 'bold 20px Segoe UI';
+            expCtx.fillText('ABILITIES', 800, 260);
+            
+            expCtx.fillStyle = '#fff';
+            expCtx.font = '16px Segoe UI';
+            expCtx.fillText('• ' + (document.getElementById('ability1').value || 'Ability 1'), 800, 290);
+            expCtx.fillText('• ' + (document.getElementById('ability2').value || 'Ability 2'), 800, 320);
+            expCtx.fillText('• ' + (document.getElementById('ability3').value || 'Ability 3'), 800, 350);
+            expCtx.fillText('⚡ ' + (document.getElementById('ultimate').value || 'Ultimate'), 800, 380);
+            
+            // Color palette
+            expCtx.fillStyle = '#e94560';
+            expCtx.font = 'bold 20px Segoe UI';
+            expCtx.fillText('COLOR PALETTE', 800, 440);
+            
+            document.querySelectorAll('.color-slot input').forEach((input, i) => {
+                expCtx.fillStyle = input.value;
+                expCtx.fillRect(800 + (i * 55), 460, 45, 45);
+                expCtx.strokeStyle = '#fff';
+                expCtx.strokeRect(800 + (i * 55), 460, 45, 45);
+            });
+            
+            // Backstory
+            expCtx.fillStyle = '#e94560';
+            expCtx.font = 'bold 20px Segoe UI';
+            expCtx.fillText('BACKSTORY', 50, 590);
+            
+            expCtx.fillStyle = '#ccc';
+            expCtx.font = '14px Segoe UI';
+            const backstory = document.getElementById('backstory').value || 'No backstory provided.';
+            wrapText(expCtx, backstory, 50, 620, 700, 20);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = (document.getElementById('charName').value || 'character') + '-sheet.png';
+            link.href = exportCanvas.toDataURL();
+            link.click();
+        }
+
+        function wrapText(context, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = context.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) {
+                    context.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            context.fillText(line, x, y);
+        }
+    </script>
+</body>
+</html>
