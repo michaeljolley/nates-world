@@ -13,7 +13,7 @@ export function useSnakePhysics(arenaSize = 3000) {
   
   const SEGMENT_SIZE = 12
   const SEGMENT_SPACING = 8
-  const TURN_SPEED = 15 // Much faster turning for better control
+  const TURN_SPEED = 25 // Very fast turning for maximum control
 
   function init(startX, startY, initialLength = 10) {
     segments.value = []
@@ -47,18 +47,22 @@ export function useSnakePhysics(arenaSize = 3000) {
   function update(delta) {
     if (!isAlive.value || segments.value.length === 0) return
 
-    // Instant turning for maximum control
+    // Very responsive turning - almost instant direction changes
     const turnAmount = TURN_SPEED * delta
     const dx = targetDirection.value.x - direction.value.x
     const dy = targetDirection.value.y - direction.value.y
     
-    // Faster interpolation for snappier controls
-    if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
+    // Check if we're close enough to snap to target
+    const diffLen = Math.sqrt(dx * dx + dy * dy)
+    if (diffLen < 0.05) {
+      // Snap to target direction
       direction.value.x = targetDirection.value.x
       direction.value.y = targetDirection.value.y
     } else {
-      direction.value.x += dx * turnAmount
-      direction.value.y += dy * turnAmount
+      // Quick interpolation toward target
+      const lerpFactor = Math.min(1, turnAmount)
+      direction.value.x += dx * lerpFactor
+      direction.value.y += dy * lerpFactor
     }
     
     // Normalize direction

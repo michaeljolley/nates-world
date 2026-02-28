@@ -55,7 +55,13 @@ const mouse = ref({ x: 0, y: 0, down: false })
 const alienStats = computed(() => {
   if (!props.currentAlien) return { attack: 10, defense: 5, speed: 3, hp: 100 }
   
-  const upgrades = props.alienUpgrades[props.currentAlien.id] || { attack: 0, defense: 0, speed: 0, hp: 0 }
+  const saved = props.alienUpgrades[props.currentAlien.id] || {}
+  const upgrades = {
+    attack: saved.attack ?? 0,
+    defense: saved.defense ?? 0,
+    speed: saved.speed ?? 0,
+    hp: saved.hp ?? 0
+  }
   
   return {
     attack: props.currentAlien.baseAttack + upgrades.attack * 5,
@@ -257,11 +263,29 @@ function handleMouseUp() {
   mouse.value.down = false
 }
 
+// Play the alien's unique hit sound using Web Speech API
+function playHitSound() {
+  if (!props.currentAlien?.hitSound) return
+  if (typeof speechSynthesis === 'undefined') return
+  try {
+    const utterance = new SpeechSynthesisUtterance(props.currentAlien.hitSound)
+    utterance.rate = 1.5 + Math.random() * 0.5
+    utterance.pitch = 0.8 + Math.random() * 0.8
+    utterance.volume = 0.7
+    speechSynthesis.speak(utterance)
+  } catch (e) {
+    // Speech synthesis not available, silently ignore
+  }
+}
+
 function playerAttack() {
   const p = player.value
   if (p.attackCooldown > 0) return
   
   p.attackCooldown = 0.3 // Attack cooldown
+  
+  // Play alien's hit sound
+  playHitSound()
   
   const attackRange = 80
   const attackDamage = alienStats.value.attack
@@ -1224,63 +1248,335 @@ function drawAlien(p) {
   ctx.translate(p.x, p.y)
   ctx.scale(p.facing, 1)
   
+  const color = props.currentAlien.color
+  const sprite = props.currentAlien.sprite || 'blob'
+  const w = p.width
+  const h = p.height
+  
   // Glow effect
-  ctx.shadowColor = props.currentAlien.color
+  ctx.shadowColor = color
   ctx.shadowBlur = 25
   
-  // Body
-  ctx.fillStyle = props.currentAlien.color
+  // Draw based on sprite type
+  if (sprite === 'blob' || sprite === 'round') {
+    drawBlobAlien(ctx, w, h, color, sprite === 'round')
+  } else if (sprite === 'spiky') {
+    drawSpikyAlien(ctx, w, h, color)
+  } else if (sprite === 'angular') {
+    drawAngularAlien(ctx, w, h, color)
+  } else if (sprite === 'legendary') {
+    drawLegendaryAlien(ctx, w, h, color)
+  } else {
+    drawBlobAlien(ctx, w, h, color, false)
+  }
+  
+  ctx.restore()
+}
+
+function drawBlobAlien(ctx, w, h, color, isRound) {
+  // Tentacle-like body with bulbous head
+  ctx.fillStyle = color
+  
+  // Main head (larger, more alien-shaped)
   ctx.beginPath()
-  ctx.ellipse(0, 0, p.width/2, p.height/2, 0, 0, Math.PI * 2)
+  if (isRound) {
+    // Round type: big bulbous head
+    ctx.ellipse(0, -5, w/2, h/2 + 5, 0, 0, Math.PI * 2)
+  } else {
+    // Blob type: teardrop/jellyfish shape
+    ctx.moveTo(0, -h/2 - 10)
+    ctx.bezierCurveTo(-w/2 - 5, -h/4, -w/2, h/4, -w/4, h/2)
+    ctx.bezierCurveTo(0, h/2 + 5, 0, h/2 + 5, w/4, h/2)
+    ctx.bezierCurveTo(w/2, h/4, w/2 + 5, -h/4, 0, -h/2 - 10)
+  }
   ctx.fill()
   
   ctx.shadowBlur = 0
   
-  // Body highlight
-  ctx.fillStyle = 'rgba(255,255,255,0.3)'
-  ctx.beginPath()
-  ctx.ellipse(-8, -8, p.width/4, p.height/4, 0, 0, Math.PI * 2)
-  ctx.fill()
+  // Slimy texture lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'
+  ctx.lineWidth = 2
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath()
+    ctx.arc(0, -5 + i * 8, w/3 - i * 5, 0.5, Math.PI - 0.5)
+    ctx.stroke()
+  }
   
-  // Eyes
+  // Large alien eyes (classic big black eyes)
   ctx.fillStyle = '#000'
   ctx.beginPath()
-  ctx.ellipse(-10, -8, 10, 14, 0, 0, Math.PI * 2)
-  ctx.ellipse(10, -8, 10, 14, 0, 0, Math.PI * 2)
+  ctx.ellipse(-12, -10, 12, 18, -0.2, 0, Math.PI * 2)
+  ctx.ellipse(12, -10, 12, 18, 0.2, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Eye reflection
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'
+  ctx.beginPath()
+  ctx.ellipse(-15, -18, 5, 7, 0, 0, Math.PI * 2)
+  ctx.ellipse(9, -18, 5, 7, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Small nostril slits
+  ctx.fillStyle = 'rgba(0,0,0,0.5)'
+  ctx.beginPath()
+  ctx.ellipse(-3, 8, 2, 4, 0, 0, Math.PI * 2)
+  ctx.ellipse(3, 8, 2, 4, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Tentacles/appendages at bottom
+  ctx.strokeStyle = color
+  ctx.lineWidth = 4
+  ctx.lineCap = 'round'
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath()
+    ctx.moveTo(i * 8, h/2 - 5)
+    const wiggle = Math.sin(Date.now() / 200 + i) * 5
+    ctx.quadraticCurveTo(i * 10 + wiggle, h/2 + 15, i * 6 + wiggle, h/2 + 25)
+    ctx.stroke()
+  }
+}
+
+function drawSpikyAlien(ctx, w, h, color) {
+  // Spiky aggressive alien
+  ctx.fillStyle = color
+  
+  // Spiky body with multiple points
+  ctx.beginPath()
+  const spikes = 8
+  const outerR = w/2 + 10
+  const innerR = w/2 - 8
+  for (let i = 0; i < spikes * 2; i++) {
+    const angle = (i / (spikes * 2)) * Math.PI * 2 - Math.PI/2
+    const r = i % 2 === 0 ? outerR : innerR
+    const x = Math.cos(angle) * r
+    const y = Math.sin(angle) * r * 0.9
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  }
+  ctx.closePath()
+  ctx.fill()
+  
+  ctx.shadowBlur = 0
+  
+  // Inner body
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'
+  ctx.beginPath()
+  ctx.ellipse(0, 0, w/3, h/3, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Angry slanted eyes
+  ctx.fillStyle = '#000'
+  ctx.beginPath()
+  ctx.ellipse(-12, -5, 10, 14, -0.4, 0, Math.PI * 2)
+  ctx.ellipse(12, -5, 10, 14, 0.4, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Red/orange pupils
+  ctx.fillStyle = '#ff3300'
+  ctx.beginPath()
+  ctx.ellipse(-12, -3, 5, 8, 0, 0, Math.PI * 2)
+  ctx.ellipse(12, -3, 5, 8, 0, 0, Math.PI * 2)
   ctx.fill()
   
   // Eye shine
   ctx.fillStyle = '#fff'
   ctx.beginPath()
-  ctx.arc(-8, -12, 4, 0, Math.PI * 2)
-  ctx.arc(12, -12, 4, 0, Math.PI * 2)
+  ctx.arc(-14, -10, 3, 0, Math.PI * 2)
+  ctx.arc(10, -10, 3, 0, Math.PI * 2)
   ctx.fill()
   
-  // Antenna
-  ctx.strokeStyle = props.currentAlien.color
-  ctx.lineWidth = 3
+  // Sharp teeth mouth
+  ctx.fillStyle = '#000'
   ctx.beginPath()
-  ctx.moveTo(-5, -p.height/2 + 5)
-  ctx.quadraticCurveTo(-15, -p.height/2 - 15, -10, -p.height/2 - 25)
-  ctx.moveTo(5, -p.height/2 + 5)
-  ctx.quadraticCurveTo(15, -p.height/2 - 15, 10, -p.height/2 - 25)
+  ctx.moveTo(-15, 12)
+  ctx.lineTo(15, 12)
+  ctx.lineTo(12, 22)
+  ctx.lineTo(-12, 22)
+  ctx.closePath()
+  ctx.fill()
+  
+  ctx.fillStyle = '#fff'
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath()
+    ctx.moveTo(i * 6 - 2, 12)
+    ctx.lineTo(i * 6 + 2, 12)
+    ctx.lineTo(i * 6, 18)
+    ctx.closePath()
+    ctx.fill()
+  }
+}
+
+function drawAngularAlien(ctx, w, h, color) {
+  // Geometric/robotic alien
+  ctx.fillStyle = color
+  
+  // Angular head shape
+  ctx.beginPath()
+  ctx.moveTo(0, -h/2 - 15)
+  ctx.lineTo(-w/2 - 5, -h/4)
+  ctx.lineTo(-w/2, h/4)
+  ctx.lineTo(-w/4, h/2 + 5)
+  ctx.lineTo(w/4, h/2 + 5)
+  ctx.lineTo(w/2, h/4)
+  ctx.lineTo(w/2 + 5, -h/4)
+  ctx.closePath()
+  ctx.fill()
+  
+  ctx.shadowBlur = 0
+  
+  // Face plate
+  ctx.fillStyle = 'rgba(0,0,0,0.4)'
+  ctx.beginPath()
+  ctx.moveTo(0, -h/3)
+  ctx.lineTo(-w/3, 0)
+  ctx.lineTo(0, h/3)
+  ctx.lineTo(w/3, 0)
+  ctx.closePath()
+  ctx.fill()
+  
+  // Visor eyes (single bar)
+  ctx.fillStyle = '#000'
+  ctx.fillRect(-w/3, -15, w*2/3, 18)
+  
+  // Glowing eye dots
+  const eyeGlow = Math.sin(Date.now() / 150) * 0.3 + 0.7
+  ctx.fillStyle = `rgba(255, 255, 255, ${eyeGlow})`
+  ctx.beginPath()
+  ctx.arc(-15, -6, 6, 0, Math.PI * 2)
+  ctx.arc(15, -6, 6, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Antenna/horns
+  ctx.strokeStyle = color
+  ctx.lineWidth = 4
+  ctx.beginPath()
+  ctx.moveTo(-15, -h/2 - 5)
+  ctx.lineTo(-20, -h/2 - 25)
+  ctx.moveTo(15, -h/2 - 5)
+  ctx.lineTo(20, -h/2 - 25)
   ctx.stroke()
   
   // Antenna tips
   ctx.fillStyle = '#fff'
   ctx.beginPath()
-  ctx.arc(-10, -p.height/2 - 25, 5, 0, Math.PI * 2)
-  ctx.arc(10, -p.height/2 - 25, 5, 0, Math.PI * 2)
+  ctx.arc(-20, -h/2 - 25, 4, 0, Math.PI * 2)
+  ctx.arc(20, -h/2 - 25, 4, 0, Math.PI * 2)
   ctx.fill()
   
-  // Mouth (slight smile)
-  ctx.strokeStyle = '#000'
+  // Mouth grill
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)'
   ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.arc(0, 5, 8, 0.2, Math.PI - 0.2)
-  ctx.stroke()
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath()
+    ctx.moveTo(i * 6, 15)
+    ctx.lineTo(i * 6, 28)
+    ctx.stroke()
+  }
+}
+
+function drawLegendaryAlien(ctx, w, h, color) {
+  // Epic legendary alien with aura
+  const time = Date.now() / 1000
   
-  ctx.restore()
+  // Pulsing aura
+  ctx.shadowBlur = 40 + Math.sin(time * 3) * 10
+  
+  // Multiple aura rings
+  for (let i = 3; i >= 0; i--) {
+    ctx.fillStyle = `rgba(${hexToRgb(color)}, ${0.1 - i * 0.02})`
+    ctx.beginPath()
+    ctx.ellipse(0, 0, w/2 + 20 + i * 10, h/2 + 20 + i * 10, 0, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  
+  // Main body - ethereal floating form
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.moveTo(0, -h/2 - 20)
+  ctx.bezierCurveTo(-w/2 - 15, -h/3, -w/2 - 10, h/3, -w/4, h/2 + 10)
+  ctx.bezierCurveTo(0, h/2 + 20, 0, h/2 + 20, w/4, h/2 + 10)
+  ctx.bezierCurveTo(w/2 + 10, h/3, w/2 + 15, -h/3, 0, -h/2 - 20)
+  ctx.fill()
+  
+  ctx.shadowBlur = 0
+  
+  // Crown/crest
+  ctx.fillStyle = color
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath()
+    ctx.moveTo(i * 10, -h/2 - 10)
+    ctx.lineTo(i * 10 - 5, -h/2 - 30 - Math.abs(i) * 5)
+    ctx.lineTo(i * 10 + 5, -h/2 - 30 - Math.abs(i) * 5)
+    ctx.closePath()
+    ctx.fill()
+  }
+  
+  // Crown jewels
+  ctx.fillStyle = '#fff'
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath()
+    ctx.arc(i * 10, -h/2 - 25 - Math.abs(i) * 5, 3, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  
+  // Large mystical eyes
+  ctx.fillStyle = '#000'
+  ctx.beginPath()
+  ctx.ellipse(-15, -8, 14, 20, -0.15, 0, Math.PI * 2)
+  ctx.ellipse(15, -8, 14, 20, 0.15, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Glowing pupils
+  const pupilGlow = Math.sin(time * 2) * 0.3 + 0.7
+  ctx.fillStyle = `rgba(255, 255, 255, ${pupilGlow})`
+  ctx.beginPath()
+  ctx.ellipse(-15, -8, 8, 12, 0, 0, Math.PI * 2)
+  ctx.ellipse(15, -8, 8, 12, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Inner eye glow (colored)
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.ellipse(-15, -8, 4, 6, 0, 0, Math.PI * 2)
+  ctx.ellipse(15, -8, 4, 6, 0, 0, Math.PI * 2)
+  ctx.fill()
+  
+  // Floating energy tentacles
+  ctx.strokeStyle = color
+  ctx.lineWidth = 5
+  ctx.lineCap = 'round'
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath()
+    ctx.moveTo(i * 12, h/2)
+    const wave1 = Math.sin(time * 3 + i) * 10
+    const wave2 = Math.sin(time * 2 + i * 2) * 8
+    ctx.bezierCurveTo(
+      i * 15 + wave1, h/2 + 20,
+      i * 10 + wave2, h/2 + 35,
+      i * 8 + wave1, h/2 + 45
+    )
+    ctx.stroke()
+  }
+  
+  // Energy particles floating around
+  ctx.fillStyle = '#fff'
+  for (let i = 0; i < 6; i++) {
+    const angle = time * 2 + (i / 6) * Math.PI * 2
+    const radius = 45 + Math.sin(time * 3 + i) * 5
+    const px = Math.cos(angle) * radius
+    const py = Math.sin(angle) * radius * 0.6
+    ctx.beginPath()
+    ctx.arc(px, py, 2 + Math.sin(time * 4 + i) * 1, 0, Math.PI * 2)
+    ctx.fill()
+  }
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (result) {
+    return `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+  }
+  return '255, 255, 255'
 }
 
 function drawHUD(p) {

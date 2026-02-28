@@ -8,13 +8,20 @@ const props = defineProps({
   alienUpgrades: { type: Object, required: true }
 })
 
-const emit = defineEmits(['upgrade', 'back'])
+const emit = defineEmits(['upgrade', 'downgrade', 'back'])
 
 const MAX_LEVEL = 20
 
 const upgrades = computed(() => {
   if (!props.currentAlien) return null
-  return props.alienUpgrades[props.currentAlien.id] || { attack: 0, defense: 0, speed: 0, hp: 0 }
+  const saved = props.alienUpgrades[props.currentAlien.id] || {}
+  return {
+    attack: saved.attack ?? 0,
+    defense: saved.defense ?? 0,
+    speed: saved.speed ?? 0,
+    hp: saved.hp ?? 0,
+    attackSpeed: saved.attackSpeed ?? 0
+  }
 })
 
 function getUpgradeCost(level) {
@@ -33,6 +40,15 @@ function isMaxLevel(level) {
   return level >= MAX_LEVEL
 }
 
+function canDowngrade(level) {
+  return level > 0
+}
+
+function getRefundAmount(level) {
+  if (level <= 0) return 0
+  return Math.floor(50 * Math.pow(1.5, level - 1))
+}
+
 const stats = computed(() => {
   if (!props.currentAlien || !upgrades.value) return []
   
@@ -48,6 +64,7 @@ const stats = computed(() => {
       current: getCurrentStat(alien.baseAttack, up.attack, 5),
       level: up.attack,
       cost: getUpgradeCost(up.attack),
+      refund: getRefundAmount(up.attack),
       color: '#ff4444'
     },
     {
@@ -58,6 +75,7 @@ const stats = computed(() => {
       current: getCurrentStat(alien.baseDefense, up.defense, 3),
       level: up.defense,
       cost: getUpgradeCost(up.defense),
+      refund: getRefundAmount(up.defense),
       color: '#4488ff'
     },
     {
@@ -68,6 +86,7 @@ const stats = computed(() => {
       current: getCurrentStat(alien.baseSpeed, up.speed, 0.5).toFixed(1),
       level: up.speed,
       cost: getUpgradeCost(up.speed),
+      refund: getRefundAmount(up.speed),
       color: '#ffff00'
     },
     {
@@ -78,7 +97,19 @@ const stats = computed(() => {
       current: getCurrentStat(alien.baseHP, up.hp, 20),
       level: up.hp,
       cost: getUpgradeCost(up.hp),
+      refund: getRefundAmount(up.hp),
       color: '#44ff44'
+    },
+    {
+      id: 'attackSpeed',
+      name: 'Attack Speed',
+      icon: '🔥',
+      base: 0.3,
+      current: (0.3 - up.attackSpeed * 0.012).toFixed(2) + 's',
+      level: up.attackSpeed,
+      cost: getUpgradeCost(up.attackSpeed),
+      refund: getRefundAmount(up.attackSpeed),
+      color: '#ff8800'
     }
   ]
 })
@@ -126,21 +157,35 @@ const stats = computed(() => {
             <span class="level-text">Lv. {{ stat.level }} / {{ MAX_LEVEL }}</span>
           </div>
           
-          <button
-            class="upgrade-btn"
-            :disabled="isMaxLevel(stat.level) || !canAfford(stat.level)"
-            :style="{ 
-              background: isMaxLevel(stat.level) ? '#333' : `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}88 100%)`
-            }"
-            @click="emit('upgrade', currentAlien.id, stat.id)"
-          >
-            <template v-if="isMaxLevel(stat.level)">
-              MAX
-            </template>
-            <template v-else>
-              Upgrade 💰{{ stat.cost }}
-            </template>
-          </button>
+          <div class="button-row">
+            <button
+              class="downgrade-btn"
+              :disabled="!canDowngrade(stat.level)"
+              @click="emit('downgrade', currentAlien.id, stat.id)"
+            >
+              <template v-if="!canDowngrade(stat.level)">
+                MIN
+              </template>
+              <template v-else>
+                ⬇️ 💰+{{ stat.refund }}
+              </template>
+            </button>
+            <button
+              class="upgrade-btn"
+              :disabled="isMaxLevel(stat.level) || !canAfford(stat.level)"
+              :style="{ 
+                background: isMaxLevel(stat.level) ? '#333' : `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}88 100%)`
+              }"
+              @click="emit('upgrade', currentAlien.id, stat.id)"
+            >
+              <template v-if="isMaxLevel(stat.level)">
+                MAX
+              </template>
+              <template v-else>
+                ⬆️ 💰{{ stat.cost }}
+              </template>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -151,6 +196,7 @@ const stats = computed(() => {
           <li>🛡️ Defense: +3 per level</li>
           <li>⚡ Speed: +0.5 per level</li>
           <li>❤️ HP: +20 per level</li>
+          <li>🔥 Attack Speed: -0.012s cooldown per level</li>
         </ul>
       </div>
     </div>
@@ -320,6 +366,39 @@ const stats = computed(() => {
   opacity: 0.5;
   cursor: not-allowed;
   color: #888;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.button-row .upgrade-btn,
+.button-row .downgrade-btn {
+  flex: 1;
+}
+
+.downgrade-btn {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #666 0%, #444 100%);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.downgrade-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #888 0%, #666 100%);
+}
+
+.downgrade-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #555;
 }
 
 .upgrade-info {

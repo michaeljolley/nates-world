@@ -66,6 +66,11 @@ export function useCollision() {
       return { type: 'crash', reason: 'wall' }
     }
 
+    // Check front wall collision (end of room)
+    if (position.z > roomBounds.depth - 0.2) {
+      return { type: 'crash', reason: 'wall' }
+    }
+
     // Check obstacle collisions
     for (const obs of obstacles) {
       if (boxesIntersect(planeMin, planeMax, obs.min, obs.max)) {

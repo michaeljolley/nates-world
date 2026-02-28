@@ -33,13 +33,21 @@ export function useGameState() {
     const alien = getAlienById(alienId)
     if (!alien) return null
     
-    const upgrades = alienUpgrades.value[alienId] || { attack: 0, defense: 0, speed: 0, hp: 0 }
+    const saved = alienUpgrades.value[alienId] || {}
+    const upgrades = {
+      attack: saved.attack ?? 0,
+      defense: saved.defense ?? 0,
+      speed: saved.speed ?? 0,
+      hp: saved.hp ?? 0,
+      attackSpeed: saved.attackSpeed ?? 0
+    }
     
     return {
       attack: alien.baseAttack + upgrades.attack * 5,
       defense: alien.baseDefense + upgrades.defense * 3,
       speed: alien.baseSpeed + upgrades.speed * 0.5,
-      hp: alien.baseHP + upgrades.hp * 20
+      hp: alien.baseHP + upgrades.hp * 20,
+      attackSpeed: 0.3 - upgrades.attackSpeed * 0.012 // Base 0.3s cooldown, reduced by 0.012s per level (min 0.06s at level 20)
     }
   }
 
@@ -80,7 +88,7 @@ export function useGameState() {
     unlockedAliens.value.push(alienId)
     
     // Initialize upgrades for new alien
-    alienUpgrades.value[alienId] = { attack: 0, defense: 0, speed: 0, hp: 0 }
+    alienUpgrades.value[alienId] = { attack: 0, defense: 0, speed: 0, hp: 0, attackSpeed: 0 }
     
     // Auto-select the new alien
     currentAlienId.value = alienId
@@ -93,17 +101,34 @@ export function useGameState() {
     if (!unlockedAliens.value.includes(alienId)) return false
     
     if (!alienUpgrades.value[alienId]) {
-      alienUpgrades.value[alienId] = { attack: 0, defense: 0, speed: 0, hp: 0 }
+      alienUpgrades.value[alienId] = { attack: 0, defense: 0, speed: 0, hp: 0, attackSpeed: 0 }
     }
     
-    const currentLevel = alienUpgrades.value[alienId][stat]
+    const currentLevel = alienUpgrades.value[alienId][stat] ?? 0
     if (currentLevel >= 20) return false // Max level
     
     const cost = getUpgradeCost(currentLevel)
     if (coins.value < cost) return false
     
     coins.value -= cost
-    alienUpgrades.value[alienId][stat]++
+    alienUpgrades.value[alienId][stat] = currentLevel + 1
+    
+    saveGame()
+    return true
+  }
+
+  function downgradeAlien(alienId, stat) {
+    if (!unlockedAliens.value.includes(alienId)) return false
+    
+    if (!alienUpgrades.value[alienId]) return false
+    
+    const currentLevel = alienUpgrades.value[alienId][stat] ?? 0
+    if (currentLevel <= 0) return false // Already at base level
+    
+    // Refund the cost of the previous level
+    const refund = getUpgradeCost(currentLevel - 1)
+    coins.value += refund
+    alienUpgrades.value[alienId][stat] = currentLevel - 1
     
     saveGame()
     return true
@@ -188,7 +213,7 @@ export function useGameState() {
     
     // Ensure first alien has upgrades initialized
     if (!alienUpgrades.value['alien_001']) {
-      alienUpgrades.value['alien_001'] = { attack: 0, defense: 0, speed: 0, hp: 0 }
+      alienUpgrades.value['alien_001'] = { attack: 0, defense: 0, speed: 0, hp: 0, attackSpeed: 0 }
     }
     
     // Auto-select first alien if none selected
@@ -213,6 +238,7 @@ export function useGameState() {
     selectRegion,
     selectAlien,
     upgradeAlien,
+    downgradeAlien,
     buyAlien,
     addCoins,
     takeDamage,

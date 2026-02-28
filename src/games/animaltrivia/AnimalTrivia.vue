@@ -3,6 +3,7 @@ import { ref, computed, onUnmounted, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useStreaksStore } from '@/stores/streaks'
 import SignInModal from '@/components/SignInModal.vue'
+import { getQuestionsForGame } from './questions.js'
 
 const authStore = useAuthStore()
 const streaksStore = useStreaksStore()
@@ -27,6 +28,9 @@ let timerInterval = null
 
 // Map difficulty names to numbers for database (use unique IDs to not conflict with other games)
 const difficultyMap = { easy: 4, medium: 5, hard: 6 }
+
+// Number of questions per difficulty
+const questionsPerDifficulty = { easy: 10, medium: 15, hard: 20 }
 
 // Audio context
 let audioCtx = null
@@ -62,31 +66,13 @@ function decodeHtml(html) {
   return txt.value
 }
 
-async function fetchQuestions() {
+function loadQuestions() {
   isLoading.value = true
   error.value = null
   
   try {
-    const response = await fetch(
-      `https://opentdb.com/api.php?amount=10&category=27&type=multiple&difficulty=${difficulty.value}`
-    )
-    const data = await response.json()
-    
-    if (data.response_code !== 0) {
-      throw new Error('Failed to fetch questions')
-    }
-    
-    questions.value = data.results.map(q => {
-      const answers = [...q.incorrect_answers, q.correct_answer]
-        .map(a => decodeHtml(a))
-        .sort(() => Math.random() - 0.5)
-      
-      return {
-        question: decodeHtml(q.question),
-        answers,
-        correctAnswer: decodeHtml(q.correct_answer)
-      }
-    })
+    const questionCount = questionsPerDifficulty[difficulty.value]
+    questions.value = getQuestionsForGame(difficulty.value, questionCount)
   } catch (e) {
     error.value = 'Failed to load questions. Please try again.'
     console.error(e)
@@ -96,7 +82,7 @@ async function fetchQuestions() {
 }
 
 async function startGame() {
-  await fetchQuestions()
+  loadQuestions()
   if (error.value) return
   
   currentQuestionIndex.value = 0
@@ -172,8 +158,9 @@ async function endGame() {
   stopTimer()
   gamePhase.value = 'results'
   
-  // A "win" is 80% or higher (8+ out of 10)
-  const isWin = score.value >= 8
+  // A "win" is 80% or higher
+  const totalQuestions = questionsPerDifficulty[difficulty.value]
+  const isWin = score.value >= Math.ceil(totalQuestions * 0.8)
   
   if (authStore.isLoggedIn) {
     const level = difficultyMap[difficulty.value]
@@ -288,9 +275,9 @@ function getAnswerClass(answer) {
         <div class="rules">
           <h3>How to Play</h3>
           <ul>
-            <li>Answer 10 multiple-choice questions about animals</li>
+            <li>Answer {{ questionsPerDifficulty[difficulty] }} multiple-choice questions about animals</li>
             <li>You have 30 seconds per question</li>
-            <li>Score 8 or more to continue your streak!</li>
+            <li>Score {{ Math.ceil(questionsPerDifficulty[difficulty] * 0.8) }} or more to continue your streak!</li>
           </ul>
         </div>
       </template>
@@ -338,7 +325,7 @@ function getAnswerClass(answer) {
           <h2>Game Over!</h2>
           <div class="final-score">
             <span class="score-number">{{ score }}</span>
-            <span class="score-total">/ 10</span>
+            <span class="score-total">/ {{ questionsPerDifficulty[difficulty] }}</span>
           </div>
           
           <p class="score-message" v-if="score === 10">🏆 Perfect Score! Amazing!</p>

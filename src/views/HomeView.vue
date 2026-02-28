@@ -27,8 +27,7 @@ const games = [
     id: 'animal-trivia',
     icon: '🦁🐘',
     title: 'Animal Trivia',
-    description: 'Test your animal knowledge! Answer 10 questions before time runs out.',
-    wip: true
+    description: 'Test your animal knowledge! Answer 10 questions before time runs out.'
   },
   {
     id: 'paper-airplane',
@@ -37,33 +36,14 @@ const games = [
     description: 'Fly a paper airplane through the school! Navigate 10 rooms and escape out the stage!',
     wip: true
   },
-  {
-    id: 'battlefields',
-    icon: '⚔️👊',
-    title: 'Battlefields',
-    description: 'Choose from 25 fighters and battle random opponents! Best of 5 rounds wins the match.',
-    wip: true
-  },
-  {
-    id: 'hot-wheels',
-    icon: '🏎️🔥',
-    title: 'Hot Wheels Racing',
-    description: 'Race around the track in a blazing hot wheels car! Complete 3 laps to win!',
-    wip: true
-  },
+
   {
     id: 'connect-four',
     icon: '🔴🟡',
     title: 'Connect Four',
     description: 'Drop discs into the grid and connect 4 in a row before the AI does!'
   },
-  {
-    id: 'lily-pad-hopper',
-    icon: '🐸🪷',
-    title: 'Lily Pad Hopper',
-    description: 'Jump from lily pad to lily pad! How many jumps can you make without falling in?',
-    wip: true
-  },
+
   {
     id: 'snake-run',
     icon: '🐍🍎',
@@ -82,21 +62,33 @@ const games = [
     id: 'fruit-ninja',
     icon: '🍉🗡️',
     title: 'Fruit Ninja',
-    description: 'Slice flying fruit while avoiding bombs! You have 3 lives - don\'t blow them all!',
-    wip: true
+    description: 'Slice flying fruit while avoiding bombs! You have 3 lives - don\'t blow them all!'
   },
-  {
-    id: 'archery',
-    icon: '🏹🎯',
-    title: 'Archery',
-    description: 'Aim your bow and shoot arrows at the target! Get closer to the bullseye for more points!',
-    wip: true
-  },
+
   {
     id: 'alien-invasion',
     icon: '👽🌍',
     title: 'Alien Invasion',
-    description: 'Control aliens to destroy buildings and take over the world! Buy and upgrade 50 unique aliens!',
+    description: 'Control aliens to destroy buildings and take over the world! Buy and upgrade 50 unique aliens!'
+  },
+  {
+    id: 'crossy-road',
+    icon: '🐔🚗',
+    title: 'Crossy Road',
+    description: 'Help the chicken cross busy roads, rivers, and train tracks! How far can you go?'
+  },
+  {
+    id: 'tetris',
+    icon: '🧱📦',
+    title: 'Tetris',
+    description: 'Stack falling blocks and clear lines! Classic puzzle action with increasing speed!',
+    wip: true
+  },
+  {
+    id: 'boxing-bros',
+    icon: '🥊👊',
+    title: 'Boxing Bros',
+    description: 'Step into the ring! Fight an NPC boxer using WASD to move and SPACE to punch!',
     wip: true
   },
 

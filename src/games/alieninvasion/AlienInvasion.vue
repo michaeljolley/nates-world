@@ -26,6 +26,7 @@ const {
   selectRegion,
   selectAlien,
   upgradeAlien,
+  downgradeAlien,
   buyAlien,
   endGame,
   winRegion,
@@ -117,6 +118,7 @@ const victoryCoins = computed(() => {
       :current-alien="currentAlien"
       :alien-upgrades="alienUpgrades"
       @upgrade="upgradeAlien"
+      @downgrade="downgradeAlien"
       @back="goToWorldMap"
     />
 

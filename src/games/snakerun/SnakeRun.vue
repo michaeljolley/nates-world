@@ -213,9 +213,9 @@ function handleMouseMove(e) {
   const dx = e.clientX - rect.left - centerX
   const dy = e.clientY - rect.top - centerY
   
-  // Set direction towards mouse - smaller dead zone for more responsive controls
+  // Set direction towards mouse - no dead zone for instant response
   const len = Math.sqrt(dx * dx + dy * dy)
-  if (len > 5) { // Very small dead zone
+  if (len > 2) { // Tiny dead zone only to prevent jitter at center
     setDirection(dx / len, dy / len)
   }
 }
