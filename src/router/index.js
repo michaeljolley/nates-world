@@ -5,9 +5,13 @@ const MinecraftMap = () => import('@/views/minecraft-map/MinecraftMap.vue')
 
 // Lazy load game components
 const TicTacToe = () => import('@/games/tictactoe').then(m => m.TicTacToe)
-const WarShips = () => import('@/games/warships').then(m => m.WarShips)
 const Plantation = () => import('@/games/plantation').then(m => m.Plantation)
 const AnimalTrivia = () => import('@/games/animaltrivia').then(m => m.AnimalTrivia)
+const DinoTrivia = () => import('@/games/dinotrivia').then(m => m.DinoTrivia)
+const BibleTrivia = () => import('@/games/bibletrivia').then(m => m.BibleTrivia)
+const HistoryTrivia = () => import('@/games/historytrivia').then(m => m.HistoryTrivia)
+const LanguageTrivia = () => import('@/games/languagetrivia').then(m => m.LanguageTrivia)
+const MathQuiz = () => import('@/games/mathquiz').then(m => m.MathQuiz)
 const PaperAirplane = () => import('@/games/paperairplane').then(m => m.PaperAirplane)
 
 const ConnectFour = () => import('@/games/connectfour').then(m => m.ConnectFour)
@@ -20,6 +24,10 @@ const RobberJoe = () => import('@/games/robberjoe').then(m => m.RobberJoe)
 const Tetris = () => import('@/games/tetris').then(m => m.Tetris)
 const CrossyRoad = () => import('@/games/crossyroad').then(m => m.CrossyRoad)
 const BoxingBros = () => import('@/games/boxingbros').then(m => m.BoxingBros)
+const PunchOut = () => import('@/games/brawlarena').then(m => m.BrawlArena)
+const MonkeyFishTD = () => import('@/games/monkeyfishtd').then(m => m.MonkeyFishTD)
+const HistoryQuiz = () => import('@/games/historyquiz').then(m => m.HistoryQuiz)
+const Monopoly = () => import('@/games/monopoly').then(m => m.Monopoly)
 
 const routes = [
   {
@@ -34,12 +42,6 @@ const routes = [
     meta: { title: 'Tic-Tac-Toe' }
   },
   {
-    path: '/warships',
-    name: 'warships',
-    component: WarShips,
-    meta: { title: 'War Ships 3D' }
-  },
-  {
     path: '/plantation',
     name: 'plantation',
     component: Plantation,
@@ -50,6 +52,36 @@ const routes = [
     name: 'animal-trivia',
     component: AnimalTrivia,
     meta: { title: 'Animal Trivia' }
+  },
+  {
+    path: '/dino-trivia',
+    name: 'dino-trivia',
+    component: DinoTrivia,
+    meta: { title: 'Dino Trivia' }
+  },
+  {
+    path: '/bible-trivia',
+    name: 'bible-trivia',
+    component: BibleTrivia,
+    meta: { title: 'Bible Trivia' }
+  },
+  {
+    path: '/history-trivia',
+    name: 'history-trivia',
+    component: HistoryTrivia,
+    meta: { title: 'History Trivia' }
+  },
+  {
+    path: '/language-trivia',
+    name: 'language-trivia',
+    component: LanguageTrivia,
+    meta: { title: 'Language Trivia' }
+  },
+  {
+    path: '/math-quiz',
+    name: 'math-quiz',
+    component: MathQuiz,
+    meta: { title: 'Math Quiz' }
   },
   {
     path: '/paper-airplane',
@@ -121,6 +153,30 @@ const routes = [
     meta: { title: 'Boxing Bros' }
   },
 
+  {
+    path: '/monkey-fish-td',
+    name: 'monkey-fish-td',
+    component: MonkeyFishTD,
+    meta: { title: 'Monkey Fish TD' }
+  },
+  {
+    path: '/punch-out',
+    name: 'punch-out',
+    component: PunchOut,
+    meta: { title: 'Punch Out' }
+  },
+  {
+    path: '/history-quiz',
+    name: 'history-quiz',
+    component: HistoryQuiz,
+    meta: { title: 'History Quiz' }
+  },
+  {
+    path: '/monopoly',
+    name: 'monopoly',
+    component: Monopoly,
+    meta: { title: 'Monopoly' }
+  },
 ]
 
 const router = createRouter({

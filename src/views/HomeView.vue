@@ -12,12 +12,6 @@ const games = [
     description: "The classic game of X's and O's! Challenge the computer at Easy, Medium, or Hard difficulty."
   },
   {
-    id: 'warships',
-    icon: '🚢💥',
-    title: 'War Ships 3D',
-    description: 'An epic 3D battleship game! Sink the enemy fleet before they sink yours!'
-  },
-  {
     id: 'plantation',
     icon: '🌱🌿',
     title: 'Plantation',
@@ -28,6 +22,36 @@ const games = [
     icon: '🦁🐘',
     title: 'Animal Trivia',
     description: 'Test your animal knowledge! Answer 10 questions before time runs out.'
+  },
+  {
+    id: 'dino-trivia',
+    icon: '🦖🦕',
+    title: 'Dino Trivia',
+    description: 'Test your dinosaur knowledge! Answer questions about prehistoric creatures!'
+  },
+  {
+    id: 'bible-trivia',
+    icon: '📖✝️',
+    title: 'Bible Trivia',
+    description: 'Test your Bible knowledge! Answer questions about your favorite Bible stories!'
+  },
+  {
+    id: 'math-quiz',
+    icon: '🧮📐',
+    title: 'Math Quiz',
+    description: 'Test your math skills! Solve addition, subtraction, multiplication, and more!'
+  },
+  {
+    id: 'language-trivia',
+    icon: '📚✏️',
+    title: 'Language Trivia',
+    description: 'Test your grammar and language arts skills! Learn about nouns, verbs, and more!'
+  },
+  {
+    id: 'history-quiz',
+    icon: '📜🏛️',
+    title: 'History Quiz',
+    description: 'Test your history knowledge! Learn about ancient civilizations, world wars, and more!'
   },
   {
     id: 'paper-airplane',
@@ -91,7 +115,18 @@ const games = [
     description: 'Step into the ring! Fight an NPC boxer using WASD to move and SPACE to punch!',
     wip: true
   },
-
+  {
+    id: 'brawl-arena',
+    icon: '⚔️💥',
+    title: 'Brawl Arena',
+    description: 'Platform fighter action! Choose your fighter and battle on unique stages. VS CPU or friends!'
+  },
+  {
+    id: 'monkey-fish-td',
+    icon: '🐵🐟',
+    title: 'Monkey Fish TD',
+    description: 'Tower defense! Place monkeys to stop the fish invasion. 15 maps and 18 monkey types!'
+  }
 ]
 
 function openGame(game) {

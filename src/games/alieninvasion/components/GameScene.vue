@@ -263,29 +263,11 @@ function handleMouseUp() {
   mouse.value.down = false
 }
 
-// Play the alien's unique hit sound using Web Speech API
-function playHitSound() {
-  if (!props.currentAlien?.hitSound) return
-  if (typeof speechSynthesis === 'undefined') return
-  try {
-    const utterance = new SpeechSynthesisUtterance(props.currentAlien.hitSound)
-    utterance.rate = 1.5 + Math.random() * 0.5
-    utterance.pitch = 0.8 + Math.random() * 0.8
-    utterance.volume = 0.7
-    speechSynthesis.speak(utterance)
-  } catch (e) {
-    // Speech synthesis not available, silently ignore
-  }
-}
-
 function playerAttack() {
   const p = player.value
   if (p.attackCooldown > 0) return
   
   p.attackCooldown = 0.3 // Attack cooldown
-  
-  // Play alien's hit sound
-  playHitSound()
   
   const attackRange = 80
   const attackDamage = alienStats.value.attack

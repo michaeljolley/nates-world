@@ -233,11 +233,14 @@ watch(gameState, (newState) => {
 
 <style scoped>
 .fruit-ninja-game {
-  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  z-index: 100;
 }
 
 .music-toggle {

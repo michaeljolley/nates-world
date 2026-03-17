@@ -37,23 +37,8 @@ const livesDisplay = () => '❤️'.repeat(props.lives) + '🖤'.repeat(3 - prop
     <div v-if="gameState === 'menu'" class="overlay menu-overlay">
       <div class="menu-content">
         <h1 class="game-title">🍉 Fruit Ninja 🗡️</h1>
-        <p class="game-subtitle">Slice the fruit, avoid the bombs!</p>
-        
-        <div class="instructions">
-          <h3>How to Play</h3>
-          <p>🍎 Swipe/drag through fruit to slice them</p>
-          <p>💣 Avoid slicing bombs - you lose a life!</p>
-          <p>❤️ You have 3 lives</p>
-          <p>🔥 Build combos for bonus points!</p>
-        </div>
-
-        <div class="high-score-display" v-if="highScore > 0">
-          🏆 High Score: {{ highScore }}
-        </div>
-
-        <button class="start-btn" @click="emit('start')">
-          🗡️ Start Slicing!
-        </button>
+        <div class="high-score-display" v-if="highScore > 0">🏆 {{ highScore }}</div>
+        <button class="start-btn" @click="emit('start')">🗡️ Start!</button>
       </div>
     </div>
 
@@ -129,42 +114,18 @@ const livesDisplay = () => '❤️'.repeat(props.lives) + '🖤'.repeat(3 - prop
 .menu-content {
   text-align: center;
   color: white;
-  max-width: 500px;
-  padding: 2rem;
+  padding: 0.5rem;
 }
 
 .game-title {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
   text-shadow: 0 0 20px rgba(255, 100, 100, 0.5);
 }
 
-.game-subtitle {
-  font-size: 1.3rem;
-  opacity: 0.9;
-  margin-bottom: 2rem;
-}
-
-.instructions {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.instructions h3 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-}
-
-.instructions p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
 .high-score-display {
-  font-size: 1.3rem;
-  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
   color: #ffd700;
 }
 
@@ -172,8 +133,8 @@ const livesDisplay = () => '❤️'.repeat(props.lives) + '🖤'.repeat(3 - prop
   background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
   color: white;
   border: none;
-  padding: 1rem 3rem;
-  font-size: 1.5rem;
+  padding: 1rem 2.5rem;
+  font-size: 1.4rem;
   border-radius: 50px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -191,64 +152,64 @@ const livesDisplay = () => '❤️'.repeat(props.lives) + '🖤'.repeat(3 - prop
   top: 0;
   left: 0;
   width: 100%;
-  padding: 1rem;
+  padding: 0.4rem 0.5rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   pointer-events: none;
 }
 
 .score-panel {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 0.75rem 1.25rem;
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
   color: white;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 0.3rem;
 }
 
 .score-label {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   opacity: 0.8;
 }
 
 .score-value {
-  font-size: 1.8rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #ffd700;
 }
 
 .lives-panel {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 0.75rem 1.25rem;
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
 }
 
 .lives-display {
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .combo-panel {
   position: absolute;
-  top: 50%;
+  top: 2.5rem;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   background: linear-gradient(135deg, #ff4757, #ff6b81);
-  padding: 0.5rem 1.5rem;
-  border-radius: 25px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
   animation: pulse 0.3s ease infinite;
 }
 
 .combo-value {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
   color: white;
 }
 
 @keyframes pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.1); }
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.1); }
 }
 
 /* Overlay content */

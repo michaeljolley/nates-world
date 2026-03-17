@@ -15,6 +15,7 @@ const gameState = ref('start')
 const playerHealth = ref(100)
 const npcHealth = ref(100)
 const canvasRef = ref(null)
+const firstPersonMode = ref(true) // First-person view by default
 
 // Three.js objects
 let scene, camera, renderer, animationId
@@ -40,10 +41,12 @@ function initThreeJS() {
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0x1a1a2e)
 
-  // Camera
-  camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100)
-  camera.position.set(0, 8, 12)
-  camera.lookAt(0, 0, 0)
+  // Camera - first-person uses wider FOV
+  camera = new THREE.PerspectiveCamera(firstPersonMode.value ? 80 : 60, width / height, 0.1, 100)
+  if (!firstPersonMode.value) {
+    camera.position.set(0, 8, 12)
+    camera.lookAt(0, 0, 0)
+  }
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
@@ -266,6 +269,23 @@ function animate() {
     npcMesh.position.y = Math.sin(Date.now() * 0.005 + 1) * 0.05
   }
 
+  // First-person camera follows player's eyes
+  if (firstPersonMode.value && playerMesh) {
+    // Position camera at player's eye level
+    camera.position.set(playerPos.x, 1.85, playerPos.z)
+    // Look in the direction the player is facing (toward NPC)
+    const lookDistance = 10
+    camera.lookAt(
+      playerPos.x + Math.sin(playerMesh.rotation.y) * lookDistance,
+      1.5,
+      playerPos.z + Math.cos(playerMesh.rotation.y) * lookDistance
+    )
+    // Hide player mesh in first-person
+    playerMesh.visible = false
+  } else if (playerMesh) {
+    playerMesh.visible = true
+  }
+
   renderer.render(scene, camera)
 }
 
@@ -400,7 +420,27 @@ function checkWinConditions() {
   }
 }
 
+function toggleCameraView() {
+  firstPersonMode.value = !firstPersonMode.value
+  if (camera) {
+    camera.fov = firstPersonMode.value ? 80 : 60
+    camera.updateProjectionMatrix()
+    if (!firstPersonMode.value) {
+      // Reset to third-person position
+      camera.position.set(0, 8, 12)
+      camera.lookAt(0, 0, 0)
+    }
+  }
+}
+
 function handleKeyDown(e) {
+  // V toggles camera view anytime
+  if (e.key === 'v' || e.key === 'V') {
+    e.preventDefault()
+    toggleCameraView()
+    return
+  }
+
   if (gameState.value !== 'playing') return
 
   switch (e.key) {
@@ -502,6 +542,7 @@ onUnmounted(() => {
         <div class="controls-hint">
           <p>WASD or Arrow Keys to Move</p>
           <p>SPACE to Punch</p>
+          <p>V to Toggle Camera View</p>
         </div>
         <button class="start-btn" @click="startGame">START FIGHT</button>
       </div>
