@@ -33,12 +33,36 @@ const board = ref(createEmptyBoard())
 const currentPiece = ref(null)
 const currentPosition = ref({ x: 0, y: 0 })
 const nextPiece = ref(null)
+const heldPiece = ref(null)
+const canHold = ref(true)
 const score = ref(0)
 const level = ref(1)
 const lines = ref(0)
 const gameOver = ref(false)
+const isNewHighScore = ref(false)
 const isPaused = ref(false)
 const isPlaying = ref(false)
+const clearingLines = ref([])
+const isClearing = ref(false)
+const highScores = ref(loadHighScores())
+
+function loadHighScores() {
+  try {
+    return JSON.parse(localStorage.getItem('tetris_highscores') || '{}')
+  } catch { return {} }
+}
+
+function saveHighScore() {
+  const key = difficulty.value
+  if (!highScores.value[key] || score.value > highScores.value[key]) {
+    highScores.value[key] = score.value
+    localStorage.setItem('tetris_highscores', JSON.stringify(highScores.value))
+    return true
+  }
+  return false
+}
+
+const currentHighScore = computed(() => highScores.value[difficulty.value] || 0)
 
 // Audio state
 let audioCtx = null
@@ -165,7 +189,12 @@ function resetGame() {
   level.value = 1
   lines.value = 0
   gameOver.value = false
+  isNewHighScore.value = false
   isPaused.value = false
+  heldPiece.value = null
+  canHold.value = true
+  clearingLines.value = []
+  isClearing.value = false
   dropInterval = 1000
   spawnPiece()
 }
@@ -180,6 +209,7 @@ function spawnPiece() {
   
   if (checkCollision(currentPiece.value.shape, currentPosition.value)) {
     gameOver.value = true
+    isNewHighScore.value = saveHighScore()
     stopGame()
   }
 }
@@ -206,7 +236,7 @@ function checkCollision(shape, pos) {
 }
 
 function rotatePiece() {
-  if (!currentPiece.value || gameOver.value || isPaused.value) return
+  if (!currentPiece.value || gameOver.value || isPaused.value || isClearing.value) return
   
   const shape = currentPiece.value.shape
   const rotated = shape[0].map((_, i) => 
@@ -229,8 +259,28 @@ function rotatePiece() {
   }
 }
 
+function holdPiece() {
+  if (!currentPiece.value || gameOver.value || isPaused.value || !canHold.value) return
+  
+  const current = { ...SHAPES[currentPiece.value.type], type: currentPiece.value.type }
+  
+  if (heldPiece.value) {
+    const held = { ...SHAPES[heldPiece.value.type], type: heldPiece.value.type }
+    heldPiece.value = current
+    currentPiece.value = held
+    currentPosition.value = {
+      x: Math.floor(COLS / 2) - Math.floor(held.shape[0].length / 2),
+      y: 0
+    }
+  } else {
+    heldPiece.value = current
+    spawnPiece()
+  }
+  canHold.value = false
+}
+
 function movePiece(dx, dy) {
-  if (!currentPiece.value || gameOver.value || isPaused.value) return false
+  if (!currentPiece.value || gameOver.value || isPaused.value || isClearing.value) return false
   
   const newPos = { x: currentPosition.value.x + dx, y: currentPosition.value.y + dy }
   
@@ -248,7 +298,7 @@ function dropPiece() {
 }
 
 function hardDrop() {
-  if (!currentPiece.value || gameOver.value || isPaused.value) return
+  if (!currentPiece.value || gameOver.value || isPaused.value || isClearing.value) return
   
   let dropDistance = 0
   while (movePiece(0, 1)) {
@@ -274,37 +324,53 @@ function lockPiece() {
     }
   }
   
-  clearLines()
-  spawnPiece()
+  const hasClears = checkForClears()
+  canHold.value = true
+  if (!hasClears) {
+    spawnPiece()
+  }
 }
 
-function clearLines() {
-  let linesCleared = 0
+function checkForClears() {
   const rows = ROWS.value
+  const linesToClear = []
   
   for (let y = rows - 1; y >= 0; y--) {
     if (board.value[y].every(cell => cell !== null)) {
-      board.value.splice(y, 1)
-      board.value.unshift(Array(COLS).fill(null))
-      linesCleared++
-      y++ // Check same row again
+      linesToClear.push(y)
     }
   }
   
-  if (linesCleared > 0) {
-    lines.value += linesCleared
-    // Scoring: 100, 300, 500, 800 for 1, 2, 3, 4 lines
-    const points = [0, 100, 300, 500, 800][linesCleared] * level.value
-    score.value += points
+  if (linesToClear.length > 0) {
+    clearingLines.value = linesToClear
+    isClearing.value = true
+    playLineClearSound()
     
-    // Level up every 10 lines
-    const newLevel = Math.floor(lines.value / 10) + 1
-    if (newLevel > level.value) {
-      level.value = newLevel
-      dropInterval = Math.max(100, 1000 - (level.value - 1) * 100)
-      restartGameLoop()
-    }
+    setTimeout(() => {
+      linesToClear.sort((a, b) => b - a).forEach(y => {
+        board.value.splice(y, 1)
+        board.value.unshift(Array(COLS).fill(null))
+      })
+      clearingLines.value = []
+      
+      const linesCleared = linesToClear.length
+      lines.value += linesCleared
+      const points = [0, 100, 300, 500, 800][linesCleared] * level.value
+      score.value += points
+      
+      const newLevel = Math.floor(lines.value / 10) + 1
+      if (newLevel > level.value) {
+        level.value = newLevel
+        dropInterval = Math.max(100, 1000 - (level.value - 1) * 100)
+        restartGameLoop()
+      }
+      
+      isClearing.value = false
+      spawnPiece()
+    }, 300)
+    return true
   }
+  return false
 }
 
 function handleKeyDown(e) {
@@ -336,6 +402,11 @@ function handleKeyDown(e) {
     case 'P':
       e.preventDefault()
       togglePause()
+      break
+    case 'c':
+    case 'C':
+      e.preventDefault()
+      holdPiece()
       break
   }
 }
@@ -376,7 +447,7 @@ function togglePause() {
 function startGameLoop() {
   if (gameLoop) clearInterval(gameLoop)
   gameLoop = setInterval(() => {
-    if (!isPaused.value && !gameOver.value) {
+    if (!isPaused.value && !gameOver.value && !isClearing.value) {
       dropPiece()
     }
   }, dropInterval)
@@ -418,7 +489,34 @@ const nextPieceStyle = computed(() => {
   }
 })
 
-// Get rendered board with current piece
+const heldPieceStyle = computed(() => {
+  if (!heldPiece.value) return {}
+  const cols = heldPiece.value.shape[0].length
+  const rows = heldPiece.value.shape.length
+  return {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${cols}, 20px)`,
+    gridTemplateRows: `repeat(${rows}, 20px)`,
+    gap: '1px'
+  }
+})
+
+// Calculate ghost piece Y position (hard drop preview)
+const ghostY = computed(() => {
+  if (!currentPiece.value) return 0
+  const shape = currentPiece.value.shape
+  const pos = currentPosition.value
+  let testY = pos.y
+  
+  while (true) {
+    testY++
+    if (checkCollision(shape, { x: pos.x, y: testY })) {
+      return testY - 1
+    }
+  }
+})
+
+// Get rendered board with ghost piece and current piece
 const renderedBoard = computed(() => {
   const rendered = board.value.map(row => [...row])
   const rows = ROWS.value
@@ -427,6 +525,23 @@ const renderedBoard = computed(() => {
     const shape = currentPiece.value.shape
     const pos = currentPosition.value
     
+    // Draw ghost piece first (underneath current piece)
+    const gy = ghostY.value
+    if (gy !== pos.y) {
+      for (let y = 0; y < shape.length; y++) {
+        for (let x = 0; x < shape[y].length; x++) {
+          if (shape[y][x]) {
+            const boardY = gy + y
+            const boardX = pos.x + x
+            if (boardY >= 0 && boardY < rows && boardX >= 0 && boardX < COLS && !rendered[boardY][boardX]) {
+              rendered[boardY][boardX] = currentPiece.value.color + '_ghost'
+            }
+          }
+        }
+      }
+    }
+    
+    // Draw current piece (overwrites ghost if overlapping)
     for (let y = 0; y < shape.length; y++) {
       for (let x = 0; x < shape[y].length; x++) {
         if (shape[y][x]) {
@@ -439,6 +554,13 @@ const renderedBoard = computed(() => {
       }
     }
   }
+  
+  // Mark clearing lines
+  clearingLines.value.forEach(lineY => {
+    for (let x = 0; x < COLS; x++) {
+      rendered[lineY][x] = 'clearing'
+    }
+  })
   
   return rendered
 })
@@ -496,6 +618,10 @@ onUnmounted(() => {
             <span class="stat-label">Lines</span>
             <span class="stat-value">{{ lines }}</span>
           </div>
+          <div class="stat-box">
+            <span class="stat-label">Best</span>
+            <span class="stat-value hi-score">{{ currentHighScore }}</span>
+          </div>
           <div class="stat-box next-piece-box">
             <span class="stat-label">Next</span>
             <div class="next-piece-preview" :style="nextPieceStyle" v-if="nextPiece">
@@ -509,6 +635,20 @@ onUnmounted(() => {
               </template>
             </div>
           </div>
+          <div class="stat-box next-piece-box">
+            <span class="stat-label">Hold <kbd>C</kbd></span>
+            <div class="next-piece-preview" :style="heldPieceStyle" v-if="heldPiece">
+              <template v-for="(row, y) in heldPiece.shape" :key="y">
+                <div 
+                  v-for="(cell, x) in row" 
+                  :key="`hold-${y}-${x}`"
+                  class="preview-cell"
+                  :style="{ background: cell ? heldPiece.color : 'transparent' }"
+                ></div>
+              </template>
+            </div>
+            <div class="empty-hold" v-else>—</div>
+          </div>
         </div>
         
         <div class="board-container">
@@ -518,8 +658,12 @@ onUnmounted(() => {
                 v-for="(cell, x) in row" 
                 :key="`${y}-${x}`"
                 class="cell"
-                :style="{ background: cell || 'rgba(20, 20, 40, 0.5)' }"
-                :class="{ filled: cell }"
+                :style="{ background: cell && !cell.endsWith('_ghost') && cell !== 'clearing' ? cell : cell === 'clearing' ? '#fff' : 'rgba(20, 20, 40, 0.5)' }"
+                :class="{ 
+                  filled: cell && !cell.endsWith('_ghost') && cell !== 'clearing', 
+                  ghost: cell && cell.endsWith('_ghost'),
+                  clearing: cell === 'clearing'
+                }"
               ></div>
             </template>
           </div>
@@ -531,13 +675,16 @@ onUnmounted(() => {
               <p>↑ Rotate</p>
               <p>↓ Soft Drop</p>
               <p>Space Hard Drop</p>
+              <p>C Hold Piece</p>
               <p>P Pause</p>
             </div>
           </div>
           
           <div v-if="gameOver" class="overlay game-over-overlay">
             <h2>GAME OVER</h2>
+            <p v-if="isNewHighScore" class="new-high-score">🏆 NEW HIGH SCORE! 🏆</p>
             <p class="final-score">Score: {{ score }}</p>
+            <p class="high-score-line">Best: {{ currentHighScore }}</p>
             <button class="restart-btn" @click="startGame">PLAY AGAIN</button>
           </div>
           
@@ -550,6 +697,7 @@ onUnmounted(() => {
       
       <div class="mobile-controls" v-if="isPlaying && !gameOver">
         <div class="control-row">
+          <button class="control-btn" @click="holdPiece">⬒</button>
           <button class="control-btn" @click="rotatePiece">↻</button>
         </div>
         <div class="control-row">
@@ -822,6 +970,24 @@ h1 {
   box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5), 0 0 5px currentColor;
 }
 
+.cell.ghost {
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.cell.clearing {
+  background: #fff !important;
+  box-shadow: 0 0 15px #fff, 0 0 30px #fff;
+  animation: line-flash 0.3s ease-out;
+}
+
+@keyframes line-flash {
+  0% { background: #fff; box-shadow: 0 0 30px #fff; }
+  50% { background: #ff0; box-shadow: 0 0 20px #ff0; }
+  100% { background: #fff; box-shadow: 0 0 10px #fff; }
+}
+
 .overlay {
   position: absolute;
   top: 0;
@@ -850,8 +1016,46 @@ h1 {
 
 .final-score {
   font-size: 1.5em;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   color: #ff0;
+}
+
+.high-score-line {
+  font-size: 1em;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.new-high-score {
+  font-size: 1.3em;
+  color: #f0f;
+  text-shadow: 0 0 20px #f0f, 0 0 40px #f0f;
+  animation: high-score-pulse 0.5s ease-in-out infinite alternate;
+  margin-bottom: 10px;
+}
+
+@keyframes high-score-pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+.hi-score {
+  color: #f0f;
+}
+
+.empty-hold {
+  opacity: 0.3;
+  font-size: 1.5em;
+  text-align: center;
+  margin-top: 5px;
+}
+
+kbd {
+  font-size: 0.7em;
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
 .controls-hint {

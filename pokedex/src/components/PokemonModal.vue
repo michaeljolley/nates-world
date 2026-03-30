@@ -13,6 +13,8 @@ const emit = defineEmits(['close'])
 const showShiny = ref(false)
 const activeTab = ref('stats')
 
+const selectedForm = ref(null)
+
 const tabs = [
   { id: 'stats', label: 'Stats', icon: '📊' },
   { id: 'abilities', label: 'Abilities', icon: '✨' },
@@ -21,9 +23,15 @@ const tabs = [
   { id: 'info', label: 'Info', icon: '📋' }
 ]
 
+const activeFormData = computed(() => {
+  if (selectedForm.value) return selectedForm.value
+  return props.pokemon
+})
+
 const currentSprite = computed(() => {
-  if (!props.pokemon) return ''
-  const sprites = props.pokemon.sprites
+  const source = activeFormData.value
+  if (!source) return ''
+  const sprites = source.sprites
   if (showShiny.value) {
     return sprites?.other?.['official-artwork']?.front_shiny ||
            sprites?.front_shiny ||
@@ -35,8 +43,9 @@ const currentSprite = computed(() => {
 })
 
 const allSprites = computed(() => {
-  if (!props.pokemon) return []
-  const sprites = props.pokemon.sprites
+  const source = activeFormData.value
+  if (!source) return []
+  const sprites = source.sprites
   const result = []
   
   if (sprites.front_default) result.push({ url: sprites.front_default, label: 'Front' })
@@ -49,9 +58,11 @@ const allSprites = computed(() => {
   return result
 })
 
+const activeStats = computed(() => activeFormData.value?.stats || [])
+const activeTypes = computed(() => activeFormData.value?.types || [])
+
 const statTotal = computed(() => {
-  if (!props.pokemon) return 0
-  return props.pokemon.stats.reduce((sum, stat) => sum + stat.base_stat, 0)
+  return activeStats.value.reduce((sum, stat) => sum + stat.base_stat, 0)
 })
 
 const statColors = {
@@ -132,6 +143,74 @@ function getEvolutionSprite(id) {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
 }
 
+function getFormLabel(formName, baseName) {
+  const suffix = formName.replace(baseName + '-', '')
+  const parts = suffix.split('-')
+  
+  const regionMap = {
+    'alola': 'Alolan',
+    'galar': 'Galarian',
+    'hisui': 'Hisuian',
+    'paldea': 'Paldean'
+  }
+
+  if (parts[0] === 'mega') {
+    if (parts[1]) return `Mega ${formatName(baseName)} ${parts[1].toUpperCase()}`
+    return `Mega ${formatName(baseName)}`
+  }
+  if (parts[0] === 'gmax') return `Gigantamax ${formatName(baseName)}`
+  if (regionMap[parts[0]]) {
+    const extra = parts.slice(1).map(p => formatName(p)).join(' ')
+    return `${regionMap[parts[0]]} ${formatName(baseName)}${extra ? ' (' + extra + ')' : ''}`
+  }
+  if (parts[0] === 'totem') return `Totem ${formatName(baseName)}`
+  if (parts[0] === 'starter') return `Starter ${formatName(baseName)}`
+
+  return formatName(formName)
+}
+
+function getFormCategory(formName, baseName) {
+  const suffix = formName.replace(baseName + '-', '')
+  const first = suffix.split('-')[0]
+  if (first === 'mega') return { label: 'Mega Evolution', color: '#FF6B6B', icon: '🔥' }
+  if (first === 'gmax') return { label: 'Gigantamax', color: '#FF4081', icon: '⚡' }
+  if (first === 'alola') return { label: 'Alolan Form', color: '#26C6DA', icon: '🌴' }
+  if (first === 'galar') return { label: 'Galarian Form', color: '#7C4DFF', icon: '🏰' }
+  if (first === 'hisui') return { label: 'Hisuian Form', color: '#66BB6A', icon: '🏔️' }
+  if (first === 'paldea') return { label: 'Paldean Form', color: '#FFA726', icon: '🌺' }
+  if (first === 'totem') return { label: 'Totem Form', color: '#8D6E63', icon: '🗿' }
+  return { label: 'Alternate Form', color: '#78909C', icon: '🔀' }
+}
+
+function selectForm(form) {
+  selectedForm.value = selectedForm.value === form ? null : form
+}
+
+function getFormButtonLabel(formName, baseName) {
+  const suffix = formName.replace(baseName + '-', '')
+  const parts = suffix.split('-')
+  
+  const regionMap = {
+    'alola': 'Alolan',
+    'galar': 'Galarian',
+    'hisui': 'Hisuian',
+    'paldea': 'Paldean'
+  }
+
+  if (parts[0] === 'mega') {
+    return parts[1] ? `Mega ${parts[1].toUpperCase()}` : 'Mega'
+  }
+  if (parts[0] === 'gmax') return 'Gigantamax'
+  if (regionMap[parts[0]]) {
+    const extra = parts.slice(1).map(p => formatName(p)).join(' ')
+    return `${regionMap[parts[0]]}${extra ? ' ' + extra : ''}`
+  }
+  if (parts[0] === 'totem') return 'Totem'
+  if (parts[0] === 'starter') return 'Starter'
+
+  return formatName(suffix)
+}
+
 function closeModal(e) {
   if (e.target === e.currentTarget) {
     emit('close')
@@ -141,7 +220,7 @@ function closeModal(e) {
 
 <template>
   <div class="modal-overlay" @click="closeModal">
-    <div class="modal-content" :style="{ '--type-color': typeColors[pokemon?.types[0]?.type.name] || '#666' }">
+    <div class="modal-content" :style="{ '--type-color': typeColors[activeTypes[0]?.type.name] || '#666' }">
       <button class="close-btn" @click="$emit('close')">✕</button>
 
       <div v-if="loading" class="loading-state">
@@ -154,12 +233,12 @@ function closeModal(e) {
         <div class="modal-header">
           <div class="header-left">
             <span class="pokemon-id">{{ formatId(pokemon.id) }}</span>
-            <h2 class="pokemon-name">{{ formatName(pokemon.name) }}</h2>
+            <h2 class="pokemon-name">{{ selectedForm ? getFormLabel(selectedForm.name, pokemon.name) : formatName(pokemon.name) }}</h2>
             <p class="pokemon-genus">{{ details.genus }}</p>
             
             <div class="type-badges">
               <span 
-                v-for="type in pokemon.types" 
+                v-for="type in activeTypes" 
                 :key="type.type.name"
                 class="type-badge"
                 :style="{ backgroundColor: typeColors[type.type.name] }"
@@ -172,11 +251,32 @@ function closeModal(e) {
               <span v-if="details.isLegendary" class="badge legendary">⭐ Legendary</span>
               <span v-if="details.isMythical" class="badge mythical">✨ Mythical</span>
             </div>
+
+            <!-- Form Selector Buttons -->
+            <div v-if="details.alternateForms?.length > 0" class="form-selector">
+              <button 
+                class="form-btn"
+                :class="{ active: !selectedForm }"
+                @click="selectedForm = null"
+              >
+                Base
+              </button>
+              <button 
+                v-for="form in details.alternateForms"
+                :key="form.name"
+                class="form-btn"
+                :class="{ active: selectedForm === form }"
+                :style="selectedForm === form ? { background: getFormCategory(form.name, pokemon.name).color } : {}"
+                @click="selectForm(form)"
+              >
+                {{ getFormCategory(form.name, pokemon.name).icon }} {{ getFormButtonLabel(form.name, pokemon.name) }}
+              </button>
+            </div>
           </div>
 
           <div class="header-right">
             <div class="sprite-container">
-              <img :src="currentSprite" :alt="pokemon.name" class="main-sprite" />
+              <img :src="currentSprite" :alt="activeFormData?.name || pokemon.name" class="main-sprite" />
             </div>
             <button class="shiny-btn" @click="showShiny = !showShiny">
               {{ showShiny ? '✨ Shiny' : '🎨 Normal' }}
@@ -215,7 +315,7 @@ function closeModal(e) {
         <div class="tab-content">
           <!-- Stats Tab -->
           <div v-if="activeTab === 'stats'" class="stats-tab">
-            <div class="stat-row" v-for="stat in pokemon.stats" :key="stat.stat.name">
+            <div class="stat-row" v-for="stat in activeStats" :key="stat.stat.name">
               <span class="stat-name">{{ statLabels[stat.stat.name] }}</span>
               <span class="stat-val">{{ stat.base_stat }}</span>
               <div class="stat-bar-bg">
@@ -236,18 +336,28 @@ function closeModal(e) {
 
           <!-- Abilities Tab -->
           <div v-if="activeTab === 'abilities'" class="abilities-tab">
-            <div v-for="(ability, idx) in details.abilityDetails" :key="ability.name" class="ability-card">
-              <div class="ability-header">
-                <h4>{{ formatName(ability.name) }}</h4>
-                <span v-if="pokemon.abilities[idx]?.is_hidden" class="hidden-tag">Hidden</span>
+            <template v-if="!selectedForm">
+              <div v-for="(ability, idx) in details.abilityDetails" :key="ability.name" class="ability-card">
+                <div class="ability-header">
+                  <h4>{{ formatName(ability.name) }}</h4>
+                  <span v-if="pokemon.abilities[idx]?.is_hidden" class="hidden-tag">Hidden</span>
+                </div>
+                <p class="ability-effect">
+                  {{ ability.effect_entries.find(e => e.language.name === 'en')?.short_effect || 'No description.' }}
+                </p>
+                <p class="ability-flavor">
+                  {{ ability.flavor_text_entries.find(f => f.language.name === 'en')?.flavor_text || '' }}
+                </p>
               </div>
-              <p class="ability-effect">
-                {{ ability.effect_entries.find(e => e.language.name === 'en')?.short_effect || 'No description.' }}
-              </p>
-              <p class="ability-flavor">
-                {{ ability.flavor_text_entries.find(f => f.language.name === 'en')?.flavor_text || '' }}
-              </p>
-            </div>
+            </template>
+            <template v-else>
+              <div v-for="ability in selectedForm.abilities" :key="ability.ability.name" class="ability-card">
+                <div class="ability-header">
+                  <h4>{{ formatName(ability.ability.name) }}</h4>
+                  <span v-if="ability.is_hidden" class="hidden-tag">Hidden</span>
+                </div>
+              </div>
+            </template>
           </div>
 
           <!-- Evolution Tab -->
@@ -274,15 +384,15 @@ function closeModal(e) {
           <div v-if="activeTab === 'moves'" class="moves-tab">
             <div class="moves-list">
               <span 
-                v-for="move in pokemon.moves.slice(0, 60)" 
+                v-for="move in activeFormData.moves.slice(0, 60)" 
                 :key="move.move.name"
                 class="move-chip"
               >
                 {{ formatName(move.move.name) }}
               </span>
             </div>
-            <p v-if="pokemon.moves.length > 60" class="more-moves">
-              + {{ pokemon.moves.length - 60 }} more moves
+            <p v-if="activeFormData.moves.length > 60" class="more-moves">
+              + {{ activeFormData.moves.length - 60 }} more moves
             </p>
           </div>
 
@@ -291,15 +401,15 @@ function closeModal(e) {
             <div class="info-grid">
               <div class="info-box">
                 <span class="info-label">📏 Height</span>
-                <span class="info-val">{{ formatHeight(pokemon.height) }}</span>
+                <span class="info-val">{{ formatHeight(activeFormData.height) }}</span>
               </div>
               <div class="info-box">
                 <span class="info-label">⚖️ Weight</span>
-                <span class="info-val">{{ formatWeight(pokemon.weight) }}</span>
+                <span class="info-val">{{ formatWeight(activeFormData.weight) }}</span>
               </div>
               <div class="info-box">
                 <span class="info-label">⭐ Base EXP</span>
-                <span class="info-val">{{ pokemon.base_experience || 'N/A' }}</span>
+                <span class="info-val">{{ activeFormData.base_experience || 'N/A' }}</span>
               </div>
               <div class="info-box">
                 <span class="info-label">🎯 Capture Rate</span>
@@ -898,6 +1008,40 @@ function closeModal(e) {
   font-weight: 600;
 }
 
+/* Form Selector */
+.form-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.form-btn {
+  padding: 8px 16px;
+  border-radius: 25px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #a0a0a0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.form-btn:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.form-btn.active {
+  background: var(--type-color);
+  border-color: var(--type-color);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
 @media (max-width: 700px) {
   .modal-header {
     flex-direction: column-reverse;
@@ -942,6 +1086,15 @@ function closeModal(e) {
 
   .info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .form-selector {
+    justify-content: center;
+  }
+
+  .form-btn {
+    font-size: 0.78rem;
+    padding: 6px 12px;
   }
 }
 </style>

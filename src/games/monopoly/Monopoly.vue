@@ -53,14 +53,14 @@ const boardLayout = computed(() => {
     right: []
   }
   
-  // Bottom: 0-10 (GO to Jail)
-  for (let i = 10; i >= 0; i--) layout.bottom.push(BOARD_SPACES[i])
-  // Left: 11-19
+  // Bottom: 0-10 (row-reverse CSS flips so Jail is left, GO is right)
+  for (let i = 0; i <= 10; i++) layout.bottom.push(BOARD_SPACES[i])
+  // Left: 11-19 (column-reverse CSS flips so 11 at bottom near Jail, 19 at top near Free Parking)
   for (let i = 11; i <= 19; i++) layout.left.push(BOARD_SPACES[i])
-  // Top: 20-30
+  // Top: 20-30 (Free Parking left, Go To Jail right)
   for (let i = 20; i <= 30; i++) layout.top.push(BOARD_SPACES[i])
-  // Right: 31-39
-  for (let i = 39; i >= 31; i--) layout.right.push(BOARD_SPACES[i])
+  // Right: 31-39 (31 at top near Go To Jail, 39 at bottom near GO)
+  for (let i = 31; i <= 39; i++) layout.right.push(BOARD_SPACES[i])
   
   return layout
 })
@@ -230,6 +230,46 @@ async function movePlayer(spaces) {
   
   // Handle landing space
   await handleLanding(player)
+}
+
+async function moveToPosition(player, targetPos, collectGo = true) {
+  gamePhase.value = 'moving'
+  animatingPlayer.value = player.id
+  
+  const startPos = player.position
+  // Calculate forward distance around the board
+  const forwardSteps = (targetPos - startPos + 40) % 40
+  
+  if (forwardSteps === 0) {
+    animatingPlayer.value = null
+    return
+  }
+  
+  for (let i = 1; i <= forwardSteps; i++) {
+    await new Promise(resolve => setTimeout(resolve, 120))
+    player.position = (startPos + i) % 40
+    
+    if (collectGo && player.position === 0 && i < forwardSteps) {
+      receiveMoney(player, 200)
+      message.value = `${player.name} passed GO! Collect $200.`
+    }
+  }
+  
+  animatingPlayer.value = null
+}
+
+async function moveBackSteps(player, steps) {
+  gamePhase.value = 'moving'
+  animatingPlayer.value = player.id
+  
+  const startPos = player.position
+  
+  for (let i = 1; i <= steps; i++) {
+    await new Promise(resolve => setTimeout(resolve, 150))
+    player.position = (startPos - i + 40) % 40
+  }
+  
+  animatingPlayer.value = null
 }
 
 async function handleLanding(player) {
@@ -498,14 +538,13 @@ async function drawCard(type, player) {
 async function executeCardAction(card, player) {
   switch (card.action) {
     case 'moveTo':
-      const passedGo = card.value < player.position && card.value !== 0
-      if (passedGo) receiveMoney(player, 200)
-      player.position = card.value
+      await moveToPosition(player, card.value, card.value !== 0)
+      if (card.value === 0) receiveMoney(player, 200)
       await handleLanding(player)
       return
       
     case 'moveBack':
-      player.position = (player.position - card.value + 40) % 40
+      await moveBackSteps(player, card.value)
       await handleLanding(player)
       return
       
@@ -552,16 +591,14 @@ async function executeCardAction(card, player) {
     case 'nearestRailroad':
       const railroads = [5, 15, 25, 35]
       let nearest = railroads.find(r => r > player.position) || railroads[0]
-      if (nearest <= player.position) receiveMoney(player, 200)
-      player.position = nearest
+      await moveToPosition(player, nearest)
       await handleLanding(player)
       return
       
     case 'nearestUtility':
       const utilities = [12, 28]
       let nearestUtil = utilities.find(u => u > player.position) || utilities[0]
-      if (nearestUtil <= player.position) receiveMoney(player, 200)
-      player.position = nearestUtil
+      await moveToPosition(player, nearestUtil)
       await handleLanding(player)
       return
   }
@@ -1226,11 +1263,11 @@ function restartGame() {
 }
 
 .board-col.left {
-  flex-direction: column;
+  flex-direction: column-reverse;
 }
 
 .board-col.right {
-  flex-direction: column-reverse;
+  flex-direction: column;
 }
 
 .board-center {
@@ -1275,7 +1312,7 @@ function restartGame() {
   height: 15px;
 }
 
-.board-row.bottom .color-bar,
+.board-row.top .color-bar,
 .board-col.left .color-bar {
   top: auto;
   bottom: 0;

@@ -105,27 +105,38 @@ const games = [
     id: 'tetris',
     icon: '🧱📦',
     title: 'Tetris',
-    description: 'Stack falling blocks and clear lines! Classic puzzle action with increasing speed!',
-    wip: true
+    description: 'Stack falling blocks and clear lines! Classic puzzle action with increasing speed!'
   },
-  {
-    id: 'boxing-bros',
-    icon: '🥊👊',
-    title: 'Boxing Bros',
-    description: 'Step into the ring! Fight an NPC boxer using WASD to move and SPACE to punch!',
-    wip: true
-  },
-  {
-    id: 'brawl-arena',
-    icon: '⚔️💥',
-    title: 'Brawl Arena',
-    description: 'Platform fighter action! Choose your fighter and battle on unique stages. VS CPU or friends!'
-  },
+
   {
     id: 'monkey-fish-td',
     icon: '🐵🐟',
     title: 'Monkey Fish TD',
     description: 'Tower defense! Place monkeys to stop the fish invasion. 15 maps and 18 monkey types!'
+  },
+  {
+    id: 'monopoly',
+    icon: '🎩💰',
+    title: 'Monopoly',
+    description: 'The classic board game! Roll the dice, buy properties, and bankrupt your opponents!'
+  },
+  {
+    id: 'natecraft',
+    icon: '⛏️🌍',
+    title: 'Natecraft',
+    description: 'Cubic survival! Mine, craft, build, and explore a vast voxel world. Find 7 Sacred Stones!'
+  },
+  {
+    id: 'color-and-run',
+    icon: '🎨🏃',
+    title: 'Color and Run',
+    description: 'Claim territory by drawing lines! Race against AI bots in this paper.io style game!'
+  },
+  {
+    id: 'hungry-hole',
+    icon: '🕳️🏙️',
+    title: 'Hungry Hole',
+    description: 'Control a hungry hole and devour the city! Eat small objects to grow, then swallow buildings and skyscrapers!'
   }
 ]
 

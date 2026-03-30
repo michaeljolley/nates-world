@@ -133,6 +133,22 @@ async function openPokemonDetails(pokemon) {
       return await res.json()
     })
     const abilities = await Promise.all(abilityPromises)
+
+    // Fetch alternate forms (mega, regional, gmax, etc.)
+    let alternateForms = []
+    if (speciesData.varieties && speciesData.varieties.length > 1) {
+      const formPromises = speciesData.varieties
+        .filter(v => !v.is_default)
+        .map(async (variety) => {
+          try {
+            const res = await fetch(variety.pokemon.url)
+            return await res.json()
+          } catch {
+            return null
+          }
+        })
+      alternateForms = (await Promise.all(formPromises)).filter(f => f !== null)
+    }
     
     const flavorText = speciesData.flavor_text_entries
       .find(f => f.language.name === 'en')?.flavor_text
@@ -146,6 +162,7 @@ async function openPokemonDetails(pokemon) {
       species: speciesData,
       evolutionChain,
       abilityDetails: abilities,
+      alternateForms,
       flavorText,
       genus,
       isLegendary: speciesData.is_legendary,
